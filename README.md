@@ -5,3 +5,4 @@
 - [Milestone](https://github.com/orgs/hhpb-code/projects/2/views/3)
 - [Requirement](./docs/REQUIREMENT.md)
 - [Flowchart](./docs/FLOWCHART.md)
+- [Sequence Diagram](./docs/SEQUENCE_DIAGRAM.md)
