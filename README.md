@@ -8,3 +8,4 @@
 - [Sequence Diagram](./docs/SEQUENCE_DIAGRAM.md)
 - [Class Diagram](./docs/CLASS_DIAGRAM.md)
 - [ERD Diagram](./docs/ERD.md)
+- [API Spec](./docs/API_SPEC.md)
