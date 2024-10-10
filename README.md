@@ -6,3 +6,4 @@
 - [Requirement](./docs/REQUIREMENT.md)
 - [Flowchart](./docs/FLOWCHART.md)
 - [Sequence Diagram](./docs/SEQUENCE_DIAGRAM.md)
+- [Class Diagram](./docs/CLASS_DIAGRAM.md)
