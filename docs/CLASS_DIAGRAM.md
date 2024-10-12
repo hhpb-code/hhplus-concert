@@ -15,7 +15,7 @@ classDiagram
     class UserFacade {
         - userService: UserService
         + getWallet(userId: Long): Wallet
-        + updateWallet(userId: Long, walletId: Long, amount: Long, operationType: OperationType): Wallet
+        + updateWallet(userId: Long, walletId: Long, amount: Integer, operationType: OperationType): Wallet
     }
 
     class QueueTokenFacade {
@@ -59,14 +59,14 @@ classDiagram
     class Wallet {
         - walletId: Long
         - userId: Long
-        - amount: Long
+        - amount: Integer
     }
 
     class UserService {
         - userRepository: UserRepository
         + getUser(userId: Long): User
         + getWallet(userId: Long): Wallet
-        + updateWallet(userId: Long, walletId: Long, amount: Long, operationType: OperationType): void
+        + updateWallet(userId: Long, walletId: Long, amount: Integer, operationType: OperationType): void
     }
 
     class UserRepository {
@@ -176,7 +176,7 @@ classDiagram
         - paymentId: Long
         - reservationId: Long
         - userId: Long
-        - amount: Long
+        - amount: Integer
     }
 
     class ConcertService {
