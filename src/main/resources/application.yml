@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: hhplus-concert
+
+# Swagger springdoc-ui Configuration
+springdoc:
+  packages-to-scan: com.example.hhplus.concert
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  cache:
+    disabled: true # 캐시 사용 여부
+  api-docs:
+    path: /api-docs/json
+    groups:
+      enabled: true
+  swagger-ui:
+    enabled: true # Swagger UI 사용여부 : 접근 경로 => <http://localhost:8080/swagger-ui/index.html>
+    tags-sorter: alpha # alpha: 알파벳 순 태그 정렬, method: HTTP Method 순 정렬
+    operations-sorter: alpha # alpha: 알파벳 순 태그 정렬, method: HTTP Method 순 정렬
+    defaultModelsExpandDepth: -1 # 모델 확장 깊이 (-1: 모델 숨김)
+
