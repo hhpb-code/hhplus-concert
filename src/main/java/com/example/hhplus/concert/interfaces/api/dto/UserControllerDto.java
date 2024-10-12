@@ -1,24 +1,24 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
-import com.example.hhplus.concert.domain.user.model.Balance;
-import com.example.hhplus.concert.domain.user.model.BalanceOperationType;
+import com.example.hhplus.concert.domain.user.model.Wallet;
+import com.example.hhplus.concert.domain.user.model.WalletOperationType;
 
 public class UserControllerDto {
 
-  public record GetBalanceResponse(
-      Balance balance
+  public record GetWalletResponse(
+      Wallet balance
   ) {
 
   }
 
-  public record UpdateBalanceRequest(
-      Long amount, BalanceOperationType operationType
+  public record UpdateWalletRequest(
+      Long amount, WalletOperationType operationType
   ) {
 
   }
 
-  public record UpdateBalanceResponse(
-      Balance balance
+  public record UpdateWalletResponse(
+      Wallet balance
   ) {
 
   }

@@ -1,6 +1,6 @@
 package com.example.hhplus.concert.domain.user.model;
 
-public record Balance(
+public record Wallet(
     Long id,
     Long userId,
     Long amount

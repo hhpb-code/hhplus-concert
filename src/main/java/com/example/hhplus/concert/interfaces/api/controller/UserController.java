@@ -1,9 +1,9 @@
 package com.example.hhplus.concert.interfaces.api.controller;
 
-import com.example.hhplus.concert.domain.user.model.Balance;
-import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.GetBalanceResponse;
-import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateBalanceRequest;
-import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateBalanceResponse;
+import com.example.hhplus.concert.domain.user.model.Wallet;
+import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.GetWalletResponse;
+import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateWalletRequest;
+import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateWalletResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -19,26 +19,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-  @GetMapping("/{userId}/balances")
-  @Operation(summary = "잔액 조회", description = "사용자의 잔액을 조회합니다.")
-  public ResponseEntity<GetBalanceResponse> getBalance(
-      @PathVariable Long userId
-  ) {
-    Balance balance = new Balance(1L, userId, 3000L);
+  @GetMapping("/{userId}/wallets")
+  @Operation(summary = "지갑 조회", description = "사용자의 지갑을 조회합니다.")
+  public ResponseEntity<GetWalletResponse> getWallets(@PathVariable Long userId) {
+    Wallet wallet = new Wallet(1L, userId, 10000L);
 
-    return ResponseEntity.ok(new GetBalanceResponse(balance));
+    return ResponseEntity.ok(new GetWalletResponse(wallet));
   }
 
-  @PutMapping("/{userId}/balances/{balanceId}")
-  @Operation(summary = "잔액 변경", description = "사용자의 잔액을 변경합니다.")
-  public ResponseEntity<UpdateBalanceResponse> updateBalance(
-      @PathVariable Long userId,
-      @PathVariable Long balanceId,
-      @RequestBody UpdateBalanceRequest request
-  ) {
-    Balance balance = new Balance(balanceId, userId, request.amount());
+  @PutMapping("/{userId}/wallets/{walletId}")
+  @Operation(summary = "지갑 수정", description = "사용자의 지갑을 수정합니다.")
+  public ResponseEntity<UpdateWalletResponse> updateWallet(@PathVariable Long userId, @PathVariable Long walletId, @RequestBody UpdateWalletRequest request) {
+    Wallet wallet = new Wallet(walletId, userId, 10000L);
 
-    return ResponseEntity.ok(new UpdateBalanceResponse(balance));
+    return ResponseEntity.ok(new UpdateWalletResponse(wallet));
   }
 
 }
