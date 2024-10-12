@@ -14,8 +14,8 @@ title: "콘서트 예약 클래스 다이어그램"
 classDiagram
     class UserFacade {
         - userService: UserService
-        + getBalance(userId: Long): Long
-        + updateBalance(userId: Long, balanceId: Long, amount: Long, operationType: OperationType): void
+        + getWallet(userId: Long): Wallet
+        + updateWallet(userId: Long, walletId: Long, amount: Integer, operationType: OperationType): Wallet
     }
 
     class QueueTokenFacade {
@@ -23,8 +23,7 @@ classDiagram
         - userService: UserService
         + createToken(userId: Long): Long
         + getToken(tokenId: Long): QueueToken
-        + updateTokenExpired(tokenId: Long, isExpired: Boolean): void
-        + update
+        + updateTokenExpired(tokenId: Long, isExpired: Boolean): QueueToken
     }
 
     class ConcertFacade {
@@ -57,30 +56,30 @@ classDiagram
         - name: String
     }
 
-    class Balance {
-        - balanceId: Long
+    class Wallet {
+        - walletId: Long
         - userId: Long
-        - amount: Long
+        - amount: Integer
     }
 
     class UserService {
         - userRepository: UserRepository
         + getUser(userId: Long): User
-        + getBalance(userId: Long): Balance
-        + updateBalance(userId: Long, balanceId: Long, amount: Long, operationType: OperationType): voidp
+        + getWallet(userId: Long): Wallet
+        + updateWallet(userId: Long, walletId: Long, amount: Integer, operationType: OperationType): void
     }
 
     class UserRepository {
         <<interface>>
         + findById(userId: Long): User
-        + findBalanceByUserId(userId: Long): Balance
+        + findWalletByUserId(userId: Long): Wallet
         + save(balance: Balance): Long
     }
 
-    User "1" -- "1" Balance
+    User "1" -- "1" Wallet
     User "1" -- "0..*" Token
     UserService ..> User
-    UserService ..> Balance
+    UserService ..> Wallet
     UserRepository --> UserService
 ```
 
@@ -177,7 +176,7 @@ classDiagram
         - paymentId: Long
         - reservationId: Long
         - userId: Long
-        - amount: Long
+        - amount: Integer
     }
 
     class ConcertService {
