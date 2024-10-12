@@ -11,67 +11,67 @@ title: "콘서트 예약 시스템 ERD"
 ---
 
 erDiagram
-    User {
-        Long id PK "AUTO_INCREMENT"
-        String name
+    user {
+        bigint id PK "AUTO_INCREMENT"
+        varchar name
     }
 
-    Balance {
-        Long id PK "AUTO_INCREMENT"
-        Long user_id FK, UK
-        Long amount
+    wallet {
+        bigint id PK "AUTO_INCREMENT"
+        bigint user_id FK, UK
+        int amount
     }
 
-    QueueToken {
-        Long id PK "AUTO_INCREMENT"
-        Long user_id FK
-        QueueTokenStatus status "WAITING, PROCESSING, EXPIRED"
-        Datetime expired_at
+    queue_token {
+        bigint id PK "AUTO_INCREMENT"
+        bigint user_id FK
+        varchar status "WAITING, PROCESSING, EXPIRED"
+        datetime expired_at
     }
 
-    Concert {
-        Long id PK "AUTO_INCREMENT"
-        String title
-        String description
+    concert {
+        bigint id PK "AUTO_INCREMENT"
+        varchar title
+        varchar description
     }
 
-    ConcertSchedule {
-        Long id PK "AUTO_INCREMENT"
-        Long concert_id FK
-        Datetime concert_at
-        DateTime reservation_start_at
-        DateTime reservation_end_at
+    concert_schedule {
+        bigint id PK "AUTO_INCREMENT"
+        bigint concert_id FK
+        datetime concert_at
+        datetime reservation_start_at
+        datetime reservation_end_at
     }
 
-    ConcertSeat {
-        Long id PK "AUTO_INCREMENT"
-        Long concert_schedule_id FK
-        Long number "concert_schedule_id, number 복합키"
-        Long price
+    concert_seat {
+        bigint id PK "AUTO_INCREMENT"
+        bigint concert_schedule_id FK
+        bigint number "concert_schedule_id, number 복합키"
+        bigint price
         Boolean is_reserved
     }
 
-    Reservation {
-        Long id PK "AUTO_INCREMENT"
-        Long concert_seat_id FK
-        Long user_id FK
-        Enum status "WAITING, CONFIRMED, CANCELED"
-        Datetime reserved_at
+    reservation {
+        bigint id PK "AUTO_INCREMENT"
+        bigint concert_seat_id FK
+        bigint user_id FK
+        varchar status "WAITING, CONFIRMED, CANCELED"
+        datetime reserved_at
     }
 
-    Payment {
-        Long id PK "AUTO_INCREMENT"
-        Long reservation_id FK
-        Long user_id FK
-        Long amount
+    payment {
+        bigint id PK "AUTO_INCREMENT"
+        bigint reservation_id FK
+        bigint user_id FK
+        bigint amount
     }
 
-    User ||--o{ QueueToken: ""
-    User ||--|| Balance: ""
-    Concert ||--|{ ConcertSchedule: ""
-    ConcertSchedule ||--|{ ConcertSeat: ""
-    ConcertSeat ||--o| Reservation: ""
-    Reservation ||--o| Payment: ""
-    User ||--o{ Reservation: ""
-    User ||--o{ Payment: ""
+    user ||--o{ queue_token: ""
+    user ||--|| wallet: ""
+    concert ||--|{ concert_schedule: ""
+    concert_schedule ||--|{ concert_seat: ""
+    concert_seat ||--o| reservation: ""
+    reservation ||--o| payment: ""
+    user ||--o{ reservation: ""
+    user ||--o{ payment: ""
 ```
