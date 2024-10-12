@@ -94,6 +94,7 @@ classDiagram
     class QueueToken {
         - queueTokenId: Long
         - userId: Long
+        - concertId: Long
         - status: QueueTokenStatus
         - expiredAt: LocalDateTime
     }

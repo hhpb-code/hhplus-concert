@@ -25,6 +25,7 @@ erDiagram
     queue_token {
         bigint id PK "AUTO_INCREMENT"
         bigint user_id FK
+        bigint concert_id FK
         varchar status "WAITING, PROCESSING, EXPIRED"
         datetime expired_at
     }
