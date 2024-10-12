@@ -125,13 +125,13 @@
 
 #### Request
 
-- **URL**: `/api/v1/users/{userId}/balances/{balanceId}`
+- **URL**: `/api/v1/users/{userId}/wallets/{walletId}`
 - **Method**: `PUT`
 - **Headers**:
   - Content-Type: application/json
 - **Path Parameters**:
   - `userId`: `Integer`
-  - `balanceId`: `Integer`
+  - `walletId`: `Integer`
 - **Body**:
   ```json
     {
@@ -145,7 +145,7 @@
 - **Status Code**: 200 OK
   ```json
   {
-    "balance": {
+    "wallet": {
         "id": "Integer",
         "userId": "Integer",
         "amount": "Integer"
@@ -157,7 +157,7 @@
 
 #### Request
 
-- **URL**: `/api/v1/users/{userId}/balances`
+- **URL**: `/api/v1/users/{userId}/wallets`
 - **Method**: `GET`
 - **Headers**:
   - Content-Type: application/json
@@ -169,7 +169,7 @@
 - **Status Code**: 200 OK
   ```json
   {
-    "balance": {
+    "wallet": {
         "id": "Integer",
         "userId": "Integer",
         "amount": "Integer"
