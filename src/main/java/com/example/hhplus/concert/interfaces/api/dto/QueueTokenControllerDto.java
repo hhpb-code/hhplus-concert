@@ -38,7 +38,7 @@ public class QueueTokenControllerDto {
       Long id,
 
       @Schema(description = "콘서트 좌석 ID", example = "1")
-      Long concertSeatId,
+      Long concertId,
 
       @Schema(description = "사용자 ID", example = "1234")
       Long userId,
@@ -51,7 +51,7 @@ public class QueueTokenControllerDto {
   ) {
 
     public QueueTokenDto(Queuetoken queuetoken) {
-      this(queuetoken.id(), queuetoken.concertSeatId(), queuetoken.userId(), queuetoken.status(),
+      this(queuetoken.id(), queuetoken.concertId(), queuetoken.userId(), queuetoken.status(),
           queuetoken.expiredAt());
     }
 
@@ -63,7 +63,7 @@ public class QueueTokenControllerDto {
       Long id,
 
       @Schema(description = "콘서트 좌석 ID", example = "1")
-      Long concertSeatId,
+      Long concertId,
 
       @Schema(description = "사용자 ID", example = "1234")
       Long userId,
@@ -79,7 +79,7 @@ public class QueueTokenControllerDto {
   ) {
 
     public QueueTokenDtoWithPosition(Queuetoken queuetoken, Integer position) {
-      this(queuetoken.id(), queuetoken.concertSeatId(), queuetoken.userId(), queuetoken.status(),
+      this(queuetoken.id(), queuetoken.concertId(), queuetoken.userId(), queuetoken.status(),
           queuetoken.expiredAt(), position);
     }
 
