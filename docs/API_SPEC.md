@@ -6,15 +6,15 @@
 
 #### Request
 
-- **URL**: `/api/v1/queue-tokens`
+- **URL**: `/api/v1/waiting-queue`
 - **Method**: `POST`
 - **Headers**:
-  - Content-Type: application/json
+    - Content-Type: application/json
 - **Body**:
   ```json
-  {
-    "userId": "Integer"
-  }
+    {
+        "concertId": "Integer"
+    }
   ```
 
 #### Response
@@ -22,26 +22,57 @@
 - **Status Code**: 201 Created
   ```json
   {
-    "queueToken": {
+    "waitingQueue": {
         "id": "Integer",
-        "userId": "Integer",
+        "concert_id": "Integer",
+        "uuid": "String",
         "status": "Enum",
-        "expiredAt": "DateTime"
+        "expiredAt": "DateTime",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
     }
   }
   ```
 
-### 2. 예약 가능 날짜 조회 API
+### 2. 대기열 토큰 상태 조회 API
+
+#### Request
+
+- **URL**: `/api/v1/waiting-queue/{queueId}/status`
+- **Method**: `GET`
+- **Headers**:
+    - Content-Type: application/json
+    - X-Waiting-Queue-Token-uuid: [대기열 토큰 UUID]
+
+#### Response
+
+- **Status Code**: 200 OK
+  ```json
+  {
+    "waitingQueue": {
+        "id": "Integer",
+        "concert_id": "Integer",
+        "uuid": "String",
+        "status": "Enum",
+        "expiredAt": "DateTime",
+        "position": "Integer",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
+    }
+  }
+  ```
+
+### 3. 예약 가능 날짜 조회 API
 
 #### Request
 
 - **URL**: `/api/v1/concerts/{concertId}/available-schedules`
 - **Method**: `GET`
 - **Headers**:
-  - Content-Type: application/json
-  - X-Queue-Token: [대기열 토큰]
+    - Content-Type: application/json
+    - X-Waiting-Queue-Token-uuid: [대기열 토큰 UUID]
 - **Path Parameters**:
-  - `concertId`: `Integer`
+    - `concertId`: `Integer`
 
 #### Response
 
@@ -54,23 +85,25 @@
             "concertId": "Integer",
             "concertAt": "DateTime",
             "reservationStartAt": "DateTime",
-            "reservationEndAt": "DateTime"
+            "reservationEndAt": "DateTime",
+            "createdAt": "DateTime",
+            "updatedAt": "DateTime"
         }
     ]
   }
   ```
 
-### 3. 예약 가능 좌석 조회 API
+### 4. 예약 가능 좌석 조회 API
 
 #### Request
 
 - **URL**: `/api/v1/concert-schedules/{scheduleId}/available-seats`
 - **Method**: `GET`
 - **Headers**:
-  - Content-Type: application/json
-  - X-Queue-Token: [대기열 토큰]
+    - Content-Type: application/json
+    - X-Waiting-Queue-Token-uuid: [대기열 토큰 UUID]
 - **Path Parameters**:
-  - `scheduleId`: `Integer`
+    - `scheduleId`: `Integer`
 
 #### Response
 
@@ -83,26 +116,28 @@
             "concertScheduleId": "Integer",
             "number": "Integer",
             "price": "Integer",
-            "isReserved": "Boolean"
+            "isReserved": "Boolean",
+            "createdAt": "DateTime",
+            "updatedAt": "DateTime"
         }
     ]
   }
   ```
 
-### 4. 좌석 예약 API
+### 5. 좌석 예약 API
 
 #### Request
 
 - **URL**: `/api/v1/reservations`
 - **Method**: `POST`
 - **Headers**:
-  - Content-Type: application/json
-  - X-Queue-Token: [대기열 토큰]
+    - Content-Type: application/json
+    - X-User-Id: [사용자 ID]
+    - X-Waiting-Queue-Token-uuid: [대기열 토큰 UUID]
 - **Body**:
   ```json
     {
-        "concertSeatId": "Integer",
-        "userId": "Integer"
+        "concertSeatId": "Integer"
     }
   ```
 
@@ -116,22 +151,24 @@
         "concertSeatId": "Integer",
         "userId": "Integer",
         "status": "Enum",
-        "reservedAt": "DateTime"
+        "reservedAt": "DateTime",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
     }
   }
   ```
 
-### 5. 잔액 충전 API
+### 6. 잔액 충전 API
 
 #### Request
 
 - **URL**: `/api/v1/users/{userId}/wallets/{walletId}`
 - **Method**: `PUT`
 - **Headers**:
-  - Content-Type: application/json
+    - Content-Type: application/json
 - **Path Parameters**:
-  - `userId`: `Integer`
-  - `walletId`: `Integer`
+    - `userId`: `Integer`
+    - `walletId`: `Integer`
 - **Body**:
   ```json
     {
@@ -148,21 +185,23 @@
     "wallet": {
         "id": "Integer",
         "userId": "Integer",
-        "amount": "Integer"
+        "amount": "Integer",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
     }
   }
   ```
 
-### 6. 잔액 조회 API
+### 7. 잔액 조회 API
 
 #### Request
 
 - **URL**: `/api/v1/users/{userId}/wallets`
 - **Method**: `GET`
 - **Headers**:
-  - Content-Type: application/json
-- **Query Parameters**:
-  - `userId`: `Integer`
+    - Content-Type: application/json
+- **Path Parameters**:
+    - `userId`: `Integer`
 
 #### Response
 
@@ -172,21 +211,24 @@
     "wallet": {
         "id": "Integer",
         "userId": "Integer",
-        "amount": "Integer"
+        "amount": "Integer",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
     }
   }
   ```
 
-### 7. 결제 API
+### 8. 결제 API
 
 #### Request
 
 - **URL**: `/api/v1/reservations/{reservationId}/payments`
 - **Method**: `POST`
 - **Headers**:
-  - Content-Type: application/json
+    - Content-Type: application/json
+    - X-User-Id: [사용자 ID]
 - **Path Parameters**:
-  - `reservationId`: `Integer`
+    - `reservationId`: `Integer`
 - **Body**:
   ```json
     {
@@ -203,7 +245,9 @@
         "id": "Integer",
         "reservationId": "Integer",
         "userId": "Integer",
-        "amount": "Integer"
+        "amount": "Integer",
+        "createdAt": "DateTime",
+        "updatedAt": "DateTime"
     }
   }
   ```

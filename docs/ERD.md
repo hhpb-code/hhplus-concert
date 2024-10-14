@@ -14,12 +14,16 @@ erDiagram
     user {
         bigint id PK "AUTO_INCREMENT"
         varchar name
+        datetime created_at
+        datetime updated_at
     }
 
     wallet {
         bigint id PK "AUTO_INCREMENT"
         bigint user_id FK, UK
         int amount
+        datetime created_at
+        datetime updated_at
     }
 
     waiting_queue {
@@ -28,12 +32,16 @@ erDiagram
         varchar uuid
         varchar status "WAITING, PROCESSING, EXPIRED"
         datetime expired_at
+        datetime created_at
+        datetime updated_at
     }
 
     concert {
         bigint id PK "AUTO_INCREMENT"
         varchar title
         varchar description
+        datetime created_at
+        datetime updated_at
     }
 
     concert_schedule {
@@ -42,6 +50,8 @@ erDiagram
         datetime concert_at
         datetime reservation_start_at
         datetime reservation_end_at
+        datetime created_at
+        datetime updated_at
     }
 
     concert_seat {
@@ -50,6 +60,8 @@ erDiagram
         int number "concert_schedule_id, number 복합키"
         int price
         boolean is_reserved
+        datetime created_at
+        datetime updated_at
     }
 
     reservation {
@@ -58,6 +70,8 @@ erDiagram
         bigint user_id FK
         varchar status "WAITING, CONFIRMED, CANCELED"
         datetime reserved_at
+        datetime created_at
+        datetime updated_at
     }
 
     payment {
@@ -65,6 +79,8 @@ erDiagram
         bigint reservation_id FK
         bigint user_id FK
         bigint amount
+        datetime created_at
+        datetime updated_at
     }
 
     user ||--|| wallet: ""

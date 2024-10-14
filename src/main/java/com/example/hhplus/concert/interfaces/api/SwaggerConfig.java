@@ -14,9 +14,11 @@ public class SwaggerConfig {
   @Bean
   public OpenAPI customOpenAPI() {
     return new OpenAPI()
-        .addSecurityItem(new SecurityRequirement().addList("X-Queue-Token"))
+        .addSecurityItem(
+            new SecurityRequirement().addList(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID))
         .components(new Components()
-            .addSecuritySchemes("X-Queue-Token", createQueueTokenScheme()));
+            .addSecuritySchemes(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID,
+                createQueueTokenScheme()));
   }
 
 
@@ -24,6 +26,6 @@ public class SwaggerConfig {
     return new SecurityScheme()
         .type(SecurityScheme.Type.APIKEY)
         .in(SecurityScheme.In.HEADER)
-        .name("X-Queue-Token");
+        .name(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID);
   }
 }

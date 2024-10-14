@@ -18,27 +18,27 @@ classDiagram
         + updateWallet(userId: Long, walletId: Long, amount: Integer, operationType: OperationType): Wallet
     }
 
-    class QueueTokenFacade {
-        - queueTokenService: QueueTokenService
+    class WaitingQueueFacade {
+        - WaitingQueueService: WaitingQueueService
         - userService: UserService
-        + createToken(userId: Long): Long
-        + getToken(tokenId: Long): QueueToken
-        + updateTokenExpired(tokenId: Long, isExpired: Boolean): QueueToken
+        + createWaitingQueue(): Long
+        + getWaitingQueue(uuid: String): WaitingQueue
+        + expireWaitingQueue(uuid: String): void
     }
 
     class ConcertFacade {
         - concertService: ConcertService
         - userService: UserService
-        - queuetokenService: QueueTokenService
+        - waitingQueueService: WaitingQueueService
         + getAvailableConcertSchedules(concertId: Long): List~ConcertSchedule~
         + getAvailableConcertSeats(concertScheduleId: Long): List~ConcertSeat~
         + reserveConcertSeat(userId: Long, concertSeatId: Long): Reservation
         + payReservation(userId: Long, reservationId: Long): Payment
     }
 
-    QueueTokenService --> QueueTokenFacade
+    WaitingQueueService --> WaitingQueueFacade
     UserService --> ConcertFacade
-    UserService --> QueueTokenFacade
+    UserService --> WaitingQueueFacade
     UserService --> UserFacade
     ConcertService --> ConcertFacade
 ```
@@ -77,7 +77,6 @@ classDiagram
     }
 
     User "1" -- "1" Wallet
-    User "1" -- "0..*" Token
     UserService ..> User
     UserService ..> Wallet
     UserRepository --> UserService
@@ -95,37 +94,37 @@ classDiagram
         - waitingQueueId: Long
         - concertId: Long
         - uuid: String
-        - status: QueueTokenStatus
+        - status: WaitingQueueStatus
         - expiredAt: LocalDateTime
     }
 
-    class QueueTokenStatus {
+    class WaitingQueueStatus {
         <<enumeration>>
         WAITING
         PROCESSING
         EXPIRED
     }
 
-    class QueueTokenService {
-        - queueTokenRepository: QueueTokenRepository
-        + getQueueToken(queueTokenId: Long): QueueToken
-        + getQueueTokensExpiredAtBefore(now: LocalDateTime): List~QueueToken~
-        + createQueueToken(userId: Long): Long
-        + updateTokenStatus(queueTokenId: Long, status: QueueTokenStatus): void
+    class WaitingQueueService {
+        - WaitingQueueRepository: WaitingQueueRepository
+        + getWaitingQueue(WaitingQueueId: Long): WaitingQueue
+        + getWaitingQueue(uuid: String): WaitingQueue
+        + getWaitingQueuesExpiredAtBefore(now: LocalDateTime): List~WaitingQueue~
+        + createWaitingQueue(): Long
+        + updateWaitingQueueStatus(WaitingQueueId: Long, status: WaitingQueueStatus): void
     }
 
-    class QueueTokenRepository {
+    class WaitingQueueRepository {
         <<interface>>
-        + findById(queueTokenId: Long): QueueToken
-        + findAllByExpiredAtBefore(now: LocalDateTime): List~QueueToken~
-        + findByStatusOrderByIdDesc(status: QueueTokenStatus): QueueToken
-        + save(queueToken: QueueToken): Long
+        + findById(WaitingQueueId: Long): WaitingQueue
+        + findAllByExpiredAtBefore(now: LocalDateTime): List~WaitingQueue~
+        + findByStatusOrderByIdDesc(status: WaitingQueueStatus): WaitingQueue
+        + save(WaitingQueue: WaitingQueue): Long
     }
 
-    User "1" -- "0..*" QueueToken
-    QueueToken -- QueueTokenStatus
-    QueueTokenService ..> QueueToken
-    QueueTokenRepository --> QueueTokenService
+    WaitingQueue -- WaitingQueueStatus
+    WaitingQueueService ..> WaitingQueue
+    WaitingQueueRepository --> WaitingQueueService
 ```
 
 ### 콘서트 도메인
