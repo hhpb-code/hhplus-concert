@@ -91,10 +91,10 @@ title: "대기열 토큰 도메인 클래스 다이어그램"
 ---
 
 classDiagram
-    class QueueToken {
-        - queueTokenId: Long
-        - userId: Long
+    class WaitingQueue {
+        - waitingQueueId: Long
         - concertId: Long
+        - uuid: String
         - status: QueueTokenStatus
         - expiredAt: LocalDateTime
     }
@@ -153,8 +153,8 @@ classDiagram
     class ConcertSeat {
         - concertSeatId: Long
         - concertScheduleId: Long
-        - number: Long
-        - price: Long
+        - number: Integer
+        - price: Integer
         - isReserved: Boolean
     }
 

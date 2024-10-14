@@ -44,6 +44,5 @@ com.example.hhpb.concert/
 └── infra/                                          # 인프라스트럭처 계층
     └── db/                                         # 데이터베이스
         └── [domain]/                               # 도메인
-            ├── entity/                             # 엔티티
             └── impl/                               # 구현체
 ```

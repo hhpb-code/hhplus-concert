@@ -22,10 +22,10 @@ erDiagram
         int amount
     }
 
-    queue_token {
+    waiting_queue {
         bigint id PK "AUTO_INCREMENT"
-        bigint user_id FK
         bigint concert_id FK
+        varchar uuid
         varchar status "WAITING, PROCESSING, EXPIRED"
         datetime expired_at
     }
@@ -47,9 +47,9 @@ erDiagram
     concert_seat {
         bigint id PK "AUTO_INCREMENT"
         bigint concert_schedule_id FK
-        bigint number "concert_schedule_id, number 복합키"
-        bigint price
-        Boolean is_reserved
+        int number "concert_schedule_id, number 복합키"
+        int price
+        boolean is_reserved
     }
 
     reservation {
@@ -67,8 +67,8 @@ erDiagram
         bigint amount
     }
 
-    user ||--o{ queue_token: ""
     user ||--|| wallet: ""
+    waiting_queue |o--|| concert: ""
     concert ||--|{ concert_schedule: ""
     concert_schedule ||--|{ concert_seat: ""
     concert_seat ||--o| reservation: ""
