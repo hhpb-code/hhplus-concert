@@ -8,4 +8,3 @@
 - [Class Diagram](./docs/CLASS_DIAGRAM.md)
 - [ERD Diagram](./docs/ERD.md)
 - [API Spec](./docs/API_SPEC.md)
-- [Swagger](./docs/SWAGGER.md)
