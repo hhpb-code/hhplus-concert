@@ -6,7 +6,7 @@
 
 #### Request
 
-- **URL**: `/api/v1/waiting-queue`
+- **URL**: `/api/v1/waiting-queues`
 - **Method**: `POST`
 - **Headers**:
     - Content-Type: application/json
@@ -38,7 +38,7 @@
 
 #### Request
 
-- **URL**: `/api/v1/waiting-queue/{queueId}/status`
+- **URL**: `/api/v1/waiting-queues/position`
 - **Method**: `GET`
 - **Headers**:
     - Content-Type: application/json
