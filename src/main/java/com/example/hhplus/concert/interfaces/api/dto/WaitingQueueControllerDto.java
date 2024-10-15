@@ -19,8 +19,8 @@ public class WaitingQueueControllerDto {
 
   }
 
-  public record GetWaitingQueueStatusResponse(
-      WaitingQueueResponse waitingQueue
+  public record GetWaitingQueuePositionResponse(
+      WaitingQueueResponseWithPosition waitingQueue
   ) {
 
   }
@@ -44,7 +44,7 @@ public class WaitingQueueControllerDto {
       Long concertId,
       String uuid,
       WaitingQueueStatus status,
-      Long position,
+      Integer position,
       LocalDateTime expiredAt,
       LocalDateTime createdAt,
       LocalDateTime updatedAt
