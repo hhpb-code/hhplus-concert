@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByIdQuery;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -66,6 +67,47 @@ class WaitingQueueQueryTest {
         // then
         assertThat(violations).isEmpty();
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("대기열 순서 조회 query")
+  class GetWaitingQueuePositionByUuidQueryTest {
+
+    @Test
+    @DisplayName("대기열 순서 조회 query 생성 실패 - uuid가 null")
+    void shouldThrowExceptionWhenUuidIsNull() {
+      // given
+      final String uuid = null;
+      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
+
+      // when
+      final Set<ConstraintViolation<GetWaitingQueuePositionByUuid>> violations = validator
+          .validate(query);
+
+      final ConstraintViolation<GetWaitingQueuePositionByUuid> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("uuid"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("대기열 순서 조회 query 생성 성공")
+    void shouldSuccessfullyCreateGetWaitingQueuePositionByUuidQuery() {
+      // given
+      final String uuid = "uuid";
+      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
+
+      // when
+      final Set<ConstraintViolation<GetWaitingQueuePositionByUuid>> violations = validator
+          .validate(query);
+
+      // then
+      assertThat(violations).isEmpty();
     }
   }
 

@@ -12,4 +12,11 @@ public class WaitingQueueQuery {
 
   }
 
+  public record GetWaitingQueuePositionByUuid(
+      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE)
+      String uuid
+  ) {
+
+  }
+
 }
