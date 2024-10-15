@@ -64,7 +64,7 @@ class ConcertCommandTest {
           command);
 
       final ConstraintViolation<ReserveConcertSeatCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("id"))
+          .filter(v -> v.getPropertyPath().toString().equals("userId"))
           .findFirst()
           .get();
 
