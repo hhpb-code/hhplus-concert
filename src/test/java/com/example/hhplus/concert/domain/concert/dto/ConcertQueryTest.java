@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.concert.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import jakarta.validation.ConstraintViolation;
@@ -22,6 +23,84 @@ class ConcertQueryTest {
   @BeforeEach
   void setUp() {
     validator = Validation.buildDefaultValidatorFactory().getValidator();
+  }
+
+  @Nested
+  @DisplayName("콘서트 조회 Query By Get")
+  class GetConcertByIdQueryTest {
+
+    @Test
+    @DisplayName("콘서트 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
+    void shouldThrowExceptionWhenConcertIdIsNull() {
+      // given
+      final Long concertId = null;
+      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+
+      // when
+      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+
+      final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("id"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("콘서트 조회 query 생성 성공")
+    void shouldSuccessfullyCreateGetConcertByIdQuery() {
+      // given
+      final Long concertId = 1L;
+      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+
+      // when
+      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+
+      // then
+      assertThat(violations).isEmpty();
+    }
+
+  }
+
+  @Nested
+  @DisplayName("예약 가능한 콘서트 스케줄 조회 Query By Get")
+  class FindAvailableConcertSchedulesQueryTest {
+
+    @Test
+    @DisplayName("예약 가능한 콘서트 스케줄 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
+    void shouldThrowExceptionWhenConcertIdIsNull() {
+      // given
+      final Long concertId = null;
+      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+
+      // when
+      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+
+      final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("id"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("예약 가능한 콘서트 스케줄 조회 query 생성 성공")
+    void shouldSuccessfullyCreateFindAvailableConcertSchedulesQuery() {
+      // given
+      final Long concertId = 1L;
+      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+
+      // when
+      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+
+      // then
+      assertThat(violations).isEmpty();
+    }
+
   }
 
 
