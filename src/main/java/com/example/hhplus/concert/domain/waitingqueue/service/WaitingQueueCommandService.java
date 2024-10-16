@@ -45,4 +45,9 @@ public class WaitingQueueCommandService {
 
     waitingQueueRepository.saveAll(waitingQueues);
   }
+
+  @Transactional
+  public void expireWaitingQueues() {
+    waitingQueueRepository.expireWaitingQueues();
+  }
 }
