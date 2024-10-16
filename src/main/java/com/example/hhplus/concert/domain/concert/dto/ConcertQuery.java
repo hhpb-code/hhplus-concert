@@ -12,7 +12,7 @@ public class ConcertQuery {
 
   }
 
-  public record FindAvailableConcertSchedulesQuery(
+  public record FindReservableConcertSchedulesQuery(
       @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
       Long concertId
   ) {

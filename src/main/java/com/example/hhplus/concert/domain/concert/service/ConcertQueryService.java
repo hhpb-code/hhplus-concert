@@ -1,10 +1,10 @@
 package com.example.hhplus.concert.domain.concert.service;
 
-import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAvailableConcertSchedulesQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAvailableConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetReservationByIdParam;
@@ -40,10 +40,10 @@ public class ConcertQueryService {
     return concertRepository.getConcert(new GetConcertByIdParam(query.id()));
   }
 
-  public List<ConcertSchedule> findAvailableConcertSchedules(
-      FindAvailableConcertSchedulesQuery query) {
-    return concertRepository.findAvailableConcertSchedules(
-        new FindAvailableConcertSchedulesByConcertIdAndNowParam(query.concertId(),
+  public List<ConcertSchedule> findReservableConcertSchedules(
+      FindReservableConcertSchedulesQuery query) {
+    return concertRepository.findReservableConcertSchedules(
+        new FindReservableConcertSchedulesByConcertIdAndNowParam(query.concertId(),
             LocalDateTime.now()));
   }
 }

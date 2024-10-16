@@ -8,7 +8,7 @@ public class ConcertRepositoryParam {
 
   }
 
-  public record FindAvailableConcertSchedulesByConcertIdAndNowParam(
+  public record FindReservableConcertSchedulesByConcertIdAndNowParam(
       Long concertId,
       LocalDateTime now
   ) {

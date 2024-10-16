@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.concert.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
@@ -65,21 +66,23 @@ class ConcertQueryTest {
   }
 
   @Nested
-  @DisplayName("예약 가능한 콘서트 스케줄 조회 Query By Get")
-  class FindAvailableConcertSchedulesQueryTest {
+  @DisplayName("예약 가능한 콘서트 스케줄 조회 Query By Find")
+  class FindReservableConcertSchedulesQueryTest {
 
     @Test
     @DisplayName("예약 가능한 콘서트 스케줄 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
     void shouldThrowExceptionWhenConcertIdIsNull() {
       // given
       final Long concertId = null;
-      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+      final FindReservableConcertSchedulesQuery query = new FindReservableConcertSchedulesQuery(
+          concertId);
 
       // when
-      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+      final Set<ConstraintViolation<FindReservableConcertSchedulesQuery>> violations = validator.validate(
+          query);
 
-      final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("id"))
+      final ConstraintViolation<FindReservableConcertSchedulesQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("concertId"))
           .findFirst()
           .get();
 
@@ -92,10 +95,12 @@ class ConcertQueryTest {
     void shouldSuccessfullyCreateFindAvailableConcertSchedulesQuery() {
       // given
       final Long concertId = 1L;
-      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+      final FindReservableConcertSchedulesQuery query = new FindReservableConcertSchedulesQuery(
+          concertId);
 
       // when
-      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+      final Set<ConstraintViolation<FindReservableConcertSchedulesQuery>> violations = validator.validate(
+          query);
 
       // then
       assertThat(violations).isEmpty();
