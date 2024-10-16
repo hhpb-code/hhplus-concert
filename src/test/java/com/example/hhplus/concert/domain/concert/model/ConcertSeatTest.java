@@ -1,6 +1,6 @@
 package com.example.hhplus.concert.domain.concert.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
@@ -29,8 +29,8 @@ class ConcertSeatTest {
           concertSeat::reserve);
 
       // then
-      assertEquals(ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED,
-          businessException.getErrorCode());
+      assertThat(businessException.getErrorCode()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED);
     }
 
     @Test
@@ -45,7 +45,45 @@ class ConcertSeatTest {
       concertSeat.reserve();
 
       // then
-      assertEquals(true, concertSeat.getIsReserved());
+      assertThat(concertSeat.getIsReserved()).isTrue();
+    }
+
+  }
+
+  @Nested
+  @DisplayName("예약 해지")
+  class Release {
+
+    @Test
+    @DisplayName("예약 해지 실패 - 이미 해지된 좌석")
+    void shouldThrowExceptionWhenRelease() {
+      // given
+      ConcertSeat concertSeat = ConcertSeat.builder()
+          .isReserved(false)
+          .build();
+
+      // when
+      BusinessException businessException = assertThrows(BusinessException.class,
+          concertSeat::release);
+
+      // then
+      assertThat(businessException.getErrorCode()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+    }
+
+    @Test
+    @DisplayName("예약 해지 성공")
+    void shouldSuccessfullyRelease() {
+      // given
+      ConcertSeat concertSeat = ConcertSeat.builder()
+          .isReserved(true)
+          .build();
+
+      // when
+      concertSeat.release();
+
+      // then
+      assertThat(concertSeat.getIsReserved()).isFalse();
     }
 
   }

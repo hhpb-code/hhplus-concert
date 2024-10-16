@@ -82,6 +82,7 @@ public class ConcertQueryService {
         new GetReservationByIdWithLockParam(query.reservationId()));
   }
 
+  // TODO: command service로 이동
   @Transactional
   public void confirmReservation(ConfirmReservationCommand command) {
     Reservation reservation = getReservation(
@@ -92,4 +93,8 @@ public class ConcertQueryService {
     concertRepository.saveReservation(reservation);
   }
 
+  @Transactional(readOnly = true)
+  public List<Reservation> findAllExpiredReservations() {
+    return concertRepository.findAllExpiredReservations();
+  }
 }

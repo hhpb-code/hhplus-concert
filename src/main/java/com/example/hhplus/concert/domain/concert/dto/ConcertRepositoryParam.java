@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ConcertRepositoryParam {
 
@@ -42,4 +43,15 @@ public class ConcertRepositoryParam {
 
   }
 
+  public record FindAllReservationsByIdsWithLockParam(
+      List<Long> reservationIds
+  ) {
+
+  }
+
+  public record FindAllConcertSeatsByIdsWithLockParam(
+      List<Long> concertSeatIds
+  ) {
+
+  }
 }

@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.domain.concert.repository;
 
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
@@ -38,4 +40,14 @@ public interface ConcertRepository {
 
   Reservation getReservation(GetReservationByIdWithLockParam param);
 
+  List<Reservation> findAllExpiredReservations();
+
+  List<Reservation> findAllReservations(FindAllReservationsByIdsWithLockParam param);
+
+  void saveAllReservations(List<Reservation> reservations);
+
+  List<ConcertSeat> findAllConcertSeats(FindAllConcertSeatsByIdsWithLockParam param);
+
+  void saveAllConcertSeats(List<ConcertSeat> concertSeats);
+  
 }

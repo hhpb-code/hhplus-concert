@@ -11,5 +11,8 @@ public class ConcertConstants {
   public static final String CONCERT_SEAT_ALREADY_RESERVED = "이미 예약된 좌석입니다.";
   public static final String RESERVATION_ALREADY_PAID = "이미 결제된 예약입니다.";
   public static final String RESERVATION_ALREADY_CANCELED = "이미 취소된 예약입니다.";
+  public static final String RESERVATION_IDS_MUST_NOT_BE_NULL = "예약 ID 목록은 필수입니다.";
+  public static final String CONCERT_SEAT_IDS_MUST_NOT_BE_NULL = "콘서트 좌석 ID 목록은 필수입니다.";
+  public static final String CONCERT_SEAT_NOT_RESERVED = "예약되지 않은 좌석입니다.";
 
 }

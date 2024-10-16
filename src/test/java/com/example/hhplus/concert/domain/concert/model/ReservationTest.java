@@ -72,4 +72,63 @@ class ReservationTest {
 
   }
 
+  @Nested
+  @DisplayName("예약 취소")
+  class CancelTest {
+
+    @Test
+    @DisplayName("예약 취소 실패 - 이미 취소된 예약")
+    void shouldThrowExceptionWhenAlreadyCanceled() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.CANCELED)
+          .build();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          reservation::cancel);
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+    }
+
+    @Test
+    @DisplayName("예약 취소 실패 - 이미 확정된 예약")
+    void shouldThrowExceptionWhenAlreadyConfirmed() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.CONFIRMED)
+          .build();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          reservation::cancel);
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+    }
+
+    @Test
+    @DisplayName("예약 취소 성공")
+    void shouldSuccessfullyCancel() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.WAITING)
+          .build();
+
+      // when
+      reservation.cancel();
+
+      // then
+      assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+  }
+
 }
