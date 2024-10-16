@@ -8,6 +8,10 @@ public class ConcertRepositoryParam {
 
   }
 
+  public record GetConcertScheduleByIdParam(Long concertScheduleId) {
+
+  }
+
   public record FindReservableConcertSchedulesByConcertIdAndNowParam(
       Long concertId,
       LocalDateTime now
@@ -16,6 +20,12 @@ public class ConcertRepositoryParam {
   }
 
   public record GetReservationByIdParam(Long id) {
+
+  }
+
+  public record FindReservableConcertSeatsByConcertIdParam(
+      Long concertScheduleId
+  ) {
 
   }
 

@@ -1,11 +1,15 @@
 package com.example.hhplus.concert.domain.concert.service;
 
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertScheduleByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetReservationByIdParam;
 import com.example.hhplus.concert.domain.concert.model.Concert;
@@ -45,5 +49,15 @@ public class ConcertQueryService {
     return concertRepository.findReservableConcertSchedules(
         new FindReservableConcertSchedulesByConcertIdAndNowParam(query.concertId(),
             LocalDateTime.now()));
+  }
+
+  public ConcertSchedule getConcertSchedule(GetConcertScheduleByIdQuery query) {
+    return concertRepository.getConcertSchedule(
+        new GetConcertScheduleByIdParam(query.concertScheduleId()));
+  }
+
+  public List<ConcertSeat> findReservableConcertSeats(FindReservableConcertSeatsQuery query) {
+    return concertRepository.findReservableConcertSeats(
+        new FindReservableConcertSeatsByConcertIdParam(query.concertScheduleId()));
   }
 }

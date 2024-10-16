@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ConcertErrorCode implements ErrorCode {
+  CONCERT_SCHEDULE_NOT_RESERVABLE(HttpStatus.BAD_REQUEST,
+      ConcertConstants.CONCERT_SCHEDULE_NOT_RESERVABLE),
   CONCERT_SEAT_ALREADY_RESERVED(HttpStatus.BAD_REQUEST,
       ConcertConstants.CONCERT_SEAT_ALREADY_RESERVED);
 

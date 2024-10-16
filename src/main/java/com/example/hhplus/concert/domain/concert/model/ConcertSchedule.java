@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.domain.concert.model;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -49,4 +51,10 @@ public class ConcertSchedule {
   @Column(insertable = false)
   private LocalDateTime updatedAt;
 
+  public void validateReservationTime() {
+    LocalDateTime now = LocalDateTime.now();
+    if (now.isBefore(reservationStartAt) || now.isAfter(reservationEndAt)) {
+      throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+    }
+  }
 }
