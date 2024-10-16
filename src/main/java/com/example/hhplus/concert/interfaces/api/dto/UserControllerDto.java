@@ -1,6 +1,5 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
-import com.example.hhplus.concert.domain.user.model.WalletOperationType;
 import java.time.LocalDateTime;
 
 public class UserControllerDto {
@@ -13,14 +12,13 @@ public class UserControllerDto {
 
   }
 
-  public record UpdateWalletRequest(
-      Integer amount,
-      WalletOperationType operationType
+  public record ChargeWalletAmountRequest(
+      Integer amount
   ) {
 
   }
 
-  public record UpdateWalletResponse(
+  public record ChargeWalletAmountResponse(
       WalletResponse wallet
   ) {
 

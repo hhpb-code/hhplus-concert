@@ -1,5 +1,8 @@
 package com.example.hhplus.concert.domain.user.model;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.user.UserConstants;
+import com.example.hhplus.concert.domain.user.UserErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -44,4 +47,15 @@ public class Wallet {
   @Column(insertable = false)
   private LocalDateTime updatedAt;
 
+  public void chargeAmount(Integer amount) {
+    if (amount == null || amount <= 0) {
+      throw new BusinessException(UserErrorCode.INVALID_AMOUNT);
+    }
+
+    if (this.amount + amount > UserConstants.MAX_WALLET_AMOUNT) {
+      throw new BusinessException(UserErrorCode.EXCEED_LIMIT_AMOUNT);
+    }
+
+    this.amount += amount;
+  }
 }
