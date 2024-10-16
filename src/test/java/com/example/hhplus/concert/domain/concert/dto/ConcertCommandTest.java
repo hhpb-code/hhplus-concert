@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.concert.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
 import jakarta.validation.ConstraintViolation;
@@ -150,6 +151,50 @@ class ConcertCommandTest {
 
       // when
       final Set<ConstraintViolation<CreateReservationCommand>> violations = validator.validate(
+          command);
+
+      // then
+      assertThat(violations).isEmpty();
+    }
+
+  }
+
+  @Nested
+  @DisplayName("예약 내역 확정 Command")
+  class ConfirmReservationCommandTest {
+
+    @Test
+    @DisplayName("예약 내역 확정 Command 생성 실패 - reservationId가 null인 경우")
+    void shouldThrowExceptionWhenReservationIdIsNull() {
+      // given
+      final Long reservationId = null;
+      final ConfirmReservationCommand command = new ConfirmReservationCommand(
+          reservationId);
+
+      // when
+      final Set<ConstraintViolation<ConfirmReservationCommand>> violations = validator.validate(
+          command);
+
+      final ConstraintViolation<ConfirmReservationCommand> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("reservationId"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("예약 내역 확정 Command 생성 성공")
+    void shouldSuccessfullyCreateConfirmReservationCommand() {
+      // given
+      final Long reservationId = 1L;
+      final ConfirmReservationCommand command = new ConfirmReservationCommand(
+          reservationId);
+
+      // when
+      final Set<ConstraintViolation<ConfirmReservationCommand>> violations = validator.validate(
           command);
 
       // then

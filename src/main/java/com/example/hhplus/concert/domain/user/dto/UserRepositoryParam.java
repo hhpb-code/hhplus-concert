@@ -25,4 +25,10 @@ public class UserRepositoryParam {
   ) {
 
   }
+
+  public record GetUserWalletByWalletUserIdIdWithLockParam(
+      Long userId
+  ) {
+
+  }
 }

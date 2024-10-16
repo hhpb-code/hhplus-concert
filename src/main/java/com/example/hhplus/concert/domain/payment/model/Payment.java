@@ -1,7 +1,5 @@
-package com.example.hhplus.concert.domain.concert.model;
+package com.example.hhplus.concert.domain.payment.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -18,30 +16,28 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+
 @Entity
-@Table(name = "reservation")
+@Table(name = "payment")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Reservation {
+public class Payment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false)
-  private Long concertSeatId;
+  private Long reservationId;
 
   @Column(nullable = false)
   private Long userId;
 
   @Column(nullable = false)
-  private ReservationStatus status;
-
-  @Column(nullable = false)
-  private LocalDateTime reservedAt;
+  private Integer amount;
 
   @CreatedDate
   @Column(nullable = false, updatable = false)
@@ -51,15 +47,4 @@ public class Reservation {
   @Column(insertable = false)
   private LocalDateTime updatedAt;
 
-  public void confirm() {
-    if (status == ReservationStatus.CONFIRMED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
-    }
-
-    if (status == ReservationStatus.CANCELED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
-    }
-
-    this.status = ReservationStatus.CONFIRMED;
-  }
 }

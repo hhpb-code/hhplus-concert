@@ -78,7 +78,7 @@ erDiagram
         bigint id PK "AUTO_INCREMENT"
         bigint reservation_id FK
         bigint user_id FK
-        bigint amount
+        int amount
         datetime created_at
         datetime updated_at
     }

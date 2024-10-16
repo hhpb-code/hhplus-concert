@@ -17,4 +17,15 @@ public class UserCommand {
 
   }
 
+  public record WithdrawUserWalletAmountCommand(
+      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
+      Long userId,
+
+      @Positive(message = UserConstants.AMOUNT_MUST_BE_POSITIVE_MESSAGE)
+      @NotNull(message = UserConstants.AMOUNT_MUST_NOT_BE_NULL_MESSAGE)
+      Integer amount
+  ) {
+
+  }
+
 }

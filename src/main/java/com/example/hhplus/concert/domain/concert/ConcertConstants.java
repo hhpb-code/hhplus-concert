@@ -9,5 +9,7 @@ public class ConcertConstants {
   public static final String RESERVATION_ID_MUST_NOT_BE_NULL = "예약 ID는 필수입니다.";
   public static final String CONCERT_SCHEDULE_NOT_RESERVABLE = "콘서트 스케줄 예약이 불가능합니다.";
   public static final String CONCERT_SEAT_ALREADY_RESERVED = "이미 예약된 좌석입니다.";
+  public static final String RESERVATION_ALREADY_PAID = "이미 결제된 예약입니다.";
+  public static final String RESERVATION_ALREADY_CANCELED = "이미 취소된 예약입니다.";
 
 }

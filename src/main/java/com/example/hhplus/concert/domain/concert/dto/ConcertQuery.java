@@ -26,6 +26,13 @@ public class ConcertQuery {
 
   }
 
+  public record GetConcertSeatByIdQuery(
+      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
+      Long concertSeatId
+  ) {
+
+  }
+
   public record GetConcertSeatByIdWithLockQuery(
       @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
       Long concertSeatId
@@ -42,6 +49,13 @@ public class ConcertQuery {
   }
 
   public record GetReservationByIdQuery(
+      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
+      Long reservationId
+  ) {
+
+  }
+
+  public record GetReservationByIdWithLockQuery(
       @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
       Long reservationId
   ) {

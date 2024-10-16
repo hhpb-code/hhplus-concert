@@ -4,6 +4,7 @@ public class UserConstants {
 
   public static final String USER_ID_NULL_MESSAGE = "사용자 ID는 필수입니다.";
   public static final String WALLET_ID_NULL_MESSAGE = "지갑 ID는 필수입니다.";
+  public static final String NOT_ENOUGH_BALANCE_MESSAGE = "잔액이 부족합니다.";
   public static final String ZERO_AMOUNT_MESSAGE = "충전 금액은 0원일 수 없습니다.";
   public static final String NEGATIVE_AMOUNT_MESSAGE = "충전 금액은 음수일 수 없습니다.";
   public static final String EXCEED_LIMIT_AMOUNT_MESSAGE = "충전 금액이 한도를 초과했습니다.";

@@ -19,9 +19,6 @@ public class ConcertRepositoryParam {
 
   }
 
-  public record GetReservationByIdParam(Long id) {
-
-  }
 
   public record FindReservableConcertSeatsByConcertIdParam(
       Long concertScheduleId
@@ -29,7 +26,19 @@ public class ConcertRepositoryParam {
 
   }
 
+  public record GetConcertSeatByIdParam(Long concertSeatId) {
+
+  }
+
   public record GetConcertSeatByIdWithLockParam(Long concertSeatId) {
+
+  }
+
+  public record GetReservationByIdParam(Long reservationId) {
+
+  }
+
+  public record GetReservationByIdWithLockParam(Long reservationId) {
 
   }
 

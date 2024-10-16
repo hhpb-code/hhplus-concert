@@ -15,6 +15,7 @@ public enum UserErrorCode implements ErrorCode {
   NEGATIVE_AMOUNT(HttpStatus.BAD_REQUEST, UserConstants.NEGATIVE_AMOUNT_MESSAGE),
   EXCEED_LIMIT_AMOUNT(HttpStatus.BAD_REQUEST, UserConstants.EXCEED_LIMIT_AMOUNT_MESSAGE),
   WALLET_NOT_MATCH_USER(HttpStatus.BAD_REQUEST, UserConstants.WALLET_NOT_MATCH_USER_MESSAGE),
+  NOT_ENOUGH_BALANCE(HttpStatus.BAD_REQUEST, UserConstants.NOT_ENOUGH_BALANCE_MESSAGE),
   ;
 
   private final HttpStatus status;

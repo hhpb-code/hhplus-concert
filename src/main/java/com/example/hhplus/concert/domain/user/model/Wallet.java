@@ -58,4 +58,17 @@ public class Wallet {
 
     this.amount += amount;
   }
+
+  public void withdrawAmount(Integer amount) {
+    if (amount == null || amount <= 0) {
+      throw new BusinessException(UserErrorCode.INVALID_AMOUNT);
+    }
+
+    if (this.amount - amount < 0) {
+      throw new BusinessException(UserErrorCode.NOT_ENOUGH_BALANCE);
+    }
+
+    this.amount -= amount;
+  }
+
 }

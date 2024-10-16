@@ -25,4 +25,11 @@ public class ConcertCommand {
 
   }
 
+  public record ConfirmReservationCommand(
+      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
+      Long reservationId
+  ) {
+
+  }
+
 }
