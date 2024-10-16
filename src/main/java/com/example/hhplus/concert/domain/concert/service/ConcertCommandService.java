@@ -1,12 +1,14 @@
 package com.example.hhplus.concert.domain.concert.service;
 
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CancelReservationsByIdsCommand;
+import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConcertSeatsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetReservationByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
@@ -43,6 +45,16 @@ public class ConcertCommandService {
         .build();
 
     return concertRepository.saveReservation(reservation).getId();
+  }
+
+  @Transactional
+  public void confirmReservation(ConfirmReservationCommand command) {
+    Reservation reservation = concertRepository.getReservation(
+        new GetReservationByIdWithLockParam(command.reservationId()));
+
+    reservation.confirm();
+
+    concertRepository.saveReservation(reservation);
   }
 
   @Transactional

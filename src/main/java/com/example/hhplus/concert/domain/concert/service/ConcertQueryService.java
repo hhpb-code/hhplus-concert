@@ -1,6 +1,5 @@
 package com.example.hhplus.concert.domain.concert.service;
 
-import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
@@ -80,17 +79,6 @@ public class ConcertQueryService {
   public Reservation getReservation(GetReservationByIdWithLockQuery query) {
     return concertRepository.getReservation(
         new GetReservationByIdWithLockParam(query.reservationId()));
-  }
-
-  // TODO: command service로 이동
-  @Transactional
-  public void confirmReservation(ConfirmReservationCommand command) {
-    Reservation reservation = getReservation(
-        new GetReservationByIdWithLockQuery(command.reservationId()));
-
-    reservation.confirm();
-
-    concertRepository.saveReservation(reservation);
   }
 
   @Transactional(readOnly = true)
