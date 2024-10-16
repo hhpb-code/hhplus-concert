@@ -3,8 +3,11 @@ package com.example.hhplus.concert.domain.waitingqueue.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.CountWaitingQueueByConcertIdAndStatusQuery;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.FindDistinctConcertIdsByStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByIdQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
+import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -110,5 +113,118 @@ class WaitingQueueQueryTest {
       assertThat(violations).isEmpty();
     }
   }
+
+  @Nested
+  @DisplayName("대기열의 concert id 목록 조회 query By Find")
+  class FindDistinctConcertIdsByStatusQueryTest {
+
+    @Test
+    @DisplayName("대기열의 concert id 목록 조회 query 생성 실패 - status가 null")
+    void shouldThrowExceptionWhenStatusIsNull() {
+      // given
+      final WaitingQueueStatus status = null;
+      final FindDistinctConcertIdsByStatusQuery query = new FindDistinctConcertIdsByStatusQuery(
+          status);
+
+      // when
+      final Set<ConstraintViolation<FindDistinctConcertIdsByStatusQuery>> violations = validator
+          .validate(query);
+
+      final ConstraintViolation<FindDistinctConcertIdsByStatusQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("status"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("대기열의 concert id 목록 조회 query 생성 성공")
+    void shouldSuccessfullyCreateFindConcertIdsByStatusQuery() {
+      // given
+      final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
+      final FindDistinctConcertIdsByStatusQuery query = new FindDistinctConcertIdsByStatusQuery(
+          status);
+
+      // when
+      final Set<ConstraintViolation<FindDistinctConcertIdsByStatusQuery>> violations = validator
+          .validate(query);
+
+      // then
+      assertThat(violations).isEmpty();
+    }
+  }
+
+  @Nested
+  @DisplayName("대기열의 count query")
+  class CountWaitingQueueByConcertIdAndStatusQueryTest {
+
+    @Test
+    @DisplayName("대기열의 count query 생성 실패 - concertId가 null")
+    void shouldThrowExceptionWhenConcertIdIsNull() {
+      // given
+      final Long concertId = null;
+      final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
+      final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
+          concertId, status);
+
+      // when
+      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
+          .validate(query);
+
+      final ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("concertId"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.CONCERT_ID_NULL_MESSAGE);
+    }
+
+
+    @Test
+    @DisplayName("대기열의 count query 생성 실패 - status가 null")
+    void shouldThrowExceptionWhenStatusIsNull() {
+      // given
+      final Long concertId = 1L;
+      final WaitingQueueStatus status = null;
+      final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
+          concertId, status);
+
+      // when
+      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
+          .validate(query);
+
+      final ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("status"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("대기열의 count query 생성 성공")
+    void shouldSuccessfullyCreateCountWaitingQueueByConcertIdAndStatusQuery() {
+      // given
+      final Long concertId = 1L;
+      final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
+      final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
+          concertId, status);
+
+      // when
+      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
+          .validate(query);
+
+      // then
+      assertThat(violations).isEmpty();
+    }
+  }
+
 
 }
