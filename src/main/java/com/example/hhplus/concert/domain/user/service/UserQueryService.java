@@ -19,4 +19,9 @@ public class UserQueryService {
     return userRepository.getUser(new GetUserByIdParam(query.id()));
   }
 
+
+  @Transactional(readOnly = true)
+  public Wallet getWallet(GetUserWalletByUserIdQuery query) {
+    return userRepository.getWallet(new GetUserWalletByUserIdParam(query.userId()));
+  }
 }

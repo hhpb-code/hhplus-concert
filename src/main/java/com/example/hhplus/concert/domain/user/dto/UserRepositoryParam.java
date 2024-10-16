@@ -8,4 +8,10 @@ public class UserRepositoryParam {
 
   }
 
+  public record GetUserWalletByUserIdParam(
+      Long userId
+  ) {
+
+  }
+
 }

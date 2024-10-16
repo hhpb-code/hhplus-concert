@@ -12,4 +12,11 @@ public class UserQuery {
 
   }
 
+  public record GetUserWalletByUserIdQuery(
+      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
+      Long userId
+  ) {
+
+  }
+
 }
