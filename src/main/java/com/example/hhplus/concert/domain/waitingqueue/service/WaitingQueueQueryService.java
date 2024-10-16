@@ -11,6 +11,7 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepository
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +33,17 @@ public class WaitingQueueQueryService {
     final WaitingQueue waitingQueue = waitingQueueReader.getWaitingQueue(
         new GetWaitingQueueByUuidWithLockParam(query.uuid()));
 
-    if (waitingQueue.getStatus() == WaitingQueueStatus.PROCESSING) {
-      return new WaitingQueueWithPosition(waitingQueue, 0);
-    }
-
     if (waitingQueue.getStatus() == WaitingQueueStatus.EXPIRED) {
       throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+
+    final LocalDateTime expiredAt = waitingQueue.getExpiredAt();
+    if (expiredAt != null && expiredAt.isBefore(LocalDateTime.now())) {
+      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+
+    if (waitingQueue.getStatus() == WaitingQueueStatus.PROCESSING) {
+      return new WaitingQueueWithPosition(waitingQueue, 0);
     }
 
     Integer position = waitingQueueReader.getWaitingQueuePosition(
