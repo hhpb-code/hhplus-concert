@@ -11,6 +11,7 @@ import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWal
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
 import com.example.hhplus.concert.infra.db.user.UserJpaRepository;
+import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements UserRepository {
 
   private final UserJpaRepository userJpaRepository;
+
+  private final WalletJpaRepository walletJpaRepository;
 
   @Override
   public void saveWallet(Wallet wallet) {
@@ -48,6 +51,7 @@ public class UserRepositoryImpl implements UserRepository {
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletUserIdIdWithLockParam param) {
-    return null;
+    return walletJpaRepository.findByUserIdWithLock(param.userId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 }

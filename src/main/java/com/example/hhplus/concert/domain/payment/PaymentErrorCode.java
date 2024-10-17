@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum PaymentErrorCode implements ErrorCode {
-
+  PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, PaymentConstants.PAYMENT_NOT_FOUND_MESSAGE),
   ;
 
   private final HttpStatus status;

@@ -40,7 +40,7 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public ConcertSeat saveConcertSeat(ConcertSeat concertSeat) {
-    return null;
+    return concertSeatJpaRepository.save(concertSeat);
   }
 
   @Override
@@ -104,7 +104,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public Reservation getReservation(GetReservationByIdWithLockParam param) {
-    return null;
+    return reservationJpaRepository.findByIdWithLock(param.reservationId()).orElseThrow(
+        () -> new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND));
   }
 
   @Override

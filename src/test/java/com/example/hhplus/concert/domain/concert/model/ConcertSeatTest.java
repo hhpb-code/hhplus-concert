@@ -88,4 +88,42 @@ class ConcertSeatTest {
 
   }
 
+  @Nested
+  @DisplayName("예약된 좌석 확인")
+  class ValidateReserved {
+
+    @Test
+    @DisplayName("예약된 좌석 확인 실패")
+    void shouldThrowExceptionWhenValidateReserved() {
+      // given
+      ConcertSeat concertSeat = ConcertSeat.builder()
+          .isReserved(false)
+          .build();
+
+      // when
+      BusinessException businessException = assertThrows(BusinessException.class,
+          concertSeat::validateReserved);
+
+      // then
+      assertThat(businessException.getErrorCode()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+    }
+
+    @Test
+    @DisplayName("예약된 좌석 확인 성공")
+    void shouldSuccessfullyValidateReserved() {
+      // given
+      ConcertSeat concertSeat = ConcertSeat.builder()
+          .isReserved(true)
+          .build();
+
+      // when
+      concertSeat.validateReserved();
+
+      // then
+      assertThat(concertSeat.getIsReserved()).isTrue();
+    }
+
+  }
+
 }

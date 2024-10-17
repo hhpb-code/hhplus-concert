@@ -20,6 +20,8 @@ public enum ConcertErrorCode implements ErrorCode {
   RESERVATION_ALREADY_CANCELED(HttpStatus.BAD_REQUEST,
       ConcertConstants.RESERVATION_ALREADY_CANCELED),
   CONCERT_SEAT_NOT_RESERVED(HttpStatus.BAD_REQUEST, ConcertConstants.CONCERT_SEAT_NOT_RESERVED),
+  RESERVATION_USER_NOT_MATCHED(HttpStatus.BAD_REQUEST,
+      ConcertConstants.RESERVATION_USER_NOT_MATCHED),
   ;
 
   private final HttpStatus status;
