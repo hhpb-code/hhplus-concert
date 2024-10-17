@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface WaitingQueueJpaRepository extends JpaRepository<WaitingQueue, Long> {
@@ -28,4 +29,8 @@ public interface WaitingQueueJpaRepository extends JpaRepository<WaitingQueue, L
       WaitingQueueStatus status, int limit);
 
   Integer countByConcertIdAndStatus(Long concertId, WaitingQueueStatus status);
+
+  @Modifying(clearAutomatically = true)
+  @Query("UPDATE WaitingQueue wq SET wq.status = 'EXPIRED' WHERE wq.status = 'PROCESSING' AND wq.expiredAt <= CURRENT_TIMESTAMP")
+  void expireWaitingQueues();
 }

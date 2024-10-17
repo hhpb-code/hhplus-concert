@@ -35,7 +35,7 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public void expireWaitingQueues() {
-
+    waitingQueueJpaRepository.expireWaitingQueues();
   }
 
   @Override

@@ -741,4 +741,70 @@ class WaitingQueueFacadeTest {
     }
   }
 
+  @Nested
+  @DisplayName("대기열 만료")
+  class ExpireWaitingQueues {
+
+    @Test
+    @DisplayName("대기열 만료 성공 - 만료 대기열이 없는 경우")
+    void shouldSuccessfullyExpireWaitingQueuesWhenNotExistsExpiredWaitingQueue() {
+      // given
+
+      // when
+      waitingQueueFacade.expireWaitingQueues();
+
+      // then
+      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      assertThat(waitingQueues).isEmpty();
+    }
+
+    @Test
+    @DisplayName("대기열 만료 성공 - 만료 대기열이 있는 경우")
+    void shouldSuccessfullyExpireWaitingQueuesWhenExistsExpiredWaitingQueue() {
+      // given
+      final Concert concert = concertJpaRepository.save(Concert.builder()
+          .title("title")
+          .description("description")
+          .build());
+      final Long concertId = concert.getId();
+
+      final int expiredWaitingQueueCount = 3;
+      IntStream.range(0, expiredWaitingQueueCount)
+          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
+              .concertId(concertId)
+              .uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.PROCESSING)
+              .expiredAt(LocalDateTime.now().minusMinutes(1))
+              .build()));
+
+      final int waitingQueueCount = 5;
+      IntStream.range(0, waitingQueueCount)
+          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
+              .concertId(concertId)
+              .uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING)
+              .build()));
+
+      // when
+      waitingQueueFacade.expireWaitingQueues();
+
+      // then
+      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      assertThat(waitingQueues).hasSize(waitingQueueCount + expiredWaitingQueueCount);
+
+      for (int i = 0; i < waitingQueueCount; i++) {
+        final WaitingQueue waitingQueue = waitingQueues.get(i);
+
+        if (i < expiredWaitingQueueCount) {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.EXPIRED);
+          assertThat(waitingQueue.getExpiredAt()).isBefore(LocalDateTime.now());
+        } else {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
+          assertThat(waitingQueue.getExpiredAt()).isNull();
+        }
+      }
+    }
+
+  }
+
 }
