@@ -24,8 +24,8 @@ public class UserRepositoryImpl implements UserRepository {
   private final WalletJpaRepository walletJpaRepository;
 
   @Override
-  public void saveWallet(Wallet wallet) {
-
+  public Wallet saveWallet(Wallet wallet) {
+    return walletJpaRepository.save(wallet);
   }
 
   @Override
@@ -36,17 +36,20 @@ public class UserRepositoryImpl implements UserRepository {
 
   @Override
   public Wallet getWallet(GetUserWalletByUserIdParam param) {
-    return null;
+    return walletJpaRepository.findByUserId(param.userId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletIdParam param) {
-    return null;
+    return walletJpaRepository.findById(param.walletId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletIdWithLockParam param) {
-    return null;
+    return walletJpaRepository.findByIdWithLock(param.walletId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
