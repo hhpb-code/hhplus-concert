@@ -14,7 +14,7 @@ public enum WaitingQueueErrorCode implements ErrorCode {
       WaitingQueueConstants.WAITING_QUEUE_EXPIRED_MESSAGE),
   INVALID_STATUS(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_STATUS_MESSAGE),
   INVALID_EXPIRED_AT(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_EXPIRED_AT_MESSAGE),
-  ;
+  INVALID_CONCERT_ID(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_CONCERT_ID_MESSAGE);
 
   private final HttpStatus status;
   private final String message;

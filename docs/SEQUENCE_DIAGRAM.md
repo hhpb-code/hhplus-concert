@@ -324,7 +324,7 @@ sequenceDiagram
     participant 잔액
     participant 대기열 토큰
     title 결제 시퀀스 다이어그램
-    User ->> API: [대기열 검증 통과] 결제 API 요청
+    User ->> API: 결제 API 요청
     API ->> 콘서트: 결제 요청
     콘서트 ->> 사용자: 사용자 조회 요청
     사용자 -->> 콘서트: 사용자 반환

@@ -7,6 +7,7 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepository
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindDistinctConcertIdsByStatusParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByIdParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByIdAndConcertIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
@@ -41,6 +42,13 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdParam param) {
     return waitingQueueJpaRepository.findById(param.id()).orElseThrow(() -> new BusinessException(
         WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
+  }
+
+  @Override
+  public WaitingQueue getWaitingQueue(GetWaitingQueueByUuidParam param) {
+    return waitingQueueJpaRepository.findByUuid(param.uuid())
+        .orElseThrow(() -> new BusinessException(
+            WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override

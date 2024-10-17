@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
+import com.example.hhplus.concert.application.WaitingQueueFacade;
 import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IConcertScheduleController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ConcertSeatResponse;
@@ -21,12 +22,15 @@ public class ConcertScheduleController implements IConcertScheduleController {
 
   private final ConcertFacade concertFacade;
 
+  private final WaitingQueueFacade waitingQueueFacade;
 
   @GetMapping("{scheduleId}/available-seats")
   public ResponseEntity<GetAvailableSeatsResponse> getAvailableSeats(
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid,
-      @PathVariable Long scheduleId) {
-    // TODO: 토큰 검증
+      @PathVariable Long scheduleId
+  ) {
+    waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+        scheduleId);
 
     List<ConcertSeatResponse> concertSeats = concertFacade.getReservableConcertSeats(scheduleId)
         .stream()

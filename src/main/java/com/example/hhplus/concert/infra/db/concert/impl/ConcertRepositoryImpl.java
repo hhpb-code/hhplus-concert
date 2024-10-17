@@ -81,7 +81,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public ConcertSeat getConcertSeat(GetConcertSeatByIdParam param) {
-    return null;
+    return concertSeatJpaRepository.findById(param.concertSeatId()).orElseThrow(
+        () -> new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND));
   }
 
   @Override

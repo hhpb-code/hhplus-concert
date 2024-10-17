@@ -1,12 +1,17 @@
 package com.example.hhplus.concert.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
+import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
+import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
+import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
 import com.example.hhplus.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,9 +33,17 @@ class WaitingQueueFacadeTest {
   @Autowired
   private WaitingQueueJpaRepository waitingQueueJpaRepository;
 
+  @Autowired
+  private ConcertScheduleJpaRepository concertScheduleJpaRepository;
+
+  @Autowired
+  private ConcertSeatJpaRepository concertSeatJpaRepository;
+
   @BeforeEach
   void setUp() {
     waitingQueueJpaRepository.deleteAll();
+    concertScheduleJpaRepository.deleteAll();
+    concertSeatJpaRepository.deleteAll();
   }
 
   @Nested
@@ -69,7 +82,7 @@ class WaitingQueueFacadeTest {
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
 
       // when
-      final BusinessException result = org.junit.jupiter.api.Assertions.assertThrows(
+      final BusinessException result = assertThrows(
           BusinessException.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
@@ -92,7 +105,7 @@ class WaitingQueueFacadeTest {
           .build());
 
       // when
-      final BusinessException result = org.junit.jupiter.api.Assertions.assertThrows(
+      final BusinessException result = assertThrows(
           BusinessException.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
@@ -115,7 +128,7 @@ class WaitingQueueFacadeTest {
           .build());
 
       // when
-      final BusinessException result = org.junit.jupiter.api.Assertions.assertThrows(
+      final BusinessException result = assertThrows(
           BusinessException.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
@@ -134,6 +147,7 @@ class WaitingQueueFacadeTest {
           .uuid(waitingQueueTokenUuid)
           .concertId(1L)
           .status(WaitingQueueStatus.PROCESSING)
+          .expiredAt(LocalDateTime.now().plusMinutes(1))
           .build());
 
       // when
@@ -180,6 +194,441 @@ class WaitingQueueFacadeTest {
       assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
       assertThat(result.getUpdatedAt()).isEqualTo(waitingQueue.getUpdatedAt());
       assertThat(result.getPosition()).isEqualTo(1);
+    }
+
+  }
+
+  @Nested
+  @DisplayName("대기열 활성 여부 검증")
+  class validateWaitingQueueProcessingTest {
+
+    @Nested
+    @DisplayName("대기열 활성 여부 검증 by concertId")
+    class validateWaitingQueueProcessingAndConcertIdTest {
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithExpiredToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(concertId)
+            .status(WaitingQueueStatus.EXPIRED)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 WAITING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithWaitingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(concertId)
+            .status(WaitingQueueStatus.WAITING)
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_STATUS);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 expireAt이 현재 시간보다 늦음")
+      void shouldSuccessfullyValidateProcessing() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(concertId)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - concertId가 일치하지 않음")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNotMatchConcertId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+        final Long notMatchConcertId = 2L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(concertId)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  notMatchConcertId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 성공 - 대기열 상태가 PROCESSING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithProcessingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(concertId)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+
+        // when
+        waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+            concertId);
+
+        // then
+        assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
+        assertThat(waitingQueue.getUuid()).isEqualTo(waitingQueueTokenUuid);
+        assertThat(waitingQueue.getExpiredAt()).isAfter(LocalDateTime.now());
+      }
+    }
+
+    @Nested
+    @DisplayName("대기열 활성 여부 검증 by scheduleId")
+    class validateWaitingQueueProcessingAndScheduleIdTest {
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithExpiredToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long scheduleId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.EXPIRED)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 WAITING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithWaitingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long scheduleId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.WAITING)
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_STATUS);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 expireAt이 현재 시간보다 늦음")
+      void shouldSuccessfullyValidateProcessing() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long scheduleId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - concertId가 일치하지 않음")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNotMatchConcertId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long notMatchConcertId = 2L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(notMatchConcertId)
+                .concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now())
+                .reservationEndAt(LocalDateTime.now())
+                .build());
+        final Long scheduleId = concertSchedule.getId();
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 성공 - 대기열 상태가 PROCESSING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithProcessingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now())
+                .reservationEndAt(LocalDateTime.now())
+                .build());
+        final Long scheduleId = concertSchedule.getId();
+
+        // when
+        waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+            scheduleId);
+
+        // then
+        assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
+        assertThat(waitingQueue.getUuid()).isEqualTo(waitingQueueTokenUuid);
+        assertThat(waitingQueue.getExpiredAt()).isAfter(LocalDateTime.now());
+      }
+
+    }
+
+    @Nested
+    @DisplayName("대기열 활성 여부 검증 by seatId")
+    class validateWaitingQueueProcessingAndSeatIdTest {
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithExpiredToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long seatId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.EXPIRED)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 WAITING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithWaitingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long seatId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.WAITING)
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_STATUS);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 대기열 expireAt이 현재 시간보다 늦음")
+      void shouldSuccessfullyValidateProcessing() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long seatId = 1L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now())
+            .build());
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - concertId가 일치하지 않음")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNotMatchConcertId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long notMatchConcertId = 2L;
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(notMatchConcertId)
+                .concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now())
+                .reservationEndAt(LocalDateTime.now())
+                .build());
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(ConcertSeat.builder()
+            .concertScheduleId(concertSchedule.getId())
+            .number(1)
+            .price(10000)
+            .isReserved(false)
+            .build());
+        final Long seatId = concertSeat.getId();
+
+        // when
+        final BusinessException result = assertThrows(
+            BusinessException.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getErrorCode()).isEqualTo(
+            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 성공 - 대기열 상태가 PROCESSING")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithProcessingToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now())
+                .reservationEndAt(LocalDateTime.now())
+                .build());
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(ConcertSeat.builder()
+            .concertScheduleId(concertSchedule.getId())
+            .number(1)
+            .price(10000)
+            .isReserved(false)
+            .build());
+        final Long seatId = concertSeat.getId();
+
+        // when
+        waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+            seatId);
+
+        // then
+        assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
+        assertThat(waitingQueue.getUuid()).isEqualTo(waitingQueueTokenUuid);
+        assertThat(waitingQueue.getExpiredAt()).isAfter(LocalDateTime.now());
+      }
+
     }
 
   }
