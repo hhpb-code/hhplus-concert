@@ -22,6 +22,10 @@ public interface ConcertRepository {
 
   Reservation saveReservation(Reservation reservation);
 
+  void saveAllReservations(List<Reservation> reservations);
+
+  void saveAllConcertSeats(List<ConcertSeat> concertSeats);
+
   Concert getConcert(GetConcertByIdParam param);
 
   ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param);
@@ -44,10 +48,6 @@ public interface ConcertRepository {
 
   List<Reservation> findAllReservations(FindAllReservationsByIdsWithLockParam param);
 
-  void saveAllReservations(List<Reservation> reservations);
-
   List<ConcertSeat> findAllConcertSeats(FindAllConcertSeatsByIdsWithLockParam param);
 
-  void saveAllConcertSeats(List<ConcertSeat> concertSeats);
-  
 }

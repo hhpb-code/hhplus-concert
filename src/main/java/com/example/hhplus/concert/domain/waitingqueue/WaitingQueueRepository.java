@@ -15,6 +15,8 @@ public interface WaitingQueueRepository {
 
   List<WaitingQueue> saveAll(List<WaitingQueue> waitingQueues);
 
+  void expireWaitingQueues();
+
   WaitingQueue getWaitingQueue(GetWaitingQueueByIdParam param);
 
   WaitingQueue getWaitingQueue(GetWaitingQueueByUuidWithLockParam param);
@@ -28,6 +30,4 @@ public interface WaitingQueueRepository {
   List<WaitingQueue> findAllWaitingQueues(
       FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam param);
 
-  void expireWaitingQueues();
-  
 }
