@@ -3,6 +3,7 @@ package com.example.hhplus.concert.infra.db.concert.impl;
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
 import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllExpiredReservationsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
@@ -50,12 +51,12 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public void saveAllReservations(List<Reservation> reservations) {
-
+    reservationJpaRepository.saveAll(reservations);
   }
 
   @Override
   public void saveAllConcertSeats(List<ConcertSeat> concertSeats) {
-
+    concertSeatJpaRepository.saveAll(concertSeats);
   }
 
   @Override
@@ -109,17 +110,18 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   }
 
   @Override
-  public List<Reservation> findAllExpiredReservations() {
-    return List.of();
+  public List<Reservation> findAllExpiredReservations(
+      FindAllExpiredReservationsWithLockParam param) {
+    return reservationJpaRepository.findAllExpiredReservationsWithLock(param.expiredAt());
   }
 
   @Override
   public List<Reservation> findAllReservations(FindAllReservationsByIdsWithLockParam param) {
-    return List.of();
+    return reservationJpaRepository.findAllByIdsWithLock(param.reservationIds());
   }
 
   @Override
   public List<ConcertSeat> findAllConcertSeats(FindAllConcertSeatsByIdsWithLockParam param) {
-    return List.of();
+    return concertSeatJpaRepository.findAllByIdsWithLock(param.concertSeatIds());
   }
 }

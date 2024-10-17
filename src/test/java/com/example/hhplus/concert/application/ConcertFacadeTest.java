@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertConstants;
 import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
@@ -647,4 +648,87 @@ class ConcertFacadeTest {
 
   }
 
+  @Nested
+  @DisplayName("콘서트 좌석 예약 내역 만료 처리 테스트")
+  class ExpireReservationTest {
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 내역 만료 처리 실패 - 좌석이 예약 상태가 아님")
+    void shouldThrowConcertSeatNotReservedException() {
+      // given
+      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
+              .isReserved(false)
+              .build());
+
+      reservationJpaRepository.save(
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
+              .reservedAt(
+                  LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES))
+              .status(ReservationStatus.WAITING)
+              .build());
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class, () -> {
+        concertFacade.expireReservations();
+      });
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+    }
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 내역 만료 처리 성공 - 만료된 예약 내역이 없음")
+    void shouldSuccessfullyExpireReservations() {
+      // given
+      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
+              .isReserved(true)
+              .build());
+
+      reservationJpaRepository.save(
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
+              .reservedAt(LocalDateTime.now()
+                  .minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES - 1))
+              .status(ReservationStatus.WAITING)
+              .build());
+
+      // when
+      concertFacade.expireReservations();
+
+      // then
+      final List<Reservation> reservations = reservationJpaRepository.findAll();
+      assertThat(reservations).hasSize(1);
+      assertThat(reservations.get(0).getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 내역 만료 처리 성공 - 만료된 예약 내역이 있음")
+    void shouldSuccessfullyExpireReservationsWithExpiredReservations() {
+      // given
+      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
+              .isReserved(true)
+              .build());
+
+      reservationJpaRepository.save(
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
+              .reservedAt(LocalDateTime.now()
+                  .minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES + 1))
+              .status(ReservationStatus.WAITING)
+              .build());
+
+      // when
+      concertFacade.expireReservations();
+
+      // then
+      final List<Reservation> reservations = reservationJpaRepository.findAll();
+      assertThat(reservations).hasSize(1);
+      assertThat(reservations.get(0).getStatus()).isEqualTo(ReservationStatus.CANCELED);
+
+      final ConcertSeat updatedConcertSeat = concertSeatJpaRepository.findById(concertSeat.getId())
+          .get();
+      assertThat(updatedConcertSeat.getIsReserved()).isFalse();
+    }
+  }
 }

@@ -61,4 +61,8 @@ public class ConcertQuery {
   ) {
 
   }
+
+  public record FindAllExpiredReservationsWithLockQuery() {
+
+  }
 }

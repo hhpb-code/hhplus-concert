@@ -14,4 +14,12 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT r FROM Reservation r WHERE r.id = :reservationId")
   Optional<Reservation> findByIdWithLock(Long reservationId);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT r FROM Reservation r WHERE r.status = 'WAITING' AND r.reservedAt < :expiredAt")
+  List<Reservation> findAllExpiredReservationsWithLock(LocalDateTime expiredAt);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT r FROM Reservation r WHERE r.id IN :ids")
+  List<Reservation> findAllByIdsWithLock(List<Long> ids);
 }

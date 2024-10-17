@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.domain.concert.service;
 
+import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAllExpiredReservationsWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
@@ -8,6 +10,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeat
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllExpiredReservationsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
@@ -82,7 +85,10 @@ public class ConcertQueryService {
   }
 
   @Transactional(readOnly = true)
-  public List<Reservation> findAllExpiredReservations() {
-    return concertRepository.findAllExpiredReservations();
+  public List<Reservation> findAllExpiredReservations(
+      FindAllExpiredReservationsWithLockQuery query) {
+    return concertRepository.findAllExpiredReservations(
+        new FindAllExpiredReservationsWithLockParam(
+            LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES)));
   }
 }

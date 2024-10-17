@@ -54,4 +54,10 @@ public class ConcertRepositoryParam {
   ) {
 
   }
+
+  public record FindAllExpiredReservationsWithLockParam(
+      LocalDateTime expiredAt
+  ) {
+
+  }
 }

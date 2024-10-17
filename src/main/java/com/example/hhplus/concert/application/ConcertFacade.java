@@ -1,8 +1,11 @@
 package com.example.hhplus.concert.application;
 
+import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CancelReservationsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
+import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConcertSeatsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAllExpiredReservationsWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
@@ -108,6 +111,27 @@ public class ConcertFacade {
         new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
 
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
+  }
+
+  // NOTE: 이 메서드는 스케줄러로 주기적으로 실행되어야 합니다.
+  @Transactional
+  public void expireReservations() {
+    var expiredReservations = concertQueryService.findAllExpiredReservations(
+        new FindAllExpiredReservationsWithLockQuery());
+
+    if (expiredReservations.isEmpty()) {
+      return;
+    }
+
+    var concertSeatIds = expiredReservations.stream()
+        .map(Reservation::getConcertSeatId)
+        .toList();
+    var reservationIds = expiredReservations.stream()
+        .map(Reservation::getId)
+        .toList();
+
+    concertCommandService.releaseConcertSeats(new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
+    concertCommandService.cancelReservations(new CancelReservationsByIdsCommand(reservationIds));
   }
 
 }

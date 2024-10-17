@@ -21,4 +21,5 @@ public class ConcertConstants {
   public static final String CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL = "콘서트 스케줄 ID는 필수입니다.";
   public static final String RESERVATION_USER_NOT_MATCHED = "예약 사용자가 일치하지 않습니다.";
 
+  public static final long RESERVATION_EXPIRATION_MINUTES = 5;
 }
