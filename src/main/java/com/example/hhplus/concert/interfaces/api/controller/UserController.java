@@ -1,8 +1,8 @@
 package com.example.hhplus.concert.interfaces.api.controller;
 
+import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWalletAmountRequest;
+import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWalletAmountResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.GetWalletResponse;
-import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateWalletRequest;
-import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.UpdateWalletResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.WalletResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,15 +29,15 @@ public class UserController {
     return ResponseEntity.ok(new GetWalletResponse(wallet));
   }
 
-  @PutMapping("/{userId}/wallets/{walletId}")
-  @Operation(summary = "지갑 수정", description = "사용자의 지갑을 수정합니다.")
-  public ResponseEntity<UpdateWalletResponse> updateWallet(@PathVariable Long userId,
-      @PathVariable Long walletId, @RequestBody UpdateWalletRequest request) {
+  @PutMapping("/{userId}/wallets/{walletId}/charge")
+  @Operation(summary = "지갑 충전", description = "사용자의 지갑을 충전합니다.")
+  public ResponseEntity<ChargeWalletAmountResponse> chargeWallet(@PathVariable Long userId,
+      @PathVariable Long walletId, @RequestBody ChargeWalletAmountRequest request) {
     WalletResponse wallet = new WalletResponse(walletId, userId, request.amount(),
         LocalDateTime.now(),
         LocalDateTime.now());
 
-    return ResponseEntity.ok(new UpdateWalletResponse(wallet));
+    return ResponseEntity.ok(new ChargeWalletAmountResponse(wallet));
   }
 
 }

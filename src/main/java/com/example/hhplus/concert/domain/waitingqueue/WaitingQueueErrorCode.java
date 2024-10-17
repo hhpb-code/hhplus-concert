@@ -9,7 +9,10 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum WaitingQueueErrorCode implements ErrorCode {
   WAITING_QUEUE_EXPIRED(HttpStatus.BAD_REQUEST,
-      WaitingQueueConstants.WAITING_QUEUE_EXPIRED_MESSAGE);
+      WaitingQueueConstants.WAITING_QUEUE_EXPIRED_MESSAGE),
+  INVALID_STATUS(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_STATUS_MESSAGE),
+  INVALID_EXPIRED_AT(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_EXPIRED_AT_MESSAGE),
+  ;
 
   private final HttpStatus status;
   private final String message;

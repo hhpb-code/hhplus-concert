@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.domain.waitingqueue.model;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -50,4 +52,21 @@ public class WaitingQueue {
   @LastModifiedDate
   @Column(insertable = false)
   private LocalDateTime updatedAt;
+
+  public void activate(LocalDateTime expiredAt) {
+    if (this.status == WaitingQueueStatus.PROCESSING) {
+      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+    }
+
+    if (this.expiredAt != null || this.status == WaitingQueueStatus.EXPIRED) {
+      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+    }
+
+    if (expiredAt.isBefore(LocalDateTime.now())) {
+      throw new BusinessException(WaitingQueueErrorCode.INVALID_EXPIRED_AT);
+    }
+
+    this.status = WaitingQueueStatus.PROCESSING;
+    this.expiredAt = expiredAt;
+  }
 }

@@ -8,4 +8,27 @@ public class UserRepositoryParam {
 
   }
 
+  public record GetUserWalletByUserIdParam(
+      Long userId
+  ) {
+
+  }
+
+  public record GetUserWalletByWalletIdParam(
+      Long walletId
+  ) {
+
+  }
+
+  public record GetUserWalletByWalletIdWithLockParam(
+      Long walletId
+  ) {
+
+  }
+
+  public record GetUserWalletByWalletUserIdIdWithLockParam(
+      Long userId
+  ) {
+
+  }
 }

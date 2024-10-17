@@ -1,8 +1,12 @@
 package com.example.hhplus.concert.domain.concert.model;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +40,7 @@ public class Reservation {
   private Long userId;
 
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private ReservationStatus status;
 
   @Column(nullable = false)
@@ -49,4 +54,27 @@ public class Reservation {
   @Column(insertable = false)
   private LocalDateTime updatedAt;
 
+  public void confirm() {
+    if (status == ReservationStatus.CONFIRMED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+    }
+
+    if (status == ReservationStatus.CANCELED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+    }
+
+    this.status = ReservationStatus.CONFIRMED;
+  }
+
+  public void cancel() {
+    if (status == ReservationStatus.CANCELED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+    }
+
+    if (status == ReservationStatus.CONFIRMED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+    }
+
+    this.status = ReservationStatus.CANCELED;
+  }
 }

@@ -12,6 +12,7 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepository
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByIdAndConcertIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,12 +37,31 @@ class WaitingQueueQueryServiceTest {
   class GetWaitingQueuePosition {
 
     @Test
-    @DisplayName("대기열 순서 조회 실패 - 대기열이 만료됨")
+    @DisplayName("대기열 순서 조회 실패 - 대기열이 만료 상태")
     void shouldThrowExceptionWhenWaitingQueueIsExpired() {
       // given
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().status(WaitingQueueStatus.EXPIRED).build())
+          .when(waitingQueueReader)
+          .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> target.getWaitingQueuePosition(query));
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+
+    @Test
+    @DisplayName("대기열 순서 조회 성공 - 대기열 만료 시간이 지남")
+    void shouldThrowExceptionWhenWaitingQueueIsExpiredAfterNow() {
+      // given
+      final String uuid = "uuid";
+      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
+      doReturn(WaitingQueue.builder().status(WaitingQueueStatus.PROCESSING)
+          .expiredAt(LocalDateTime.now()).build())
           .when(waitingQueueReader)
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
@@ -62,7 +82,9 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().id(waitingQueueId).concertId(concertId).uuid(uuid)
-          .status(WaitingQueueStatus.PROCESSING).build())
+          .status(WaitingQueueStatus.PROCESSING)
+          .expiredAt(LocalDateTime.now().plusMinutes(1))
+          .build())
           .when(waitingQueueReader)
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 

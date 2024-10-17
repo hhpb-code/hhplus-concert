@@ -5,9 +5,45 @@ import jakarta.validation.constraints.NotNull;
 
 public class ConcertQuery {
 
+  public record GetConcertByIdQuery(
+      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
+      Long id
+  ) {
+
+  }
+
+  public record GetConcertScheduleByIdQuery(
+      @NotNull(message = ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL)
+      Long concertScheduleId
+  ) {
+
+  }
+
+  public record FindReservableConcertSchedulesQuery(
+      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
+      Long concertId
+  ) {
+
+  }
+
+  public record GetConcertSeatByIdQuery(
+      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
+      Long concertSeatId
+  ) {
+
+  }
+
   public record GetConcertSeatByIdWithLockQuery(
       @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
       Long concertSeatId
+  ) {
+
+  }
+
+
+  public record FindReservableConcertSeatsQuery(
+      @NotNull(message = ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL)
+      Long concertScheduleId
   ) {
 
   }
@@ -19,4 +55,10 @@ public class ConcertQuery {
 
   }
 
+  public record GetReservationByIdWithLockQuery(
+      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
+      Long reservationId
+  ) {
+
+  }
 }

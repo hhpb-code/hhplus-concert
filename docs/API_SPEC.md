@@ -162,7 +162,7 @@
 
 #### Request
 
-- **URL**: `/api/v1/users/{userId}/wallets/{walletId}`
+- **URL**: `/api/v1/users/{userId}/wallets/{walletId}/charge`
 - **Method**: `PUT`
 - **Headers**:
     - Content-Type: application/json
@@ -172,8 +172,7 @@
 - **Body**:
   ```json
     {
-        "amount": "Integer",
-        "operationType": "Enum"
+        "amount": "Integer"
     }
   ```
 

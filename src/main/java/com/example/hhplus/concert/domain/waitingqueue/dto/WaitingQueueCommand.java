@@ -13,4 +13,13 @@ public class WaitingQueueCommand {
   }
 
 
+  public record ActivateWaitingQueuesCommand(
+      @NotNull(message = WaitingQueueConstants.CONCERT_ID_NULL_MESSAGE)
+      Long concertId,
+      @NotNull(message = WaitingQueueConstants.AVAILABLE_SLOTS_NULL_MESSAGE)
+      Integer availableSlots
+  ) {
+
+  }
+
 }

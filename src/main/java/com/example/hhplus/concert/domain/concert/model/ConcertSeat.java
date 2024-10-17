@@ -58,4 +58,12 @@ public class ConcertSeat {
 
     this.isReserved = true;
   }
+
+  public void release() {
+    if (!this.isReserved) {
+      throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+    }
+
+    this.isReserved = false;
+  }
 }
