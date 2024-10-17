@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 public enum ConcertErrorCode implements ErrorCode {
   CONCERT_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_NOT_FOUND),
   CONCERT_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_SCHEDULE_NOT_FOUND),
+  CONCERT_SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_SEAT_NOT_FOUND),
+  RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.RESERVATION_NOT_FOUND),
   CONCERT_SCHEDULE_NOT_RESERVABLE(HttpStatus.BAD_REQUEST,
       ConcertConstants.CONCERT_SCHEDULE_NOT_RESERVABLE),
   CONCERT_SEAT_ALREADY_RESERVED(HttpStatus.BAD_REQUEST,

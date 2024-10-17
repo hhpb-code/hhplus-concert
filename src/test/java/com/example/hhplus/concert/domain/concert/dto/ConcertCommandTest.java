@@ -37,9 +37,8 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenConcertSeatIdIsNull() {
       // given
       final Long concertSeatId = null;
-      final Long userId = 1L;
       final ReserveConcertSeatCommand command = new ReserveConcertSeatCommand(
-          concertSeatId, userId);
+          concertSeatId);
 
       // when
       final Set<ConstraintViolation<ReserveConcertSeatCommand>> violations = validator.validate(
@@ -55,35 +54,12 @@ class ConcertCommandTest {
     }
 
     @Test
-    @DisplayName("콘서트 좌석 예약 Command 생성 실패 - userId가 null인 경우")
-    void shouldThrowExceptionWhenUserIdIsNull() {
-      // given
-      final Long concertSeatId = 1L;
-      final Long userId = null;
-      final ReserveConcertSeatCommand command = new ReserveConcertSeatCommand(
-          concertSeatId, userId);
-
-      // when
-      final Set<ConstraintViolation<ReserveConcertSeatCommand>> violations = validator.validate(
-          command);
-
-      final ConstraintViolation<ReserveConcertSeatCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("userId"))
-          .findFirst()
-          .get();
-
-      // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.USER_ID_NOT_NULL);
-    }
-
-    @Test
     @DisplayName("콘서트 좌석 예약 Command 생성 성공")
     void shouldSuccessfullyCreateReserveConcertSeatCommand() {
       // given
       final Long concertSeatId = 1L;
-      final Long userId = 1L;
       final ReserveConcertSeatCommand command = new ReserveConcertSeatCommand(
-          concertSeatId, userId);
+          concertSeatId);
 
       // when
       final Set<ConstraintViolation<ReserveConcertSeatCommand>> violations = validator.validate(

@@ -20,6 +20,7 @@ import com.example.hhplus.concert.domain.concert.repository.ConcertRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
+import com.example.hhplus.concert.infra.db.concert.ReservationJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   private final ConcertSeatJpaRepository concertSeatJpaRepository;
 
+  private final ReservationJpaRepository reservationJpaRepository;
+
   @Override
   public ConcertSeat saveConcertSeat(ConcertSeat concertSeat) {
     return null;
@@ -42,7 +45,7 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public Reservation saveReservation(Reservation reservation) {
-    return null;
+    return reservationJpaRepository.save(reservation);
   }
 
   @Override
@@ -82,7 +85,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public ConcertSeat getConcertSeat(GetConcertSeatByIdWithLockParam param) {
-    return null;
+    return concertSeatJpaRepository.findByIdWithLock(param.concertSeatId()).orElseThrow(
+        () -> new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND));
   }
 
   @Override
@@ -94,7 +98,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public Reservation getReservation(GetReservationByIdParam param) {
-    return null;
+    return reservationJpaRepository.findById(param.reservationId()).orElseThrow(
+        () -> new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND));
   }
 
   @Override

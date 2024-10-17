@@ -2,6 +2,7 @@ package com.example.hhplus.concert.interfaces.api.dto;
 
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
+import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -116,6 +117,11 @@ public class ConcertControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public ReservationResponse(Reservation reservation) {
+      this(reservation.getId(), reservation.getConcertSeatId(), reservation.getUserId(),
+          reservation.getStatus(), reservation.getReservedAt(), reservation.getCreatedAt(),
+          reservation.getUpdatedAt());
+    }
   }
 
 }
