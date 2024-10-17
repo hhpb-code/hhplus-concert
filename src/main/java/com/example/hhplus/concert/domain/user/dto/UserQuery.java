@@ -19,6 +19,13 @@ public class UserQuery {
 
   }
 
+  public record GetUserWalletByUserIdWithLockQuery(
+      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
+      Long userId
+  ) {
+
+  }
+
   public record GetUserWalletByIdQuery(
       @NotNull(message = UserConstants.WALLET_ID_NULL_MESSAGE)
       Long walletId

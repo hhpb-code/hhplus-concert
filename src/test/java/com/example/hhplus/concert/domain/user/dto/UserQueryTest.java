@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.user.UserConstants;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdWithLockQuery;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -107,6 +108,47 @@ class UserQueryTest {
 
         // when
         final Set<ConstraintViolation<GetUserWalletByUserIdQuery>> violations = validator.validate(
+            query);
+
+        // then
+        assertThat(violations).isEmpty();
+      }
+
+    }
+
+    @Nested
+    @DisplayName("유저 지갑 조회 Query By userId with lock")
+    class GetUserWalletByUserIdWithLockQueryTest {
+
+      @Test
+      @DisplayName("유저 지갑 조회 Query 생성 실패 - id가 null")
+      void shouldThrowExceptionWhenIdIsNull() {
+        // given
+        final Long id = null;
+        final GetUserWalletByUserIdWithLockQuery query = new GetUserWalletByUserIdWithLockQuery(id);
+
+        // when
+        final Set<ConstraintViolation<GetUserWalletByUserIdWithLockQuery>> violations = validator.validate(
+            query);
+
+        final ConstraintViolation<GetUserWalletByUserIdWithLockQuery> violation = violations.stream()
+            .filter(v -> v.getPropertyPath().toString().equals("userId"))
+            .findFirst()
+            .get();
+
+        // then
+        assertThat(violation.getMessage()).isEqualTo(UserConstants.USER_ID_NULL_MESSAGE);
+      }
+
+      @Test
+      @DisplayName("유저 지갑 조회 Query 생성 성공")
+      void shouldSuccessfullyCreateGetUserWalletByUserIdWithLockQuery() {
+        // given
+        final Long id = 1L;
+        final GetUserWalletByUserIdWithLockQuery query = new GetUserWalletByUserIdWithLockQuery(id);
+
+        // when
+        final Set<ConstraintViolation<GetUserWalletByUserIdWithLockQuery>> violations = validator.validate(
             query);
 
         // then

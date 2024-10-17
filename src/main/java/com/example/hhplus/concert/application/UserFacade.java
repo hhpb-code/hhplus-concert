@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.user.dto.UserCommand.ChargeUserWalletAm
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdWithLockQuery;
 import com.example.hhplus.concert.domain.user.model.Wallet;
 import com.example.hhplus.concert.domain.user.service.UserCommandService;
 import com.example.hhplus.concert.domain.user.service.UserQueryService;
@@ -25,7 +26,7 @@ public class UserFacade {
   public Wallet chargeUserWalletAmount(Long userId, Long walletId, Integer amount) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 
-    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdQuery(user.getId()));
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdWithLockQuery(user.getId()));
 
     if (!wallet.getId().equals(walletId)) {
       throw new BusinessException(UserErrorCode.WALLET_NOT_FOUND);
@@ -37,6 +38,7 @@ public class UserFacade {
     return userQueryService.getWallet(new GetUserWalletByIdQuery(wallet.getId()));
   }
 
+  @Transactional(readOnly = true)
   public Wallet getWallet(Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 
