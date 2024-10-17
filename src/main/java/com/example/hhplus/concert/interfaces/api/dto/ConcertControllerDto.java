@@ -93,7 +93,7 @@ public class ConcertControllerDto {
       ReservationStatus status,
 
       @Schema(description = "예약 일시", example = "2024-12-31T23:59:59")
-      LocalDateTime reservationAt,
+      LocalDateTime reservedAt,
 
       @Schema(description = "생성 일시", example = "2024-12-31T23:59:59")
       LocalDateTime createdAt,

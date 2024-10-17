@@ -19,11 +19,8 @@ public class ReservationController implements IReservationController {
   @PostMapping("{reservationId}/payments")
   public ResponseEntity<PayReservationResponse> payReservation(
       @PathVariable Long reservationId,
-      @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId,
-      @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
+      @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId
   ) {
-    // TODO: 토큰 검증
-
     PaymentResponse payment = new PaymentResponse(1L, reservationId, userId, 100L,
         LocalDateTime.now(),
         null);
