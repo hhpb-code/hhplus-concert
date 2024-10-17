@@ -158,4 +158,52 @@ class UserFacadeTest {
 
   }
 
+  @Nested
+  @DisplayName("사용자 지갑 조회")
+  class GetWallet {
+
+    @Test
+    @DisplayName("사용자 지갑 조회 실패 - 사용자가 존재하지 않음")
+    void shouldThrowUserNotFoundException() {
+      // given
+      final Long userId = 1L;
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> userFacade.getWallet(userId));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(UserErrorCode.USER_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 조회 실패 - 지갑이 존재하지 않음")
+    void shouldThrowWalletNotFoundException() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> userFacade.getWallet(user.getId()));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(UserErrorCode.WALLET_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 조회 성공")
+    void shouldSuccessfullyGetWallet() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Wallet wallet = walletJpaRepository.save(Wallet.builder().userId(user.getId()).build());
+
+      // when
+      final Wallet result = userFacade.getWallet(user.getId());
+
+      // then
+      assertThat(result.getId()).isEqualTo(wallet.getId());
+    }
+
+  }
+
 }

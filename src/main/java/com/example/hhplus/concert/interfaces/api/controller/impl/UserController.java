@@ -6,7 +6,6 @@ import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWal
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWalletAmountResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.GetWalletResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.WalletResponse;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +24,7 @@ public class UserController implements IUserController {
 
   @GetMapping("/{userId}/wallets")
   public ResponseEntity<GetWalletResponse> getWallets(@PathVariable Long userId) {
-    WalletResponse wallet = new WalletResponse(1L, userId, 10000, LocalDateTime.now(),
-        LocalDateTime.now());
+    WalletResponse wallet = new WalletResponse(userFacade.getWallet(userId));
 
     return ResponseEntity.ok(new GetWalletResponse(wallet));
   }
