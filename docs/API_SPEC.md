@@ -24,7 +24,7 @@
   {
     "waitingQueue": {
         "id": "Integer",
-        "concert_id": "Integer",
+        "concertId": "Integer",
         "uuid": "String",
         "status": "Enum",
         "expiredAt": "DateTime",
@@ -128,7 +128,7 @@
 
 #### Request
 
-- **URL**: `/api/v1/reservations`
+- **URL**: `/api/v1/concert-seats/{concertSeatId}/reservations`
 - **Method**: `POST`
 - **Headers**:
     - Content-Type: application/json
@@ -228,12 +228,6 @@
     - X-User-Id: [사용자 ID]
 - **Path Parameters**:
     - `reservationId`: `Integer`
-- **Body**:
-  ```json
-    {
-        "amount": "Long"
-    }
-  ```
 
 #### Response
 

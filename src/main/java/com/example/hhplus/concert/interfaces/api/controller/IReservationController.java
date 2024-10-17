@@ -17,10 +17,7 @@ public interface IReservationController {
       Long reservationId,
 
       @Schema(description = "사용자 ID", example = "1")
-      Long userId,
-
-      @Schema(description = "대기열 토큰 UUID", example = "123e4567-e89b-12d3-a456-426614174000")
-      String waitingQueueTokenUuid
+      Long userId
   );
 
 }
