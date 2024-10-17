@@ -21,4 +21,14 @@ public class ConcertFacade {
         new FindReservableConcertSchedulesQuery(concert.getId()));
   }
 
+  public List<ConcertSeat> getReservableConcertSeats(Long concertScheduleId) {
+    var concertSchedule = concertQueryService.getConcertSchedule(
+        new GetConcertScheduleByIdQuery(concertScheduleId));
+
+    concertSchedule.validateReservationTime();
+
+    return concertQueryService.findReservableConcertSeats(
+        new FindReservableConcertSeatsQuery(concertScheduleId));
+  }
+
 }

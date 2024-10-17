@@ -19,6 +19,7 @@ import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.repository.ConcertRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
+import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   private final ConcertJpaRepository concertJpaRepository;
 
   private final ConcertScheduleJpaRepository concertScheduleJpaRepository;
+
+  private final ConcertSeatJpaRepository concertSeatJpaRepository;
 
   @Override
   public ConcertSeat saveConcertSeat(ConcertSeat concertSeat) {
@@ -60,7 +63,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param) {
-    return null;
+    return concertScheduleJpaRepository.findById(param.concertScheduleId()).orElseThrow(
+        () -> new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND));
   }
 
   @Override
@@ -84,7 +88,8 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   @Override
   public List<ConcertSeat> findReservableConcertSeats(
       FindReservableConcertSeatsByConcertIdParam param) {
-    return List.of();
+    return concertSeatJpaRepository.findReservableConcertSeatsByConcertScheduleId(
+        param.concertScheduleId());
   }
 
   @Override

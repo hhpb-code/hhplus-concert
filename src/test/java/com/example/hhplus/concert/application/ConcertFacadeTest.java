@@ -7,8 +7,10 @@ import com.example.hhplus.concert.domain.common.exception.BusinessException;
 import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
+import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
+import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +33,15 @@ class ConcertFacadeTest {
   @Autowired
   private ConcertScheduleJpaRepository concertScheduleJpaRepository;
 
+  @Autowired
+  private ConcertSeatJpaRepository concertSeatJpaRepository;
+
 
   @BeforeEach
   void setUp() {
     concertScheduleJpaRepository.deleteAll();
     concertJpaRepository.deleteAll();
+    concertSeatJpaRepository.deleteAll();
   }
 
   @Nested
@@ -108,6 +114,117 @@ class ConcertFacadeTest {
         assertThat(concertSchedule.getReservationStartAt()).isEqualTo(
             expected.getReservationStartAt());
         assertThat(concertSchedule.getReservationEndAt()).isEqualTo(expected.getReservationEndAt());
+      }
+    }
+
+  }
+
+  @Nested
+  @DisplayName("예약 가능한 좌석 조회")
+  class GetReservableConcertSeatsTest {
+
+    @Test
+    @DisplayName("예약 가능한 좌석 조회 실패 - 콘서트 일정이 존재하지 않음")
+    void shouldThrowConcertScheduleNotFoundException() {
+      // given
+      final Long concertScheduleId = 1L;
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class, () -> {
+        concertFacade.getReservableConcertSeats(concertScheduleId);
+      });
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("예약 가능한 좌석 조회 실패 - 예약 가능 시간이 아님")
+    void shouldThrowReservationTimeException() {
+      // given
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
+      final Long concertId = concert.getId();
+
+      final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+          ConcertSchedule.builder().concertId(concertId)
+              .concertAt(LocalDateTime.now().plusDays(1))
+              .reservationStartAt(LocalDateTime.now().plusMinutes(1))
+              .reservationEndAt(LocalDateTime.now().plusMinutes(2)).build());
+      final Long concertScheduleId = concertSchedule.getId();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class, () -> {
+        concertFacade.getReservableConcertSeats(concertScheduleId);
+      });
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+    }
+
+    @Test
+    @DisplayName("예약 가능한 좌석 조회 성공 - 좌석 없음")
+    void shouldSuccessfullyGetReservableConcertSeats() {
+      // given
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
+      final Long concertId = concert.getId();
+
+      final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+          ConcertSchedule.builder().concertId(concertId)
+              .concertAt(LocalDateTime.now().plusDays(1))
+              .reservationStartAt(LocalDateTime.now())
+              .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
+      final Long concertScheduleId = concertSchedule.getId();
+      concertSeatJpaRepository.save(ConcertSeat.builder().concertScheduleId(concertScheduleId)
+          .number(1).price(100).isReserved(true).build());
+
+      // when
+      final List<ConcertSeat> result = concertFacade.getReservableConcertSeats(concertScheduleId);
+
+      // then
+      assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 가능한 좌석 조회 성공 - 좌석 있음")
+    void shouldSuccessfullyGetReservableConcertSeatsWithSeats() {
+      // given
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
+      final Long concertId = concert.getId();
+
+      final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+          ConcertSchedule.builder().concertId(concertId)
+              .concertAt(LocalDateTime.now().plusDays(1))
+              .reservationStartAt(LocalDateTime.now())
+              .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
+      final Long concertScheduleId = concertSchedule.getId();
+
+      final List<ConcertSeat> concertSeats = concertSeatJpaRepository.saveAll(
+          List.of(
+              ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
+                  .isReserved(false).build(),
+              ConcertSeat.builder().concertScheduleId(concertScheduleId).number(2).price(200)
+                  .isReserved(false).build()
+          ));
+
+      // when
+      final List<ConcertSeat> result = concertFacade.getReservableConcertSeats(concertScheduleId);
+
+      // then
+      assertThat(result).hasSize(concertSeats.size());
+      for (int i = 0; i < result.size(); i++) {
+        final ConcertSeat concertSeat = result.get(i);
+        final ConcertSeat expected = concertSeats.get(i);
+
+        assertThat(concertSeat.getId()).isNotNull();
+        assertThat(concertSeat.getConcertScheduleId()).isEqualTo(expected.getConcertScheduleId());
+        assertThat(concertSeat.getNumber()).isEqualTo(expected.getNumber());
+        assertThat(concertSeat.getPrice()).isEqualTo(expected.getPrice());
+        assertThat(concertSeat.getIsReserved()).isEqualTo(expected.getIsReserved());
+        assertThat(concertSeat.getCreatedAt()).isEqualTo(expected.getCreatedAt());
+        assertThat(concertSeat.getUpdatedAt()).isEqualTo(expected.getUpdatedAt());
       }
     }
 
