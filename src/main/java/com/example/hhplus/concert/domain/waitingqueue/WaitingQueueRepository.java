@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.waitingqueue;
 
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.CountWaitingQueueByConcertIdAndStatusParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLockParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindDistinctConcertIdsByStatusParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
@@ -15,6 +15,8 @@ public interface WaitingQueueRepository {
 
   List<WaitingQueue> saveAll(List<WaitingQueue> waitingQueues);
 
+  void expireWaitingQueues();
+
   WaitingQueue getWaitingQueue(GetWaitingQueueByIdParam param);
 
   WaitingQueue getWaitingQueue(GetWaitingQueueByUuidWithLockParam param);
@@ -26,6 +28,6 @@ public interface WaitingQueueRepository {
   Integer countByConcertIdAndStatus(CountWaitingQueueByConcertIdAndStatusParam param);
 
   List<WaitingQueue> findAllWaitingQueues(
-      FindAllWaitingQueuesByConcertIdAndStatusWithLockParam param);
+      FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam param);
 
 }

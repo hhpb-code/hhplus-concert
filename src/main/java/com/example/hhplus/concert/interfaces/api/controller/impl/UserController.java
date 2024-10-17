@@ -1,11 +1,10 @@
-package com.example.hhplus.concert.interfaces.api.controller;
+package com.example.hhplus.concert.interfaces.api.controller.impl;
 
+import com.example.hhplus.concert.interfaces.api.controller.IUserController;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWalletAmountRequest;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.ChargeWalletAmountResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.GetWalletResponse;
 import com.example.hhplus.concert.interfaces.api.dto.UserControllerDto.WalletResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "User", description = "사용자 API")
 @RestController
 @RequestMapping("/api/v1/users")
-public class UserController {
+public class UserController implements IUserController {
 
   @GetMapping("/{userId}/wallets")
-  @Operation(summary = "지갑 조회", description = "사용자의 지갑을 조회합니다.")
   public ResponseEntity<GetWalletResponse> getWallets(@PathVariable Long userId) {
     WalletResponse wallet = new WalletResponse(1L, userId, 10000, LocalDateTime.now(),
         LocalDateTime.now());
@@ -30,7 +27,6 @@ public class UserController {
   }
 
   @PutMapping("/{userId}/wallets/{walletId}/charge")
-  @Operation(summary = "지갑 충전", description = "사용자의 지갑을 충전합니다.")
   public ResponseEntity<ChargeWalletAmountResponse> chargeWallet(@PathVariable Long userId,
       @PathVariable Long walletId, @RequestBody ChargeWalletAmountRequest request) {
     WalletResponse wallet = new WalletResponse(walletId, userId, request.amount(),

@@ -1,11 +1,9 @@
-package com.example.hhplus.concert.interfaces.api.controller;
+package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
+import com.example.hhplus.concert.interfaces.api.controller.IConcertController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ConcertScheduleResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.GetAvailableSchedulesResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -15,18 +13,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Concert", description = "콘서트 API")
 @RestController
 @RequestMapping("/api/v1/concerts")
-public class ConcertController {
+public class ConcertController implements IConcertController {
 
   @GetMapping("/{concertId}/available-schedules")
-  @Operation(summary = "예약 가능한 콘서트 일정 조회", description = "예약 가능한 콘서트 일정을 조회합니다.")
-  @ApiResponse(responseCode = "200", description = "예약 가능한 콘서트 일정 조회 성공")
   public ResponseEntity<GetAvailableSchedulesResponse> getAvailableSchedules(
       @PathVariable Long concertId,
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
+    // TODO: 토큰 검증
+    
     List<ConcertScheduleResponse> concertSchedules = List.of(new ConcertScheduleResponse(
         1L,
         concertId,

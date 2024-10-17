@@ -1,23 +1,11 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
-import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 public class ReservationControllerDto {
 
   // NOTE: Request, Response DTO
-
-  public record CreateReservationRequest(
-      Long concertSeatId
-  ) {
-
-  }
-
-  public record CreateReservationResponse(
-      ReservationResponse reservation
-  ) {
-
-  }
 
   public record PayReservationResponse(
       PaymentResponse payment
@@ -27,24 +15,23 @@ public class ReservationControllerDto {
 
   // NOTE: Common DTO
 
-  public record ReservationResponse(
-      Long id,
-      Long concertSeatId,
-      Long userId,
-      ReservationStatus status,
-      LocalDateTime reservationAt,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt
-  ) {
-
-  }
-
   public record PaymentResponse(
+      @Schema(description = "결제 내역 ID", example = "1")
       Long id,
+
+      @Schema(description = "예약 내역 ID", example = "1")
       Long reservationId,
+
+      @Schema(description = "사용자 ID", example = "1")
       Long userId,
+
+      @Schema(description = "결제 금액", example = "10000")
       Long amount,
+
+      @Schema(description = "결제 일시", example = "2024-12-31T23:59:59")
       LocalDateTime createdAt,
+
+      @Schema(description = "수정 일시", example = "2024-12-31T23:59:59")
       LocalDateTime updatedAt
   ) {
 

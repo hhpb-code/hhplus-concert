@@ -1,15 +1,13 @@
-package com.example.hhplus.concert.interfaces.api.controller;
+package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
+import com.example.hhplus.concert.interfaces.api.controller.IWaitingQueueController;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenRequest;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.GetWaitingQueuePositionResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponseWithPosition;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -21,14 +19,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "WaitingQueue", description = "대기열 API")
 @RestController
 @RequestMapping("/api/v1/waiting-queues")
-public class WaitingQueueController {
+public class WaitingQueueController implements IWaitingQueueController {
 
   @PostMapping("/tokens")
-  @Operation(summary = "대기열 토큰 생성", description = "새로운 대기열 토큰을 생성합니다.")
-  @ApiResponse(responseCode = "201", description = "대기열 토큰 생성 성공")
   public ResponseEntity<CreateWaitingQueueTokenResponse> createWaitingQueueToken(
       @RequestBody CreateWaitingQueueTokenRequest request
   ) {
@@ -42,7 +37,6 @@ public class WaitingQueueController {
   }
 
   @GetMapping("/position")
-  @Operation(summary = "대기열 순번 조회", description = "대기 중인 토큰의 순번을 조회합니다.")
   public ResponseEntity<GetWaitingQueuePositionResponse> getWaitingQueuePosition(
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
@@ -52,6 +46,5 @@ public class WaitingQueueController {
 
     return ResponseEntity.ok(new GetWaitingQueuePositionResponse(waitingQueue));
   }
-
 
 }
