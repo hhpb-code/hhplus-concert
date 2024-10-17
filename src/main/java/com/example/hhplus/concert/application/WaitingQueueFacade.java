@@ -1,18 +1,25 @@
 package com.example.hhplus.concert.application;
 
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdQuery;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.service.ConcertQueryService;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ActivateWaitingQueuesCommand;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.CreateWaitingQueueCommand;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.CountWaitingQueueByConcertIdAndStatusQuery;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.FindDistinctConcertIdsByStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByIdQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
+import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
 import com.example.hhplus.concert.domain.waitingqueue.service.WaitingQueueCommandService;
 import com.example.hhplus.concert.domain.waitingqueue.service.WaitingQueueQueryService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +81,26 @@ public class WaitingQueueFacade {
     ConcertSchedule concertSchedule = concertQueryService.getConcertSchedule(
         new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
     waitingQueue.validateConcertId(concertSchedule.getConcertId());
+  }
+
+  // NOTE: 이 메서드는 스케줄러로 주기적으로 실행되어야 합니다.
+  @Transactional
+  public void activateWaitingQueues() {
+    final List<Long> concertIds = waitingQueueQueryService.findDistinctConcertIds(
+        new FindDistinctConcertIdsByStatusQuery(WaitingQueueStatus.WAITING));
+
+    for (Long concertId : concertIds) {
+      concertQueryService.getConcert(new GetConcertByIdWithLockQuery(concertId));
+
+      Integer processingWaitingQueueCount = waitingQueueQueryService.countWaitingQueueByConcertIdAndStatus(
+          new CountWaitingQueueByConcertIdAndStatusQuery(concertId, WaitingQueueStatus.PROCESSING)
+      );
+      Integer availableWaitingQueueCount =
+          WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT - processingWaitingQueueCount;
+
+      waitingQueueCommandService.activateWaitingQueues(
+          new ActivateWaitingQueuesCommand(concertId, availableWaitingQueueCount));
+    }
   }
 
 }

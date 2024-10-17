@@ -12,6 +12,7 @@ public class WaitingQueueConstants {
   public static final String WAITING_QUEUE_ID_NULL_MESSAGE = "대기열 ID는 필수입니다.";
   public static final String WAITING_QUEUE_UUID_EMPTY_MESSAGE = "대기열 UUID는 필수입니다.";
   public static final String INVALID_CONCERT_ID_MESSAGE = "콘서트 ID가 유효하지 않습니다.";
+  public static final String AVAILABLE_SLOTS_NEGATIVE_MESSAGE = "대기열 활성화 가능한 슬롯 수는 0보다 커야 합니다.";
 
 
   // NOTE: 테스트를 용이하게 하기 위해 작은 값으로 설정

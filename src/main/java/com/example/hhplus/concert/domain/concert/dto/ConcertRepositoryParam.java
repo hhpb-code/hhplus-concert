@@ -9,6 +9,10 @@ public class ConcertRepositoryParam {
 
   }
 
+  public record GetConcertByIdWithLockParam(Long id) {
+
+  }
+
   public record GetConcertScheduleByIdParam(Long concertScheduleId) {
 
   }

@@ -30,7 +30,7 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public List<WaitingQueue> saveAll(List<WaitingQueue> waitingQueues) {
-    return List.of();
+    return waitingQueueJpaRepository.saveAll(waitingQueues);
   }
 
   @Override
@@ -66,17 +66,18 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public List<Long> findDistinctConcertIdByStatus(FindDistinctConcertIdsByStatusParam param) {
-    return List.of();
+    return waitingQueueJpaRepository.findAllDistinctConcertIdsByStatus(param.status());
   }
 
   @Override
   public Integer countByConcertIdAndStatus(CountWaitingQueueByConcertIdAndStatusParam param) {
-    return 0;
+    return waitingQueueJpaRepository.countByConcertIdAndStatus(param.concertId(), param.status());
   }
 
   @Override
   public List<WaitingQueue> findAllWaitingQueues(
       FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam param) {
-    return List.of();
+    return waitingQueueJpaRepository.findAllByConcertIdAndStatusWithLimitAndLock(
+        param.concertId(), param.status(), param.limit());
   }
 }

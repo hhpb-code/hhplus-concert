@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.Find
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertScheduleByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
@@ -28,6 +29,8 @@ public interface ConcertRepository {
   void saveAllConcertSeats(List<ConcertSeat> concertSeats);
 
   Concert getConcert(GetConcertByIdParam param);
+
+  Concert getConcert(GetConcertByIdWithLockParam param);
 
   ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param);
 

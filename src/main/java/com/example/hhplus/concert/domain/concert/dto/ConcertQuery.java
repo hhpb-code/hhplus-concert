@@ -12,6 +12,13 @@ public class ConcertQuery {
 
   }
 
+  public record GetConcertByIdWithLockQuery(
+      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
+      Long id
+  ) {
+
+  }
+
   public record GetConcertScheduleByIdQuery(
       @NotNull(message = ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL)
       Long concertScheduleId

@@ -5,6 +5,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAllExpired
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
@@ -14,6 +15,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.Find
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertScheduleByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
@@ -37,10 +39,14 @@ public class ConcertQueryService {
   private final ConcertRepository concertRepository;
 
   @Transactional(readOnly = true)
-  public Reservation getReservation(GetReservationByIdQuery query) {
-    return concertRepository.getReservation(new GetReservationByIdParam(query.reservationId()));
+  public Concert getConcert(GetConcertByIdQuery query) {
+    return concertRepository.getConcert(new GetConcertByIdParam(query.id()));
   }
 
+  @Transactional
+  public Concert getConcert(GetConcertByIdWithLockQuery query) {
+    return concertRepository.getConcert(new GetConcertByIdWithLockParam(query.id()));
+  }
 
   @Transactional(readOnly = true)
   public ConcertSeat getConcertSeat(GetConcertSeatByIdQuery query) {
@@ -54,8 +60,8 @@ public class ConcertQueryService {
   }
 
   @Transactional(readOnly = true)
-  public Concert getConcert(GetConcertByIdQuery query) {
-    return concertRepository.getConcert(new GetConcertByIdParam(query.id()));
+  public Reservation getReservation(GetReservationByIdQuery query) {
+    return concertRepository.getReservation(new GetReservationByIdParam(query.reservationId()));
   }
 
   @Transactional(readOnly = true)

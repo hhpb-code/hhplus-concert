@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.concert.ConcertConstants;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
@@ -32,39 +33,84 @@ class ConcertQueryTest {
 
   @Nested
   @DisplayName("콘서트 조회 Query By Get")
-  class GetConcertByIdQueryTest {
+  class GetConcertQueryTest {
 
-    @Test
-    @DisplayName("콘서트 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
-    void shouldThrowExceptionWhenConcertIdIsNull() {
-      // given
-      final Long concertId = null;
-      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+    @Nested
+    @DisplayName("콘서트 조회 Query By Id")
+    class GetConcertByIdQueryTest {
 
-      // when
-      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+      @Test
+      @DisplayName("콘서트 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
+      void shouldThrowExceptionWhenConcertIdIsNull() {
+        // given
+        final Long concertId = null;
+        final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
 
-      final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("id"))
-          .findFirst()
-          .get();
+        // when
+        final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
 
-      // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+        final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
+            .filter(v -> v.getPropertyPath().toString().equals("id"))
+            .findFirst()
+            .get();
+
+        // then
+        assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 조회 query 생성 성공")
+      void shouldSuccessfullyCreateGetConcertByIdQuery() {
+        // given
+        final Long concertId = 1L;
+        final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+
+        // when
+        final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+
+        // then
+        assertThat(violations).isEmpty();
+      }
     }
 
-    @Test
-    @DisplayName("콘서트 조회 query 생성 성공")
-    void shouldSuccessfullyCreateGetConcertByIdQuery() {
-      // given
-      final Long concertId = 1L;
-      final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
+    @Nested
+    @DisplayName("콘서트 조회 Query By Id With Lock")
+    class GetConcertByIdWithLockQueryTest {
 
-      // when
-      final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+      @Test
+      @DisplayName("콘서트 조회 query 생성 실패 - 콘서트 ID가 null인 경우")
+      void shouldThrowExceptionWhenConcertIdIsNull() {
+        // given
+        final Long concertId = null;
+        final GetConcertByIdWithLockQuery query = new GetConcertByIdWithLockQuery(concertId);
 
-      // then
-      assertThat(violations).isEmpty();
+        // when
+        final Set<ConstraintViolation<GetConcertByIdWithLockQuery>> violations = validator.validate(
+            query);
+
+        final ConstraintViolation<GetConcertByIdWithLockQuery> violation = violations.stream()
+            .filter(v -> v.getPropertyPath().toString().equals("id"))
+            .findFirst()
+            .get();
+
+        // then
+        assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 조회 query 생성 성공")
+      void shouldSuccessfullyCreateGetConcertByIdWithLockQuery() {
+        // given
+        final Long concertId = 1L;
+        final GetConcertByIdWithLockQuery query = new GetConcertByIdWithLockQuery(concertId);
+
+        // when
+        final Set<ConstraintViolation<GetConcertByIdWithLockQuery>> violations = validator.validate(
+            query);
+
+        // then
+        assertThat(violations).isEmpty();
+      }
     }
 
   }

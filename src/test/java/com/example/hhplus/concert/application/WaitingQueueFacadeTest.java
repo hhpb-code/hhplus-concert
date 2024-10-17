@@ -4,17 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
+import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
 import com.example.hhplus.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,9 +34,11 @@ class WaitingQueueFacadeTest {
   @Autowired
   private WaitingQueueFacade waitingQueueFacade;
 
-
   @Autowired
   private WaitingQueueJpaRepository waitingQueueJpaRepository;
+
+  @Autowired
+  private ConcertJpaRepository concertJpaRepository;
 
   @Autowired
   private ConcertScheduleJpaRepository concertScheduleJpaRepository;
@@ -42,6 +49,7 @@ class WaitingQueueFacadeTest {
   @BeforeEach
   void setUp() {
     waitingQueueJpaRepository.deleteAll();
+    concertJpaRepository.deleteAll();
     concertScheduleJpaRepository.deleteAll();
     concertSeatJpaRepository.deleteAll();
   }
@@ -631,6 +639,106 @@ class WaitingQueueFacadeTest {
 
     }
 
+  }
+
+  @Nested
+  @DisplayName("대기열 활성화")
+  class ActivateWaitingQueues {
+
+    @Test
+    @DisplayName("대기열 활성화 성공 - 활성 자리가 없는 경우")
+    void shouldSuccessfullyActivateWaitingQueuesWhenNotExistsAvailableSlots() {
+      // given
+      final Concert concert = concertJpaRepository.save(Concert.builder()
+          .title("title")
+          .description("description")
+          .build());
+      final Long concertId = concert.getId();
+
+      IntStream.range(0, WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT)
+          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
+              .concertId(concertId)
+              .uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.PROCESSING)
+              .expiredAt(LocalDateTime.now().plusMinutes(1))
+              .build()));
+      final int waitingQueueCount = 5;
+      IntStream.range(0, waitingQueueCount)
+          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
+              .concertId(concertId)
+              .uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING)
+              .build()));
+
+      // when
+      waitingQueueFacade.activateWaitingQueues();
+
+      // then
+      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      assertThat(waitingQueues).hasSize(
+          waitingQueueCount + WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT);
+
+      for (int i = 0; i < waitingQueueCount; i++) {
+        final WaitingQueue waitingQueue = waitingQueues.get(i);
+
+        if (i < WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT) {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
+          assertThat(waitingQueue.getExpiredAt()).isAfter(LocalDateTime.now());
+        } else {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
+          assertThat(waitingQueue.getExpiredAt()).isNull();
+        }
+      }
+    }
+
+    @Test
+    @DisplayName("대기열 활성화 성공 - 대기열이 없는 경우")
+    void shouldSuccessfullyActivateWaitingQueuesWhenNotExistsWaitingQueue() {
+      // given
+
+      // when
+      waitingQueueFacade.activateWaitingQueues();
+
+      // then
+      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      assertThat(waitingQueues).isEmpty();
+    }
+
+    @Test
+    @DisplayName("대기열 활성화 성공 - 대기열이 있는 경우")
+    void shouldSuccessfullyActivateWaitingQueuesWhenExistsWaitingQueue() {
+      // given
+      final Concert concert = concertJpaRepository.save(Concert.builder()
+          .title("title")
+          .description("description")
+          .build());
+      final Long concertId = concert.getId();
+      final int waitingQueueCount = WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT + 5;
+      IntStream.range(0, waitingQueueCount)
+          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
+              .concertId(concertId)
+              .uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING)
+              .build()));
+
+      // when
+      waitingQueueFacade.activateWaitingQueues();
+
+      // then
+      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      assertThat(waitingQueues).hasSize(waitingQueueCount);
+      for (int i = 0; i < waitingQueueCount; i++) {
+        final WaitingQueue waitingQueue = waitingQueues.get(i);
+
+        if (i < WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT) {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
+          assertThat(waitingQueue.getExpiredAt()).isAfter(LocalDateTime.now());
+        } else {
+          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
+          assertThat(waitingQueue.getExpiredAt()).isNull();
+        }
+      }
+    }
   }
 
 }
