@@ -1,7 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.WaitingQueueFacade;
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IWaitingQueueController;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenRequest;
@@ -9,7 +8,6 @@ import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.C
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.GetWaitingQueuePositionResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponseWithPosition;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +40,8 @@ public class WaitingQueueController implements IWaitingQueueController {
   public ResponseEntity<GetWaitingQueuePositionResponse> getWaitingQueuePosition(
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
-    WaitingQueueResponseWithPosition waitingQueue = new WaitingQueueResponseWithPosition(1L, 1L,
-        waitingQueueTokenUuid, WaitingQueueStatus.WAITING, 10, LocalDateTime.now(),
-        LocalDateTime.now(), null);
+    WaitingQueueResponseWithPosition waitingQueue = new WaitingQueueResponseWithPosition(
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid));
 
     return ResponseEntity.ok(new GetWaitingQueuePositionResponse(waitingQueue));
   }

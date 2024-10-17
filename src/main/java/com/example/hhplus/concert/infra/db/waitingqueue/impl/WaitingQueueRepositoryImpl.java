@@ -10,6 +10,7 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepository
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByIdAndConcertIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
+import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -44,12 +45,15 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public WaitingQueue getWaitingQueue(GetWaitingQueueByUuidWithLockParam param) {
-    return null;
+    return waitingQueueJpaRepository.findByUuid(param.uuid())
+        .orElseThrow(() -> new BusinessException(
+            WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override
   public Integer getWaitingQueuePosition(GetWaitingQueuePositionByIdAndConcertIdParam param) {
-    return 0;
+    return waitingQueueJpaRepository.countByStatusAndConcertIdAndIdLessThan(
+        WaitingQueueStatus.WAITING, param.concertId(), param.id());
   }
 
   @Override

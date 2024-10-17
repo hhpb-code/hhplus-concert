@@ -25,17 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WaitingQueueQueryService {
 
-  private final WaitingQueueRepository waitingQueueReader;
+  private final WaitingQueueRepository waitingQueueRepository;
 
   @Transactional(readOnly = true)
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdQuery query) {
-    return waitingQueueReader.getWaitingQueue(new GetWaitingQueueByIdParam(query.id()));
+    return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByIdParam(query.id()));
   }
 
   @Transactional
   public WaitingQueueWithPosition getWaitingQueuePosition(
       GetWaitingQueuePositionByUuid query) {
-    final WaitingQueue waitingQueue = waitingQueueReader.getWaitingQueue(
+    final WaitingQueue waitingQueue = waitingQueueRepository.getWaitingQueue(
         new GetWaitingQueueByUuidWithLockParam(query.uuid()));
 
     if (waitingQueue.getStatus() == WaitingQueueStatus.EXPIRED) {
@@ -51,7 +51,7 @@ public class WaitingQueueQueryService {
       return new WaitingQueueWithPosition(waitingQueue, 0);
     }
 
-    Integer position = waitingQueueReader.getWaitingQueuePosition(
+    Integer position = waitingQueueRepository.getWaitingQueuePosition(
         new GetWaitingQueuePositionByIdAndConcertIdParam(waitingQueue.getId(),
             waitingQueue.getConcertId()));
 
@@ -59,13 +59,13 @@ public class WaitingQueueQueryService {
   }
 
   public List<Long> findDistinctConcertIds(FindDistinctConcertIdsByStatusQuery query) {
-    return waitingQueueReader.findDistinctConcertIdByStatus(
+    return waitingQueueRepository.findDistinctConcertIdByStatus(
         new FindDistinctConcertIdsByStatusParam(query.status()));
   }
 
   public Integer countWaitingQueueByConcertIdAndStatus(
       CountWaitingQueueByConcertIdAndStatusQuery query) {
-    return waitingQueueReader.countByConcertIdAndStatus(
+    return waitingQueueRepository.countByConcertIdAndStatus(
         new CountWaitingQueueByConcertIdAndStatusParam(
             query.concertId(), query.status()));
   }
