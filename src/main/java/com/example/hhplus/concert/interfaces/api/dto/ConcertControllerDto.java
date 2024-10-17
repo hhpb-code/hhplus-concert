@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
+import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -51,6 +52,12 @@ public class ConcertControllerDto {
       @Schema(description = "수정 일시", example = "2024-12-31T23:59:59")
       LocalDateTime updatedAt
   ) {
+
+    public ConcertScheduleResponse(ConcertSchedule concertSchedule) {
+      this(concertSchedule.getId(), concertSchedule.getConcertId(), concertSchedule.getConcertAt(),
+          concertSchedule.getReservationStartAt(), concertSchedule.getReservationEndAt(),
+          concertSchedule.getCreatedAt(), concertSchedule.getUpdatedAt());
+    }
 
   }
 

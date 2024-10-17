@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.infra.db.concert.impl;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
@@ -15,13 +17,20 @@ import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.repository.ConcertRepository;
+import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
+import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class concertRepositoryImpl implements ConcertRepository {
+public class ConcertRepositoryImpl implements ConcertRepository {
+
+  private final ConcertJpaRepository concertJpaRepository;
+
+  private final ConcertScheduleJpaRepository concertScheduleJpaRepository;
 
   @Override
   public ConcertSeat saveConcertSeat(ConcertSeat concertSeat) {
@@ -45,7 +54,8 @@ public class concertRepositoryImpl implements ConcertRepository {
 
   @Override
   public Concert getConcert(GetConcertByIdParam param) {
-    return null;
+    return concertJpaRepository.findById(param.id()).orElseThrow(() -> new BusinessException(
+        ConcertErrorCode.CONCERT_NOT_FOUND));
   }
 
   @Override
@@ -56,7 +66,9 @@ public class concertRepositoryImpl implements ConcertRepository {
   @Override
   public List<ConcertSchedule> findReservableConcertSchedules(
       FindReservableConcertSchedulesByConcertIdAndNowParam param) {
-    return List.of();
+    return concertScheduleJpaRepository.findReservableConcertSchedulesByConcertIdAndNow(
+        param.concertId(),
+        LocalDateTime.now());
   }
 
   @Override

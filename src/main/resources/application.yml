@@ -1,6 +1,22 @@
 spring:
   application:
     name: hhplus-concert
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:mysql://${DB_HOST}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:none}
+    properties:
+      hibernate:
+        format_sql: ${JPA_FORMAT_SQL:false}
+        highlight_sql: ${JPA_HIGHLIGHT_SQL:false}
 
 # Swagger springdoc-ui Configuration
 springdoc:
