@@ -36,7 +36,7 @@ public class WaitingQueue {
   @Column(nullable = false)
   private Long concertId;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String uuid;
 
   @Column(nullable = false)

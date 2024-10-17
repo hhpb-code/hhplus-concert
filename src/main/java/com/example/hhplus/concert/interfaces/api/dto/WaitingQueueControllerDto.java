@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
+import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -51,6 +52,12 @@ public class WaitingQueueControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public WaitingQueueResponse(WaitingQueue waitingQueueToken) {
+      this(waitingQueueToken.getId(), waitingQueueToken.getConcertId(),
+          waitingQueueToken.getUuid(), waitingQueueToken.getStatus(),
+          waitingQueueToken.getExpiredAt(), waitingQueueToken.getCreatedAt(),
+          waitingQueueToken.getUpdatedAt());
+    }
   }
 
   public record WaitingQueueResponseWithPosition(

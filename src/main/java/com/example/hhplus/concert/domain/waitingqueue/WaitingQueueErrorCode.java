@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum WaitingQueueErrorCode implements ErrorCode {
+  WAITING_QUEUE_NOT_FOUND(HttpStatus.NOT_FOUND,
+      WaitingQueueConstants.WAITING_QUEUE_NOT_FOUND_MESSAGE),
   WAITING_QUEUE_EXPIRED(HttpStatus.BAD_REQUEST,
       WaitingQueueConstants.WAITING_QUEUE_EXPIRED_MESSAGE),
   INVALID_STATUS(HttpStatus.BAD_REQUEST, WaitingQueueConstants.INVALID_STATUS_MESSAGE),

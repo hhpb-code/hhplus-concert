@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.infra.db.waitingqueue.impl;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.CountWaitingQueueByConcertIdAndStatusParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam;
@@ -8,6 +10,7 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepository
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByIdAndConcertIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
+import com.example.hhplus.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,9 +19,11 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
+  private final WaitingQueueJpaRepository waitingQueueJpaRepository;
+
   @Override
   public WaitingQueue save(WaitingQueue waitingQueue) {
-    return null;
+    return waitingQueueJpaRepository.save(waitingQueue);
   }
 
   @Override
@@ -33,7 +38,8 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdParam param) {
-    return null;
+    return waitingQueueJpaRepository.findById(param.id()).orElseThrow(() -> new BusinessException(
+        WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override
