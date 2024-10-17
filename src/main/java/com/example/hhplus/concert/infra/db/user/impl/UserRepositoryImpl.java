@@ -1,5 +1,7 @@
 package com.example.hhplus.concert.infra.db.user.impl;
 
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.user.UserErrorCode;
 import com.example.hhplus.concert.domain.user.UserRepository;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserByIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByUserIdParam;
@@ -8,6 +10,8 @@ import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWal
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdIdWithLockParam;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
+import com.example.hhplus.concert.infra.db.user.UserJpaRepository;
+import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -15,33 +19,42 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
-  @Override
-  public void saveWallet(Wallet wallet) {
+  private final UserJpaRepository userJpaRepository;
 
+  private final WalletJpaRepository walletJpaRepository;
+
+  @Override
+  public Wallet saveWallet(Wallet wallet) {
+    return walletJpaRepository.save(wallet);
   }
 
   @Override
   public User getUser(GetUserByIdParam param) {
-    return null;
+    return userJpaRepository.findById(param.id())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByUserIdParam param) {
-    return null;
+    return walletJpaRepository.findByUserId(param.userId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletIdParam param) {
-    return null;
+    return walletJpaRepository.findById(param.walletId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletIdWithLockParam param) {
-    return null;
+    return walletJpaRepository.findByIdWithLock(param.walletId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 
   @Override
   public Wallet getWallet(GetUserWalletByWalletUserIdIdWithLockParam param) {
-    return null;
+    return walletJpaRepository.findByUserIdWithLock(param.userId())
+        .orElseThrow(() -> new BusinessException(UserErrorCode.WALLET_NOT_FOUND));
   }
 }

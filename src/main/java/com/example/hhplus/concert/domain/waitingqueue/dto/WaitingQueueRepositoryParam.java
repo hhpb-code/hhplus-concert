@@ -10,6 +10,12 @@ public class WaitingQueueRepositoryParam {
 
   }
 
+  public record GetWaitingQueueByUuidParam(
+      String uuid
+  ) {
+
+  }
+
   public record GetWaitingQueueByUuidWithLockParam(
       String uuid
   ) {

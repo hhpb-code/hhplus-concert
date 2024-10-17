@@ -10,7 +10,7 @@ import com.example.hhplus.concert.domain.user.model.Wallet;
 
 public interface UserRepository {
 
-  void saveWallet(Wallet wallet);
+  Wallet saveWallet(Wallet wallet);
 
   User getUser(GetUserByIdParam param);
 

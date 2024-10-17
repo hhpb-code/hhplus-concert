@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
+import com.example.hhplus.concert.domain.payment.model.Payment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ public class ReservationControllerDto {
       Long userId,
 
       @Schema(description = "결제 금액", example = "10000")
-      Long amount,
+      Integer amount,
 
       @Schema(description = "결제 일시", example = "2024-12-31T23:59:59")
       LocalDateTime createdAt,
@@ -35,5 +36,9 @@ public class ReservationControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public PaymentResponse(Payment payment) {
+      this(payment.getId(), payment.getReservationId(), payment.getUserId(), payment.getAmount(),
+          payment.getCreatedAt(), payment.getUpdatedAt());
+    }
   }
 }

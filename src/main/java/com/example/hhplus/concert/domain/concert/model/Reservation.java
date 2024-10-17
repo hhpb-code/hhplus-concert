@@ -77,4 +77,18 @@ public class Reservation {
 
     this.status = ReservationStatus.CANCELED;
   }
+
+  public void validateConfirmConditions(Long userId) {
+    if (!this.userId.equals(userId)) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+    }
+
+    if (status == ReservationStatus.CANCELED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+    }
+
+    if (status == ReservationStatus.CONFIRMED) {
+      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+    }
+  }
 }

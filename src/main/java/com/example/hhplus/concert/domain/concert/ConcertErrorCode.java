@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ConcertErrorCode implements ErrorCode {
+  CONCERT_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_NOT_FOUND),
+  CONCERT_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_SCHEDULE_NOT_FOUND),
+  CONCERT_SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.CONCERT_SEAT_NOT_FOUND),
+  RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, ConcertConstants.RESERVATION_NOT_FOUND),
   CONCERT_SCHEDULE_NOT_RESERVABLE(HttpStatus.BAD_REQUEST,
       ConcertConstants.CONCERT_SCHEDULE_NOT_RESERVABLE),
   CONCERT_SEAT_ALREADY_RESERVED(HttpStatus.BAD_REQUEST,
@@ -16,6 +20,8 @@ public enum ConcertErrorCode implements ErrorCode {
   RESERVATION_ALREADY_CANCELED(HttpStatus.BAD_REQUEST,
       ConcertConstants.RESERVATION_ALREADY_CANCELED),
   CONCERT_SEAT_NOT_RESERVED(HttpStatus.BAD_REQUEST, ConcertConstants.CONCERT_SEAT_NOT_RESERVED),
+  RESERVATION_USER_NOT_MATCHED(HttpStatus.BAD_REQUEST,
+      ConcertConstants.RESERVATION_USER_NOT_MATCHED),
   ;
 
   private final HttpStatus status;

@@ -36,7 +36,7 @@ public class WaitingQueue {
   @Column(nullable = false)
   private Long concertId;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String uuid;
 
   @Column(nullable = false)
@@ -68,5 +68,43 @@ public class WaitingQueue {
 
     this.status = WaitingQueueStatus.PROCESSING;
     this.expiredAt = expiredAt;
+  }
+
+  public void validateNotExpired() {
+    if (this.status == WaitingQueueStatus.EXPIRED) {
+      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+
+    if (this.expiredAt != null && LocalDateTime.now().isAfter(this.expiredAt)) {
+      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+  }
+
+  public boolean isProcessing() {
+    if (this.status != WaitingQueueStatus.PROCESSING) {
+      return false;
+    }
+
+    return LocalDateTime.now().isBefore(this.expiredAt);
+  }
+
+  public void validateProcessing() {
+    if (this.status == WaitingQueueStatus.EXPIRED) {
+      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+
+    if (this.status != WaitingQueueStatus.PROCESSING) {
+      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+    }
+
+    if (LocalDateTime.now().isAfter(this.expiredAt)) {
+      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+    }
+  }
+
+  public void validateConcertId(Long concertId) {
+    if (!this.concertId.equals(concertId)) {
+      throw new BusinessException(WaitingQueueErrorCode.INVALID_CONCERT_ID);
+    }
   }
 }

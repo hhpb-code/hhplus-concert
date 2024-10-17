@@ -9,6 +9,10 @@ public class ConcertRepositoryParam {
 
   }
 
+  public record GetConcertByIdWithLockParam(Long id) {
+
+  }
+
   public record GetConcertScheduleByIdParam(Long concertScheduleId) {
 
   }
@@ -51,6 +55,12 @@ public class ConcertRepositoryParam {
 
   public record FindAllConcertSeatsByIdsWithLockParam(
       List<Long> concertSeatIds
+  ) {
+
+  }
+
+  public record FindAllExpiredReservationsWithLockParam(
+      LocalDateTime expiredAt
   ) {
 
   }

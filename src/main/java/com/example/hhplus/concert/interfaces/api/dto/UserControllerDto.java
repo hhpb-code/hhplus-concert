@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
+import com.example.hhplus.concert.domain.user.model.Wallet;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -44,6 +45,10 @@ public class UserControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public WalletResponse(Wallet wallet) {
+      this(wallet.getId(), wallet.getUserId(), wallet.getAmount(), wallet.getCreatedAt(),
+          wallet.getUpdatedAt());
+    }
   }
 
 }

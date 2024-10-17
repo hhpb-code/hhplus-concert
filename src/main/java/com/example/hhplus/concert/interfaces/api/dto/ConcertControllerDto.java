@@ -1,5 +1,8 @@
 package com.example.hhplus.concert.interfaces.api.dto;
 
+import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
+import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
+import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -52,6 +55,12 @@ public class ConcertControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public ConcertScheduleResponse(ConcertSchedule concertSchedule) {
+      this(concertSchedule.getId(), concertSchedule.getConcertId(), concertSchedule.getConcertAt(),
+          concertSchedule.getReservationStartAt(), concertSchedule.getReservationEndAt(),
+          concertSchedule.getCreatedAt(), concertSchedule.getUpdatedAt());
+    }
+
   }
 
   public record ConcertSeatResponse(
@@ -76,6 +85,12 @@ public class ConcertControllerDto {
       @Schema(description = "수정 일시", example = "2024-12-31T23:59:59")
       LocalDateTime updatedAt
   ) {
+
+    public ConcertSeatResponse(ConcertSeat concertSeat) {
+      this(concertSeat.getId(), concertSeat.getConcertScheduleId(), concertSeat.getNumber(),
+          concertSeat.getPrice(), concertSeat.getIsReserved(), concertSeat.getCreatedAt(),
+          concertSeat.getUpdatedAt());
+    }
 
   }
 
@@ -102,6 +117,11 @@ public class ConcertControllerDto {
       LocalDateTime updatedAt
   ) {
 
+    public ReservationResponse(Reservation reservation) {
+      this(reservation.getId(), reservation.getConcertSeatId(), reservation.getUserId(),
+          reservation.getStatus(), reservation.getReservedAt(), reservation.getCreatedAt(),
+          reservation.getUpdatedAt());
+    }
   }
 
 }

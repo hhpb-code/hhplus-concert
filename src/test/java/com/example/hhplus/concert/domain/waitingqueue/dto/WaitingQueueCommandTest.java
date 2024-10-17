@@ -114,6 +114,52 @@ class WaitingQueueCommandTest {
     }
 
     @Test
+    @DisplayName("대기열 활성화 command 유효성 검증 실패 - 사용 가능한 슬롯이 0")
+    void shouldThrowExceptionWhenAvailableSlotsIsZero() {
+      // given
+      final Long concertId = 1L;
+      final Integer availableSlots = 0;
+      final ActivateWaitingQueuesCommand command = new ActivateWaitingQueuesCommand(concertId,
+          availableSlots);
+
+      // when
+      final Set<ConstraintViolation<ActivateWaitingQueuesCommand>> violations = validator.validate(
+          command);
+
+      final ConstraintViolation<ActivateWaitingQueuesCommand> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("availableSlots"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.AVAILABLE_SLOTS_NEGATIVE_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("대기열 활성화 command 유효성 검증 실패 - 사용 가능한 슬롯이 음수")
+    void shouldThrowExceptionWhenAvailableSlotsIsNegative() {
+      // given
+      final Long concertId = 1L;
+      final Integer availableSlots = -1;
+      final ActivateWaitingQueuesCommand command = new ActivateWaitingQueuesCommand(concertId,
+          availableSlots);
+
+      // when
+      final Set<ConstraintViolation<ActivateWaitingQueuesCommand>> violations = validator.validate(
+          command);
+
+      final ConstraintViolation<ActivateWaitingQueuesCommand> violation = violations.stream()
+          .filter(v -> v.getPropertyPath().toString().equals("availableSlots"))
+          .findFirst()
+          .get();
+
+      // then
+      assertThat(violation.getMessage()).isEqualTo(
+          WaitingQueueConstants.AVAILABLE_SLOTS_NEGATIVE_MESSAGE);
+    }
+
+    @Test
     @DisplayName("대기열 활성화 command 유효성 검증 성공")
     void shouldSuccessfullyValidateActivateWaitingQueuesCommand() {
       // given

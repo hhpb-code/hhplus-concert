@@ -1,6 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
+import com.example.hhplus.concert.application.WaitingQueueFacade;
 import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IWaitingQueueController;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenRequest;
@@ -8,8 +8,7 @@ import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.C
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.GetWaitingQueuePositionResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.WaitingQueueResponseWithPosition;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,16 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/waiting-queues")
+@RequiredArgsConstructor
 public class WaitingQueueController implements IWaitingQueueController {
+
+  private final WaitingQueueFacade waitingQueueFacade;
 
   @PostMapping("/tokens")
   public ResponseEntity<CreateWaitingQueueTokenResponse> createWaitingQueueToken(
       @RequestBody CreateWaitingQueueTokenRequest request
   ) {
-    UUID token = UUID.randomUUID();
-    WaitingQueueResponse waitingQueue = new WaitingQueueResponse(1L, request.concertId(),
-        token.toString(),
-        WaitingQueueStatus.WAITING, LocalDateTime.now(), LocalDateTime.now(), null);
+    WaitingQueueResponse waitingQueue = new WaitingQueueResponse(
+        waitingQueueFacade.createWaitingQueueToken(request.concertId()));
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(new CreateWaitingQueueTokenResponse(waitingQueue));
@@ -40,9 +40,8 @@ public class WaitingQueueController implements IWaitingQueueController {
   public ResponseEntity<GetWaitingQueuePositionResponse> getWaitingQueuePosition(
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
-    WaitingQueueResponseWithPosition waitingQueue = new WaitingQueueResponseWithPosition(1L, 1L,
-        waitingQueueTokenUuid, WaitingQueueStatus.WAITING, 10, LocalDateTime.now(),
-        LocalDateTime.now(), null);
+    WaitingQueueResponseWithPosition waitingQueue = new WaitingQueueResponseWithPosition(
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid));
 
     return ResponseEntity.ok(new GetWaitingQueuePositionResponse(waitingQueue));
   }

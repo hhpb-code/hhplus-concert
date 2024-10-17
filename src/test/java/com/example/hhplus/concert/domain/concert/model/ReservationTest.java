@@ -131,4 +131,78 @@ class ReservationTest {
 
   }
 
+  @Nested
+  @DisplayName("예약 확정 검증")
+  class ValidateConfirmConditionsTest {
+
+    @Test
+    @DisplayName("예약 확정 검증 실패 - 사용자 불일치")
+    void shouldThrowExceptionWhenUserNotMatched() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.WAITING)
+          .build();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> reservation.validateConfirmConditions(2L));
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+    }
+
+    @Test
+    @DisplayName("예약 확정 검증 실패 - 이미 취소된 예약")
+    void shouldThrowExceptionWhenAlreadyCanceled() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.CANCELED)
+          .build();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> reservation.validateConfirmConditions(1L));
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+    }
+
+    @Test
+    @DisplayName("예약 확정 검증 실패 - 이미 확정된 예약")
+    void shouldThrowExceptionWhenAlreadyConfirmed() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.CONFIRMED)
+          .build();
+
+      // when
+      final BusinessException result = assertThrows(BusinessException.class,
+          () -> reservation.validateConfirmConditions(1L));
+
+      // then
+      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+    }
+
+    @Test
+    @DisplayName("예약 확정 검증 성공")
+    void shouldSuccessfullyValidateConfirmConditions() {
+      // given
+      final Reservation reservation = Reservation.builder()
+          .concertSeatId(1L)
+          .userId(1L)
+          .status(ReservationStatus.WAITING)
+          .build();
+
+      // when
+      reservation.validateConfirmConditions(1L);
+    }
+  }
+
+
 }

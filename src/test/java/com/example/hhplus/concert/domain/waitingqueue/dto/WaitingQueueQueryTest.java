@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.CountWaitingQueueByConcertIdAndStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.FindDistinctConcertIdsByStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByIdQuery;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import jakarta.validation.ConstraintViolation;
@@ -65,6 +66,47 @@ class WaitingQueueQueryTest {
 
         // when
         final Set<ConstraintViolation<GetWaitingQueueByIdQuery>> violations = validator.validate(
+            query);
+
+        // then
+        assertThat(violations).isEmpty();
+      }
+    }
+
+    @Nested
+    @DisplayName("대기열 조회 query By uuid")
+    class GetWaitingQueueByUuidQueryTest {
+
+      @Test
+      @DisplayName("대기열 조회 query 생성 실패 - uuid가 null")
+      void shouldThrowExceptionWhenUuidIsNull() {
+        // given
+        final String uuid = null;
+        final GetWaitingQueueByUuid query = new GetWaitingQueueByUuid(uuid);
+
+        // when
+        final Set<ConstraintViolation<GetWaitingQueueByUuid>> violations = validator.validate(
+            query);
+
+        final ConstraintViolation<GetWaitingQueueByUuid> violation = violations.stream()
+            .filter(v -> v.getPropertyPath().toString().equals("uuid"))
+            .findFirst()
+            .get();
+
+        // then
+        assertThat(violation.getMessage()).isEqualTo(
+            WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE);
+      }
+
+      @Test
+      @DisplayName("대기열 조회 query 생성 성공")
+      void shouldSuccessfullyCreateGetWaitingQueueByUuidQuery() {
+        // given
+        final String uuid = "uuid";
+        final GetWaitingQueueByUuid query = new GetWaitingQueueByUuid(uuid);
+
+        // when
+        final Set<ConstraintViolation<GetWaitingQueueByUuid>> violations = validator.validate(
             query);
 
         // then
