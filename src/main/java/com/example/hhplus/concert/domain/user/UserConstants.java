@@ -13,6 +13,8 @@ public class UserConstants {
   public static final String WALLET_ID_MUST_NOT_BE_NULL_MESSAGE = "지갑 ID는 필수입니다.";
   public static final String AMOUNT_MUST_BE_POSITIVE_MESSAGE = "금액은 0보다 커야 합니다.";
   public static final String AMOUNT_MUST_NOT_BE_NULL_MESSAGE = "금액은 필수입니다.";
+  public static final String USER_NOT_FOUND_MESSAGE = "사용자를 찾을 수 없습니다.";
+  public static final String WALLET_NOT_FOUND_MESSAGE = "지갑을 찾을 수 없습니다.";
 
   public static final int MAX_WALLET_AMOUNT = 1000000;
 
