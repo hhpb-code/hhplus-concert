@@ -30,4 +30,6 @@ public interface WaitingQueueRepository {
   List<WaitingQueue> findAllWaitingQueues(
       FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam param);
 
+  void expireWaitingQueues();
+  
 }
