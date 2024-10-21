@@ -1,35 +1,21 @@
 package com.example.hhplus.concert.domain.concert.model;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
 import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "concert_seat")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ConcertSeat {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class ConcertSeat extends BaseEntity {
 
   @Column(nullable = false)
   private Long concertScheduleId;
@@ -43,13 +29,15 @@ public class ConcertSeat {
   @Column(nullable = false)
   private Boolean isReserved;
 
-  @CreatedDate
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  @Builder
+  public ConcertSeat(Long id, Long concertScheduleId, Integer number, Integer price,
+      Boolean isReserved, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    super(id, createdAt, updatedAt);
+    this.concertScheduleId = concertScheduleId;
+    this.number = number;
+    this.price = price;
+    this.isReserved = isReserved;
+  }
 
   public void reserve() {
     if (this.isReserved) {

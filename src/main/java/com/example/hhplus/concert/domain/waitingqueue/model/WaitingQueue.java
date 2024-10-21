@@ -1,37 +1,23 @@
 package com.example.hhplus.concert.domain.waitingqueue.model;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "waiting_queue")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-public class WaitingQueue {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class WaitingQueue extends BaseEntity {
 
   @Column(nullable = false)
   private Long concertId;
@@ -45,13 +31,15 @@ public class WaitingQueue {
 
   private LocalDateTime expiredAt;
 
-  @CreatedDate
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  @Builder
+  public WaitingQueue(Long id, Long concertId, String uuid, WaitingQueueStatus status,
+      LocalDateTime expiredAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    super(id, createdAt, updatedAt);
+    this.concertId = concertId;
+    this.uuid = uuid;
+    this.status = status;
+    this.expiredAt = expiredAt;
+  }
 
   public void activate(LocalDateTime expiredAt) {
     if (this.status == WaitingQueueStatus.PROCESSING) {

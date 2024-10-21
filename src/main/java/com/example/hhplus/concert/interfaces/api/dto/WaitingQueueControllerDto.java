@@ -88,10 +88,14 @@ public class WaitingQueueControllerDto {
   ) {
 
     public WaitingQueueResponseWithPosition(WaitingQueueWithPosition waitingQueueWithPosition) {
-      this(waitingQueueWithPosition.getId(), waitingQueueWithPosition.getConcertId(),
-          waitingQueueWithPosition.getUuid(), waitingQueueWithPosition.getStatus(),
-          waitingQueueWithPosition.getPosition(), waitingQueueWithPosition.getExpiredAt(),
-          waitingQueueWithPosition.getCreatedAt(), waitingQueueWithPosition.getUpdatedAt());
+      this(waitingQueueWithPosition.id(),
+          waitingQueueWithPosition.concertId(),
+          waitingQueueWithPosition.uuid(),
+          waitingQueueWithPosition.status(),
+          waitingQueueWithPosition.position(),
+          waitingQueueWithPosition.expiredAt(),
+          waitingQueueWithPosition.createdAt(),
+          waitingQueueWithPosition.updatedAt());
     }
   }
 

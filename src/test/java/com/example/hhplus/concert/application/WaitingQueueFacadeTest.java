@@ -163,13 +163,13 @@ class WaitingQueueFacadeTest {
           .getWaitingQueueWithPosition(waitingQueueTokenUuid);
 
       // then
-      assertThat(result.getId()).isEqualTo(waitingQueue.getId());
-      assertThat(result.getConcertId()).isEqualTo(waitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(waitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(waitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
-      assertThat(result.getUpdatedAt()).isEqualTo(waitingQueue.getUpdatedAt());
-      assertThat(result.getPosition()).isZero();
+      assertThat(result.id()).isEqualTo(waitingQueue.getId());
+      assertThat(result.concertId()).isEqualTo(waitingQueue.getConcertId());
+      assertThat(result.uuid()).isEqualTo(waitingQueue.getUuid());
+      assertThat(result.status()).isEqualTo(waitingQueue.getStatus());
+      assertThat(result.createdAt()).isEqualTo(waitingQueue.getCreatedAt());
+      assertThat(result.updatedAt()).isEqualTo(waitingQueue.getUpdatedAt());
+      assertThat(result.position()).isZero();
 
     }
 
@@ -195,13 +195,13 @@ class WaitingQueueFacadeTest {
           .getWaitingQueueWithPosition(waitingQueueTokenUuid);
 
       // then
-      assertThat(result.getId()).isEqualTo(waitingQueue.getId());
-      assertThat(result.getConcertId()).isEqualTo(waitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(waitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(waitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
-      assertThat(result.getUpdatedAt()).isEqualTo(waitingQueue.getUpdatedAt());
-      assertThat(result.getPosition()).isEqualTo(1);
+      assertThat(result.id()).isEqualTo(waitingQueue.getId());
+      assertThat(result.concertId()).isEqualTo(waitingQueue.getConcertId());
+      assertThat(result.uuid()).isEqualTo(waitingQueue.getUuid());
+      assertThat(result.status()).isEqualTo(waitingQueue.getStatus());
+      assertThat(result.createdAt()).isEqualTo(waitingQueue.getCreatedAt());
+      assertThat(result.updatedAt()).isEqualTo(waitingQueue.getUpdatedAt());
+      assertThat(result.position()).isEqualTo(1);
     }
 
   }
