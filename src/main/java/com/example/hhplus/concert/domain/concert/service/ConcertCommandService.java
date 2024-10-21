@@ -19,13 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class ConcertCommandService {
 
   private final ConcertRepository concertRepository;
 
-  @Transactional
   public void reserveConcertSeat(ReserveConcertSeatCommand command) {
     ConcertSeat concertSeat = concertRepository.getConcertSeat(
         new GetConcertSeatByIdWithLockParam(command.concertSeatId()));
@@ -35,7 +35,6 @@ public class ConcertCommandService {
     concertRepository.saveConcertSeat(concertSeat);
   }
 
-  @Transactional
   public Long createReservation(CreateReservationCommand command) {
     Reservation reservation = Reservation.builder()
         .concertSeatId(command.concertSeatId())
@@ -47,7 +46,6 @@ public class ConcertCommandService {
     return concertRepository.saveReservation(reservation).getId();
   }
 
-  @Transactional
   public void confirmReservation(ConfirmReservationCommand command) {
     Reservation reservation = concertRepository.getReservation(
         new GetReservationByIdWithLockParam(command.reservationId()));
@@ -57,7 +55,6 @@ public class ConcertCommandService {
     concertRepository.saveReservation(reservation);
   }
 
-  @Transactional
   public void cancelReservations(CancelReservationsByIdsCommand command) {
     List<Reservation> reservations = concertRepository.findAllReservations(
         new FindAllReservationsByIdsWithLockParam(command.reservationIds()));
@@ -67,7 +64,6 @@ public class ConcertCommandService {
     concertRepository.saveAllReservations(reservations);
   }
 
-  @Transactional
   public void releaseConcertSeats(ReleaseConcertSeatsByIdsCommand command) {
     List<ConcertSeat> concertSeats = concertRepository.findAllConcertSeats(
         new FindAllConcertSeatsByIdsWithLockParam(command.concertSeatIds()));

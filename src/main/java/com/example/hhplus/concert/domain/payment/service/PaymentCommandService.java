@@ -5,7 +5,9 @@ import com.example.hhplus.concert.domain.payment.dto.PaymentCommand.CreatePaymen
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class PaymentCommandService {

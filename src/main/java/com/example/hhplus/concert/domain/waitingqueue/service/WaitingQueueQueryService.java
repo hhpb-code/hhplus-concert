@@ -19,18 +19,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class WaitingQueueQueryService {
 
   private final WaitingQueueRepository waitingQueueRepository;
 
-  @Transactional(readOnly = true)
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdQuery query) {
     return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByIdParam(query.id()));
   }
 
-  @Transactional(readOnly = true)
   public WaitingQueue getWaitingQueue(GetWaitingQueueByUuid query) {
     return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByUuidParam(query.uuid()));
   }

@@ -32,13 +32,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class ConcertQueryService {
 
   private final ConcertRepository concertRepository;
 
-  @Transactional(readOnly = true)
   public Concert getConcert(GetConcertByIdQuery query) {
     return concertRepository.getConcert(new GetConcertByIdParam(query.id()));
   }
@@ -48,7 +48,6 @@ public class ConcertQueryService {
     return concertRepository.getConcert(new GetConcertByIdWithLockParam(query.id()));
   }
 
-  @Transactional(readOnly = true)
   public ConcertSeat getConcertSeat(GetConcertSeatByIdQuery query) {
     return concertRepository.getConcertSeat(new GetConcertSeatByIdParam(query.concertSeatId()));
   }
@@ -59,12 +58,10 @@ public class ConcertQueryService {
         new GetConcertSeatByIdWithLockParam(query.concertSeatId()));
   }
 
-  @Transactional(readOnly = true)
   public Reservation getReservation(GetReservationByIdQuery query) {
     return concertRepository.getReservation(new GetReservationByIdParam(query.reservationId()));
   }
 
-  @Transactional(readOnly = true)
   public List<ConcertSchedule> findReservableConcertSchedules(
       FindReservableConcertSchedulesQuery query) {
     return concertRepository.findReservableConcertSchedules(
@@ -72,13 +69,11 @@ public class ConcertQueryService {
             LocalDateTime.now()));
   }
 
-  @Transactional(readOnly = true)
   public ConcertSchedule getConcertSchedule(GetConcertScheduleByIdQuery query) {
     return concertRepository.getConcertSchedule(
         new GetConcertScheduleByIdParam(query.concertScheduleId()));
   }
 
-  @Transactional(readOnly = true)
   public List<ConcertSeat> findReservableConcertSeats(FindReservableConcertSeatsQuery query) {
     return concertRepository.findReservableConcertSeats(
         new FindReservableConcertSeatsByConcertIdParam(query.concertScheduleId()));
@@ -90,7 +85,6 @@ public class ConcertQueryService {
         new GetReservationByIdWithLockParam(query.reservationId()));
   }
 
-  @Transactional(readOnly = true)
   public List<Reservation> findAllExpiredReservations(
       FindAllExpiredReservationsWithLockQuery query) {
     return concertRepository.findAllExpiredReservations(

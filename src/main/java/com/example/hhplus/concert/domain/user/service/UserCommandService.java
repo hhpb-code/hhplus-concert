@@ -9,13 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class UserCommandService {
 
   private final UserRepository userRepository;
 
-  @Transactional
   public void chargeUserWalletAmount(ChargeUserWalletAmountByWalletIdCommand command) {
     var wallet = userRepository.getWallet(
         new GetUserWalletByWalletIdWithLockParam(command.walletId()));
@@ -25,7 +25,6 @@ public class UserCommandService {
     userRepository.saveWallet(wallet);
   }
 
-  @Transactional
   public void withDrawUserWalletAmount(WithdrawUserWalletAmountCommand command) {
     var wallet = userRepository.getWallet(
         new GetUserWalletByWalletUserIdIdWithLockParam(command.userId()));
