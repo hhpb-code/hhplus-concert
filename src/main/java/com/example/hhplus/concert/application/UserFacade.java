@@ -38,7 +38,6 @@ public class UserFacade {
     return userQueryService.getWallet(new GetUserWalletByIdQuery(wallet.getId()));
   }
 
-  @Transactional(readOnly = true)
   public Wallet getWallet(Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 

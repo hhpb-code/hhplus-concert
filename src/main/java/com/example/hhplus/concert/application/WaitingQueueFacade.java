@@ -43,13 +43,11 @@ public class WaitingQueueFacade {
     return waitingQueueQueryService.getWaitingQueue(new GetWaitingQueueByIdQuery(waitingQueueId));
   }
 
-  @Transactional(readOnly = true)
   public WaitingQueueWithPosition getWaitingQueueWithPosition(String waitingQueueUuid) {
     return waitingQueueQueryService.getWaitingQueuePosition(
         new GetWaitingQueuePositionByUuid(waitingQueueUuid));
   }
 
-  @Transactional(readOnly = true)
   public void validateWaitingQueueProcessingAndConcertId(String waitingQueueUuid, Long concertId) {
     WaitingQueue waitingQueue = waitingQueueQueryService.getWaitingQueue(
         new GetWaitingQueueByUuid(waitingQueueUuid));
@@ -58,7 +56,6 @@ public class WaitingQueueFacade {
     waitingQueue.validateConcertId(concertId);
   }
 
-  @Transactional(readOnly = true)
   public void validateWaitingQueueProcessingAndScheduleId(String waitingQueueUuid,
       Long scheduleId) {
     WaitingQueue waitingQueue = waitingQueueQueryService.getWaitingQueue(
@@ -70,7 +67,6 @@ public class WaitingQueueFacade {
     waitingQueue.validateConcertId(concertSchedule.getConcertId());
   }
 
-  @Transactional(readOnly = true)
   public void validateWaitingQueueProcessingAndSeatId(String waitingQueueUuid, Long seatId) {
     WaitingQueue waitingQueue = waitingQueueQueryService.getWaitingQueue(
         new GetWaitingQueueByUuid(waitingQueueUuid));
