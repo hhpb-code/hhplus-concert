@@ -1,7 +1,5 @@
 package com.example.hhplus.concert.interfaces.api;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +10,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 @RestControllerAdvice
 class ApiControllerAdvice extends ResponseEntityExceptionHandler {
-
-  @ExceptionHandler(value = BusinessException.class)
-  public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-    ErrorCode errorCode = e.getErrorCode();
-
-    return ResponseEntity.status(errorCode.getStatus())
-        .body(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()));
-  }
 
   @ExceptionHandler(value = Exception.class)
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
