@@ -1,32 +1,22 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CancelReservationsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConcertSeatsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import java.util.List;
-import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("콘서트 Command 단위 테스트")
 class ConcertCommandTest {
-
-  private Validator validator;
-
-  @BeforeEach
-  void setUp() {
-    validator = Validation.buildDefaultValidatorFactory().getValidator();
-  }
 
   @Nested
   @DisplayName("콘서트 좌석 예약 Command")
@@ -37,20 +27,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenConcertSeatIdIsNull() {
       // given
       final Long concertSeatId = null;
-      final ReserveConcertSeatCommand command = new ReserveConcertSeatCommand(
-          concertSeatId);
 
       // when
-      final Set<ConstraintViolation<ReserveConcertSeatCommand>> violations = validator.validate(
-          command);
-
-      final ConstraintViolation<ReserveConcertSeatCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertSeatId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new ReserveConcertSeatCommand(concertSeatId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_SEAT_ID_NOT_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -58,17 +42,14 @@ class ConcertCommandTest {
     void shouldSuccessfullyCreateReserveConcertSeatCommand() {
       // given
       final Long concertSeatId = 1L;
-      final ReserveConcertSeatCommand command = new ReserveConcertSeatCommand(
-          concertSeatId);
 
       // when
-      final Set<ConstraintViolation<ReserveConcertSeatCommand>> violations = validator.validate(
-          command);
+      final ReserveConcertSeatCommand result = new ReserveConcertSeatCommand(concertSeatId);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(result).isNotNull();
+      assertThat(result.concertSeatId()).isEqualTo(concertSeatId);
     }
-
   }
 
   @Nested
@@ -81,20 +62,14 @@ class ConcertCommandTest {
       // given
       final Long concertSeatId = null;
       final Long userId = 1L;
-      final CreateReservationCommand command = new CreateReservationCommand(
-          concertSeatId, userId);
 
       // when
-      final Set<ConstraintViolation<CreateReservationCommand>> violations = validator.validate(
-          command);
-
-      final ConstraintViolation<CreateReservationCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertSeatId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_SEAT_ID_NOT_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -103,20 +78,14 @@ class ConcertCommandTest {
       // given
       final Long concertSeatId = 1L;
       final Long userId = null;
-      final CreateReservationCommand command = new CreateReservationCommand(
-          concertSeatId, userId);
 
       // when
-      final Set<ConstraintViolation<CreateReservationCommand>> violations = validator.validate(
-          command);
-
-      final ConstraintViolation<CreateReservationCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("userId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.USER_ID_NOT_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.RESERVATION_USER_NOT_MATCHED.getMessage());
     }
 
     @Test
@@ -125,17 +94,15 @@ class ConcertCommandTest {
       // given
       final Long concertSeatId = 1L;
       final Long userId = 1L;
-      final CreateReservationCommand command = new CreateReservationCommand(
-          concertSeatId, userId);
 
       // when
-      final Set<ConstraintViolation<CreateReservationCommand>> violations = validator.validate(
-          command);
+      final CreateReservationCommand result = new CreateReservationCommand(concertSeatId, userId);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(result).isNotNull();
+      assertThat(result.concertSeatId()).isEqualTo(concertSeatId);
+      assertThat(result.userId()).isEqualTo(userId);
     }
-
   }
 
   @Nested
@@ -147,21 +114,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenReservationIdIsNull() {
       // given
       final Long reservationId = null;
-      final ConfirmReservationCommand command = new ConfirmReservationCommand(
-          reservationId);
 
       // when
-      final Set<ConstraintViolation<ConfirmReservationCommand>> violations = validator.validate(
-          command);
-
-      final ConstraintViolation<ConfirmReservationCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("reservationId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new ConfirmReservationCommand(reservationId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -169,17 +129,14 @@ class ConcertCommandTest {
     void shouldSuccessfullyCreateConfirmReservationCommand() {
       // given
       final Long reservationId = 1L;
-      final ConfirmReservationCommand command = new ConfirmReservationCommand(
-          reservationId);
 
       // when
-      final Set<ConstraintViolation<ConfirmReservationCommand>> violations = validator.validate(
-          command);
+      final ConfirmReservationCommand result = new ConfirmReservationCommand(reservationId);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(result).isNotNull();
+      assertThat(result.reservationId()).isEqualTo(reservationId);
     }
-
   }
 
   @Nested
@@ -191,21 +148,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenReservationIdsIsNull() {
       // given
       final List<Long> reservationIds = null;
-      final CancelReservationsByIdsCommand command = new CancelReservationsByIdsCommand(
-          reservationIds);
 
       // when
-      final Set<ConstraintViolation<CancelReservationsByIdsCommand>> violations = validator
-          .validate(command);
-
-      final ConstraintViolation<CancelReservationsByIdsCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("reservationIds"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.RESERVATION_IDS_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -213,21 +163,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenReservationIdsIsEmpty() {
       // given
       final List<Long> reservationIds = List.of();
-      final CancelReservationsByIdsCommand command = new CancelReservationsByIdsCommand(
-          reservationIds);
 
       // when
-      final Set<ConstraintViolation<CancelReservationsByIdsCommand>> violations = validator
-          .validate(command);
-
-      final ConstraintViolation<CancelReservationsByIdsCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("reservationIds"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.RESERVATION_IDS_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -235,17 +178,15 @@ class ConcertCommandTest {
     void shouldSuccessfullyCreateCancelReservationsByIdsCommand() {
       // given
       final List<Long> reservationIds = List.of(1L, 2L, 3L);
-      final CancelReservationsByIdsCommand command = new CancelReservationsByIdsCommand(
-          reservationIds);
 
       // when
-      final Set<ConstraintViolation<CancelReservationsByIdsCommand>> violations = validator
-          .validate(command);
+      final CancelReservationsByIdsCommand result = new CancelReservationsByIdsCommand(
+          reservationIds);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(result).isNotNull();
+      assertThat(result.reservationIds()).isEqualTo(reservationIds);
     }
-
   }
 
   @Nested
@@ -257,21 +198,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenConcertSeatIdsIsNull() {
       // given
       final List<Long> concertSeatIds = null;
-      final ReleaseConcertSeatsByIdsCommand command = new ReleaseConcertSeatsByIdsCommand(
-          concertSeatIds);
 
       // when
-      final Set<ConstraintViolation<ReleaseConcertSeatsByIdsCommand>> violations = validator
-          .validate(command);
-
-      final ConstraintViolation<ReleaseConcertSeatsByIdsCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertSeatIds"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.CONCERT_SEAT_IDS_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test
@@ -279,21 +213,14 @@ class ConcertCommandTest {
     void shouldThrowExceptionWhenConcertSeatIdsIsEmpty() {
       // given
       final List<Long> concertSeatIds = List.of();
-      final ReleaseConcertSeatsByIdsCommand command = new ReleaseConcertSeatsByIdsCommand(
-          concertSeatIds);
 
       // when
-      final Set<ConstraintViolation<ReleaseConcertSeatsByIdsCommand>> violations = validator
-          .validate(command);
-
-      final ConstraintViolation<ReleaseConcertSeatsByIdsCommand> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertSeatIds"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.CONCERT_SEAT_IDS_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test
@@ -301,16 +228,14 @@ class ConcertCommandTest {
     void shouldSuccessfullyCreateReleaseConcertSeatsByIdsCommand() {
       // given
       final List<Long> concertSeatIds = List.of(1L, 2L, 3L);
-      final ReleaseConcertSeatsByIdsCommand command = new ReleaseConcertSeatsByIdsCommand(
-          concertSeatIds);
 
       // when
-      final Set<ConstraintViolation<ReleaseConcertSeatsByIdsCommand>> violations = validator
-          .validate(command);
+      final ReleaseConcertSeatsByIdsCommand result = new ReleaseConcertSeatsByIdsCommand(
+          concertSeatIds);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(result).isNotNull();
+      assertThat(result.concertSeatIds()).isEqualTo(concertSeatIds);
     }
-
   }
 }
