@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.waitingqueue.dto;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 
 public class WaitingQueueCommand {
 
@@ -9,7 +9,7 @@ public class WaitingQueueCommand {
 
     public CreateWaitingQueueCommand {
       if (concertId == null) {
-        throw new BusinessException(WaitingQueueErrorCode.CONCERT_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -18,13 +18,13 @@ public class WaitingQueueCommand {
 
     public ActivateWaitingQueuesCommand {
       if (concertId == null) {
-        throw new BusinessException(WaitingQueueErrorCode.CONCERT_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
       if (availableSlots == null) {
-        throw new BusinessException(WaitingQueueErrorCode.AVAILABLE_SLOTS_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_NOT_BE_NULL);
       }
       if (availableSlots <= 0) {
-        throw new BusinessException(WaitingQueueErrorCode.AVAILABLE_SLOTS_MUST_BE_POSITIVE);
+        throw new CoreException(ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_BE_POSITIVE);
       }
     }
   }

@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
@@ -47,11 +46,12 @@ class WaitingQueueQueryServiceTest {
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> target.getWaitingQueuePosition(query));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
     }
 
     @Test
@@ -66,11 +66,12 @@ class WaitingQueueQueryServiceTest {
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> target.getWaitingQueuePosition(query));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
     }
 
     @Test

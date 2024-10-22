@@ -1,8 +1,8 @@
 package com.example.hhplus.concert.domain.waitingqueue.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.support.model.BaseEntity;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,15 +43,15 @@ public class WaitingQueue extends BaseEntity {
 
   public void activate(LocalDateTime expiredAt) {
     if (this.status == WaitingQueueStatus.PROCESSING) {
-      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+      throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_ALREADY_ACTIVATED);
     }
 
     if (this.expiredAt != null || this.status == WaitingQueueStatus.EXPIRED) {
-      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+      throw new CoreException(ErrorType.WaitingQueue.INVALID_STATUS);
     }
 
     if (expiredAt.isBefore(LocalDateTime.now())) {
-      throw new BusinessException(WaitingQueueErrorCode.INVALID_EXPIRED_AT);
+      throw new CoreException(ErrorType.WaitingQueue.INVALID_EXPIRED_AT);
     }
 
     this.status = WaitingQueueStatus.PROCESSING;
@@ -60,11 +60,11 @@ public class WaitingQueue extends BaseEntity {
 
   public void validateNotExpired() {
     if (this.status == WaitingQueueStatus.EXPIRED) {
-      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     if (this.expiredAt != null && LocalDateTime.now().isAfter(this.expiredAt)) {
-      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
   }
 
@@ -78,21 +78,21 @@ public class WaitingQueue extends BaseEntity {
 
   public void validateProcessing() {
     if (this.status == WaitingQueueStatus.EXPIRED) {
-      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     if (this.status != WaitingQueueStatus.PROCESSING) {
-      throw new BusinessException(WaitingQueueErrorCode.INVALID_STATUS);
+      throw new CoreException(ErrorType.WaitingQueue.INVALID_STATUS);
     }
 
     if (LocalDateTime.now().isAfter(this.expiredAt)) {
-      throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
   }
 
   public void validateConcertId(Long concertId) {
     if (!this.concertId.equals(concertId)) {
-      throw new BusinessException(WaitingQueueErrorCode.INVALID_CONCERT_ID);
+      throw new CoreException(ErrorType.Concert.INVALID_CONCERT_ID);
     }
   }
 }
