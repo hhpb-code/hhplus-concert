@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.waitingqueue.model;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
+import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

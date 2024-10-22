@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.user.model;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
+import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import com.example.hhplus.concert.domain.user.UserConstants;
 import com.example.hhplus.concert.domain.user.UserErrorCode;
 import jakarta.persistence.Column;
