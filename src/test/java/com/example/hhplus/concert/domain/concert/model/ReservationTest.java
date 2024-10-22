@@ -3,8 +3,7 @@ package com.example.hhplus.concert.domain.concert.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,11 +27,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           reservation::confirm);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_PAID.getMessage());
     }
 
     @Test
@@ -46,11 +46,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           reservation::confirm);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -87,11 +88,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           reservation::cancel);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -105,11 +107,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           reservation::cancel);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_PAID.getMessage());
     }
 
     @Test
@@ -146,11 +149,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> reservation.validateConfirmConditions(2L));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_USER_NOT_MATCHED.getMessage());
     }
 
     @Test
@@ -164,11 +168,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> reservation.validateConfirmConditions(1L));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -182,11 +187,12 @@ class ReservationTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> reservation.validateConfirmConditions(1L));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_PAID.getMessage());
     }
 
     @Test

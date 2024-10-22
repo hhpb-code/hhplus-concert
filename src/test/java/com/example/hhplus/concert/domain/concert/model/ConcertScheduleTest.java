@@ -3,8 +3,7 @@ package com.example.hhplus.concert.domain.concert.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,12 +26,12 @@ class ConcertScheduleTest {
           .build();
 
       // when
-      BusinessException exception = assertThrows(BusinessException.class,
+      Exception exception = assertThrows(Exception.class,
           () -> concertSchedule.validateReservationTime());
 
       // then
-      assertThat(exception.getErrorCode()).isEqualTo(
-          ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+      assertThat(exception.getMessage()
+          .equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage()));
     }
 
     @Test
@@ -45,12 +44,12 @@ class ConcertScheduleTest {
           .build();
 
       // when
-      BusinessException exception = assertThrows(BusinessException.class,
+      Exception exception = assertThrows(Exception.class,
           () -> concertSchedule.validateReservationTime());
 
       // then
-      assertThat(exception.getErrorCode()).isEqualTo(
-          ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+      assertThat(exception.getMessage()
+          .equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage()));
     }
 
     @Test

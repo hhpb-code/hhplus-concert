@@ -2,8 +2,6 @@ package com.example.hhplus.concert.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
@@ -107,8 +105,8 @@ class ConcertFacadeConcurrencyTest {
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
               concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
-            } catch (BusinessException e) {
-              if (e.getErrorCode().equals(ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED)) {
+            } catch (CoreException e) {
+              if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
                 return;
               }
 
@@ -180,8 +178,8 @@ class ConcertFacadeConcurrencyTest {
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
               concertFacade.payReservation(reservation.getId(), user.getId());
-            } catch (BusinessException e) {
-              if (e.getErrorCode().equals(ConcertErrorCode.RESERVATION_ALREADY_PAID)) {
+            } catch (CoreException e) {
+              if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
                 return;
               }
 

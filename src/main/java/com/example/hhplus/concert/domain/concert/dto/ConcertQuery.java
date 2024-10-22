@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 
 public class ConcertQuery {
 
@@ -9,7 +9,7 @@ public class ConcertQuery {
 
     public GetConcertByIdQuery {
       if (id == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -18,7 +18,7 @@ public class ConcertQuery {
 
     public GetConcertByIdWithLockQuery {
       if (id == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -27,7 +27,7 @@ public class ConcertQuery {
 
     public GetConcertScheduleByIdQuery {
       if (concertScheduleId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -36,7 +36,7 @@ public class ConcertQuery {
 
     public FindReservableConcertSchedulesQuery {
       if (concertId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -45,7 +45,7 @@ public class ConcertQuery {
 
     public GetConcertSeatByIdQuery {
       if (concertSeatId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -54,7 +54,7 @@ public class ConcertQuery {
 
     public GetConcertSeatByIdWithLockQuery {
       if (concertSeatId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -63,7 +63,7 @@ public class ConcertQuery {
 
     public FindReservableConcertSeatsQuery {
       if (concertScheduleId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -72,7 +72,7 @@ public class ConcertQuery {
 
     public GetReservationByIdQuery {
       if (reservationId == null) {
-        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -81,7 +81,7 @@ public class ConcertQuery {
 
     public GetReservationByIdWithLockQuery {
       if (reservationId == null) {
-        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
     }
   }

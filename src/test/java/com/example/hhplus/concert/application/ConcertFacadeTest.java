@@ -3,9 +3,7 @@ package com.example.hhplus.concert.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
 import com.example.hhplus.concert.domain.concert.ConcertConstants;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
@@ -76,12 +74,12 @@ class ConcertFacadeTest {
       final Long concertId = 1L;
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.getReservableConcertSchedules(concertId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.CONCERT_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -151,12 +149,13 @@ class ConcertFacadeTest {
       final Long concertScheduleId = 1L;
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.getReservableConcertSeats(concertScheduleId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+      assertThat(result.getMessage())
+          .isEqualTo(ErrorType.Concert.CONCERT_SCHEDULE_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -175,12 +174,13 @@ class ConcertFacadeTest {
       final Long concertScheduleId = concertSchedule.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.getReservableConcertSeats(concertScheduleId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage());
     }
 
     @Test
@@ -280,12 +280,13 @@ class ConcertFacadeTest {
       final Long userId = user.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.reserveConcertSeat(concertSeatId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -311,12 +312,13 @@ class ConcertFacadeTest {
       final Long userId = user.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.reserveConcertSeat(concertSeatId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage());
     }
 
     @Test
@@ -342,12 +344,13 @@ class ConcertFacadeTest {
       final Long userId = user.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.reserveConcertSeat(concertSeatId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED.getMessage());
     }
 
     @Test
@@ -402,12 +405,13 @@ class ConcertFacadeTest {
       final Long userId = 1L;
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_NOT_FOUND);
+      assertThat(result.getMessage())
+          .isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND.getMessage());
     }
 
 
@@ -424,12 +428,13 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_PAID.getMessage());
     }
 
     @Test
@@ -456,12 +461,13 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId + 1);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_USER_NOT_MATCHED.getMessage());
     }
 
     @Test
@@ -503,12 +509,13 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_FOUND.getMessage());
     }
 
 
@@ -565,12 +572,13 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test
@@ -597,12 +605,13 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -669,12 +678,13 @@ class ConcertFacadeTest {
               .build());
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.expireReservations();
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test

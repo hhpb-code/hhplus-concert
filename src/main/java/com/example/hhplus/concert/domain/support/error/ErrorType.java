@@ -55,8 +55,23 @@ public enum ErrorType implements IErrorType {
 
   @AllArgsConstructor
   public enum Concert implements IErrorType {
+    CONCERT_NOT_FOUND(ErrorCode.NOT_FOUND, "콘서트를 찾을 수 없습니다.", LogLevel.WARN),
+    CONCERT_SCHEDULE_NOT_FOUND(ErrorCode.NOT_FOUND, "콘서트 스케줄을 찾을 수 없습니다.", LogLevel.WARN),
+    CONCERT_SEAT_NOT_FOUND(ErrorCode.NOT_FOUND, "콘서트 좌석을 찾을 수 없습니다.", LogLevel.WARN),
+    RESERVATION_NOT_FOUND(ErrorCode.NOT_FOUND, "예약을 찾을 수 없습니다.", LogLevel.WARN),
     INVALID_CONCERT_ID(ErrorCode.BAD_REQUEST, "콘서트 ID가 유효하지 않습니다.", LogLevel.WARN),
+    CONCERT_SCHEDULE_NOT_RESERVABLE(ErrorCode.BAD_REQUEST, "콘서트 스케줄 예약이 불가능합니다.",
+        LogLevel.WARN),
+    CONCERT_SEAT_ALREADY_RESERVED(ErrorCode.BAD_REQUEST, "이미 예약된 좌석입니다.", LogLevel.WARN),
+    CONCERT_SEAT_NOT_RESERVED(ErrorCode.BAD_REQUEST, "예약되지 않은 좌석입니다.", LogLevel.WARN),
+    RESERVATION_ALREADY_PAID(ErrorCode.BAD_REQUEST, "이미 결제된 예약입니다.", LogLevel.WARN),
+    RESERVATION_ALREADY_CANCELED(ErrorCode.BAD_REQUEST, "이미 취소된 예약입니다.", LogLevel.WARN),
+    RESERVATION_USER_NOT_MATCHED(ErrorCode.BAD_REQUEST, "예약 사용자가 일치하지 않습니다.", LogLevel.WARN),
     CONCERT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "콘서트 ID는 null일 수 없습니다.", LogLevel.WARN),
+    CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "콘서트 스케줄 ID는 null일 수 없습니다.",
+        LogLevel.WARN),
+    CONCERT_SEAT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "콘서트 좌석 ID는 null일 수 없습니다.",
+        LogLevel.WARN),
     RESERVATION_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "예약 ID는 null일 수 없습니다.", LogLevel.WARN),
     ;
 
