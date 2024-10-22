@@ -1,5 +1,6 @@
-package com.example.hhplus.concert.interfaces.api;
+package com.example.hhplus.concert.interfaces.api.support.advice;
 
+import com.example.hhplus.concert.interfaces.api.support.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

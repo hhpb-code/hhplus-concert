@@ -2,10 +2,10 @@ package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
 import com.example.hhplus.concert.application.WaitingQueueFacade;
-import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IConcertController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ConcertScheduleResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.GetAvailableSchedulesResponse;
+import com.example.hhplus.concert.interfaces.api.support.CommonHttpHeader;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

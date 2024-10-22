@@ -1,10 +1,10 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
-import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IReservationController;
 import com.example.hhplus.concert.interfaces.api.dto.ReservationControllerDto.PayReservationResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ReservationControllerDto.PaymentResponse;
+import com.example.hhplus.concert.interfaces.api.support.CommonHttpHeader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package com.example.hhplus.concert.interfaces.api;
+package com.example.hhplus.concert.interfaces.api.support;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
