@@ -19,18 +19,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class WaitingQueueQueryService {
 
   private final WaitingQueueRepository waitingQueueRepository;
 
-  @Transactional(readOnly = true)
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdQuery query) {
     return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByIdParam(query.id()));
   }
 
-  @Transactional(readOnly = true)
   public WaitingQueue getWaitingQueue(GetWaitingQueueByUuid query) {
     return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByUuidParam(query.uuid()));
   }
@@ -44,14 +43,32 @@ public class WaitingQueueQueryService {
     waitingQueue.validateNotExpired();
 
     if (waitingQueue.isProcessing()) {
-      return new WaitingQueueWithPosition(waitingQueue, 0);
+      return new WaitingQueueWithPosition(
+          waitingQueue.getId(),
+          waitingQueue.getConcertId(),
+          waitingQueue.getUuid(),
+          waitingQueue.getStatus(),
+          waitingQueue.getExpiredAt(),
+          waitingQueue.getCreatedAt(),
+          waitingQueue.getUpdatedAt(),
+          0
+      );
     }
 
     Integer position = waitingQueueRepository.getWaitingQueuePosition(
         new GetWaitingQueuePositionByIdAndConcertIdParam(waitingQueue.getId(),
             waitingQueue.getConcertId()));
 
-    return new WaitingQueueWithPosition(waitingQueue, position);
+    return new WaitingQueueWithPosition(
+        waitingQueue.getId(),
+        waitingQueue.getConcertId(),
+        waitingQueue.getUuid(),
+        waitingQueue.getStatus(),
+        waitingQueue.getExpiredAt(),
+        waitingQueue.getCreatedAt(),
+        waitingQueue.getUpdatedAt(),
+        position
+    );
   }
 
   public List<Long> findDistinctConcertIds(FindDistinctConcertIdsByStatusQuery query) {

@@ -1,34 +1,20 @@
 package com.example.hhplus.concert.domain.payment.model;
 
+import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
 @Table(name = "payment")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Payment {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Payment extends BaseEntity {
 
   @Column(nullable = false)
   private Long reservationId;
@@ -39,12 +25,13 @@ public class Payment {
   @Column(nullable = false)
   private Integer amount;
 
-  @CreatedDate
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  @Builder
+  public Payment(Long id, Long reservationId, Long userId, Integer amount,
+      LocalDateTime createdAt, LocalDateTime updatedAt) {
+    super(id, createdAt, updatedAt);
+    this.reservationId = reservationId;
+    this.userId = userId;
+    this.amount = amount;
+  }
 
 }

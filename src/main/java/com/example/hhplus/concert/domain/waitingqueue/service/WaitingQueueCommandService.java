@@ -14,13 +14,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class WaitingQueueCommandService {
 
   private final WaitingQueueRepository waitingQueueRepository;
 
-  @Transactional
   public Long createWaitingQueue(CreateWaitingQueueCommand command) {
     return waitingQueueRepository.save(
         WaitingQueue.builder()
@@ -31,7 +31,6 @@ public class WaitingQueueCommandService {
     ).getId();
   }
 
-  @Transactional
   public void activateWaitingQueues(ActivateWaitingQueuesCommand command) {
     List<WaitingQueue> waitingQueues = waitingQueueRepository.findAllWaitingQueues(
         new FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam(
@@ -46,7 +45,6 @@ public class WaitingQueueCommandService {
     waitingQueueRepository.saveAll(waitingQueues);
   }
 
-  @Transactional
   public void expireWaitingQueues() {
     waitingQueueRepository.expireWaitingQueues();
   }

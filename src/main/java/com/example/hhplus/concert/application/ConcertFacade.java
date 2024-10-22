@@ -48,7 +48,6 @@ public class ConcertFacade {
 
   private final PaymentCommandService paymentCommandService;
 
-  @Transactional(readOnly = true)
   public List<ConcertSchedule> getReservableConcertSchedules(Long concertId) {
     var concert = concertQueryService.getConcert(new GetConcertByIdQuery(concertId));
 
@@ -56,7 +55,6 @@ public class ConcertFacade {
         new FindReservableConcertSchedulesQuery(concert.getId()));
   }
 
-  @Transactional(readOnly = true)
   public List<ConcertSeat> getReservableConcertSeats(Long concertScheduleId) {
     var concertSchedule = concertQueryService.getConcertSchedule(
         new GetConcertScheduleByIdQuery(concertScheduleId));

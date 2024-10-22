@@ -92,11 +92,11 @@ class WaitingQueueQueryServiceTest {
       final var result = target.getWaitingQueuePosition(query);
 
       // then
-      assertThat(result.getId()).isEqualTo(waitingQueueId);
-      assertThat(result.getConcertId()).isEqualTo(concertId);
-      assertThat(result.getUuid()).isEqualTo(uuid);
-      assertThat(result.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
-      assertThat(result.getPosition()).isEqualTo(0);
+      assertThat(result.id()).isEqualTo(waitingQueueId);
+      assertThat(result.concertId()).isEqualTo(concertId);
+      assertThat(result.uuid()).isEqualTo(uuid);
+      assertThat(result.status()).isEqualTo(WaitingQueueStatus.PROCESSING);
+      assertThat(result.position()).isEqualTo(0);
     }
 
     @Test
@@ -120,11 +120,11 @@ class WaitingQueueQueryServiceTest {
       final var result = target.getWaitingQueuePosition(query);
 
       // then
-      assertThat(result.getId()).isEqualTo(waitingQueueId);
-      assertThat(result.getConcertId()).isEqualTo(concertId);
-      assertThat(result.getUuid()).isEqualTo(uuid);
-      assertThat(result.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
-      assertThat(result.getPosition()).isEqualTo(1);
+      assertThat(result.id()).isEqualTo(waitingQueueId);
+      assertThat(result.concertId()).isEqualTo(concertId);
+      assertThat(result.uuid()).isEqualTo(uuid);
+      assertThat(result.status()).isEqualTo(WaitingQueueStatus.WAITING);
+      assertThat(result.position()).isEqualTo(1);
     }
 
   }

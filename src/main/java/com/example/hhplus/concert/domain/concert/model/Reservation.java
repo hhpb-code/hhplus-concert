@@ -1,37 +1,23 @@
 package com.example.hhplus.concert.domain.concert.model;
 
 import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
 import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "reservation")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Reservation {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Reservation extends BaseEntity {
 
   @Column(nullable = false)
   private Long concertSeatId;
@@ -46,13 +32,15 @@ public class Reservation {
   @Column(nullable = false)
   private LocalDateTime reservedAt;
 
-  @CreatedDate
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  @Column(insertable = false)
-  private LocalDateTime updatedAt;
+  @Builder
+  public Reservation(Long id, Long concertSeatId, Long userId, ReservationStatus status,
+      LocalDateTime reservedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    super(id, createdAt, updatedAt);
+    this.concertSeatId = concertSeatId;
+    this.userId = userId;
+    this.status = status;
+    this.reservedAt = reservedAt;
+  }
 
   public void confirm() {
     if (status == ReservationStatus.CONFIRMED) {
