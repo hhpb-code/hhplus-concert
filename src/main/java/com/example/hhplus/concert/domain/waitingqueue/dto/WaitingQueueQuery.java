@@ -1,46 +1,57 @@
 package com.example.hhplus.concert.domain.waitingqueue.dto;
 
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
-import jakarta.validation.constraints.NotNull;
 
 public class WaitingQueueQuery {
 
-  public record GetWaitingQueueByIdQuery(
-      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_ID_NULL_MESSAGE)
-      Long id
-  ) {
+  public record GetWaitingQueueByIdQuery(Long id) {
 
+    public GetWaitingQueueByIdQuery {
+      if (id == null) {
+        throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_ID_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
-  public record GetWaitingQueueByUuid(
-      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE)
-      String uuid
-  ) {
+  public record GetWaitingQueueByUuid(String uuid) {
 
+    public GetWaitingQueueByUuid {
+      if (uuid == null || uuid.isEmpty()) {
+        throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
+      }
+    }
   }
 
-  public record GetWaitingQueuePositionByUuid(
-      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE)
-      String uuid
-  ) {
+  public record GetWaitingQueuePositionByUuid(String uuid) {
 
+    public GetWaitingQueuePositionByUuid {
+      if (uuid == null || uuid.isEmpty()) {
+        throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
+      }
+    }
   }
 
-  public record FindDistinctConcertIdsByStatusQuery(
-      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE)
-      WaitingQueueStatus status
-  ) {
+  public record FindDistinctConcertIdsByStatusQuery(WaitingQueueStatus status) {
 
+    public FindDistinctConcertIdsByStatusQuery {
+      if (status == null) {
+        throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
-  public record CountWaitingQueueByConcertIdAndStatusQuery(
-      @NotNull(message = WaitingQueueConstants.CONCERT_ID_NULL_MESSAGE)
-      Long concertId,
-      @NotNull(message = WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE)
-      WaitingQueueStatus status
-  ) {
+  public record CountWaitingQueueByConcertIdAndStatusQuery(Long concertId,
+                                                           WaitingQueueStatus status) {
 
+    public CountWaitingQueueByConcertIdAndStatusQuery {
+      if (concertId == null) {
+        throw new BusinessException(WaitingQueueErrorCode.CONCERT_ID_MUST_NOT_BE_NULL);
+      }
+      if (status == null) {
+        throw new BusinessException(WaitingQueueErrorCode.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL);
+      }
+    }
   }
-
 }
