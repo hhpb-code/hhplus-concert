@@ -57,6 +57,7 @@ public enum ErrorType implements IErrorType {
   public enum Concert implements IErrorType {
     INVALID_CONCERT_ID(ErrorCode.BAD_REQUEST, "콘서트 ID가 유효하지 않습니다.", LogLevel.WARN),
     CONCERT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "콘서트 ID는 null일 수 없습니다.", LogLevel.WARN),
+    RESERVATION_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "예약 ID는 null일 수 없습니다.", LogLevel.WARN),
     ;
 
     private final ErrorCode code;
@@ -91,6 +92,32 @@ public enum ErrorType implements IErrorType {
     WALLET_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "지갑 ID는 null일 수 없습니다.", LogLevel.WARN),
     AMOUNT_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "금액은 null일 수 없습니다.", LogLevel.WARN),
     AMOUNT_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "금액은 0보다 커야 합니다.", LogLevel.WARN),
+    ;
+
+    private final ErrorCode code;
+    private final String message;
+    private final LogLevel logLevel;
+
+    @Override
+    public ErrorCode getCode() {
+      return code;
+    }
+
+    @Override
+    public String getMessage() {
+      return message;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+      return logLevel;
+    }
+  }
+
+  @AllArgsConstructor
+  public enum Payment implements IErrorType {
+    PAYMENT_NOT_FOUND(ErrorCode.NOT_FOUND, "결제 정보를 찾을 수 없습니다.", LogLevel.WARN),
+    PAYMENT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "결제 ID는 필수입니다.", LogLevel.WARN),
     ;
 
     private final ErrorCode code;
