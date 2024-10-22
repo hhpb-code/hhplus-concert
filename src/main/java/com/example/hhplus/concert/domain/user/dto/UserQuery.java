@@ -1,36 +1,44 @@
 package com.example.hhplus.concert.domain.user.dto;
 
-import com.example.hhplus.concert.domain.user.UserConstants;
-import jakarta.validation.constraints.NotNull;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.user.UserErrorCode;
 
 public class UserQuery {
 
-  public record GetUserByIdQuery(
-      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
-      Long id
-  ) {
+  public record GetUserByIdQuery(Long id) {
 
+    public GetUserByIdQuery {
+      if (id == null) {
+        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
-  public record GetUserWalletByUserIdQuery(
-      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
-      Long userId
-  ) {
+  public record GetUserWalletByUserIdQuery(Long userId) {
 
+    public GetUserWalletByUserIdQuery {
+      if (userId == null) {
+        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
-  public record GetUserWalletByUserIdWithLockQuery(
-      @NotNull(message = UserConstants.USER_ID_NULL_MESSAGE)
-      Long userId
-  ) {
+  public record GetUserWalletByUserIdWithLockQuery(Long userId) {
 
+    public GetUserWalletByUserIdWithLockQuery {
+      if (userId == null) {
+        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
-  public record GetUserWalletByIdQuery(
-      @NotNull(message = UserConstants.WALLET_ID_NULL_MESSAGE)
-      Long walletId
-  ) {
+  public record GetUserWalletByIdQuery(Long walletId) {
 
+    public GetUserWalletByIdQuery {
+      if (walletId == null) {
+        throw new BusinessException(UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL);
+      }
+    }
   }
 
 }

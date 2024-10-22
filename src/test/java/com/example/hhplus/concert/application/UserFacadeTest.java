@@ -104,7 +104,7 @@ class UserFacadeTest {
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
@@ -120,7 +120,7 @@ class UserFacadeTest {
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
