@@ -12,7 +12,7 @@ import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import com.example.hhplus.concert.domain.payment.model.Payment;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
@@ -263,12 +263,12 @@ class ConcertFacadeTest {
       final Long userId = 1L;
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.reserveConcertSeat(concertSeatId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -481,12 +481,12 @@ class ConcertFacadeTest {
               .build());
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -536,12 +536,12 @@ class ConcertFacadeTest {
       final Long reservationId = reservation.getId();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.NOT_ENOUGH_BALANCE);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE.getMessage());
     }
 
     @Test

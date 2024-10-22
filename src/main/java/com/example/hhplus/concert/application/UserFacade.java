@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.application;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType.User;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.ChargeUserWalletAmountByWalletIdCommand;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
@@ -29,7 +29,7 @@ public class UserFacade {
     var wallet = userQueryService.getWallet(new GetUserWalletByUserIdWithLockQuery(user.getId()));
 
     if (!wallet.getId().equals(walletId)) {
-      throw new BusinessException(UserErrorCode.WALLET_NOT_FOUND);
+      throw new CoreException(User.WALLET_NOT_MATCH_USER);
     }
 
     userCommandService.chargeUserWalletAmount(

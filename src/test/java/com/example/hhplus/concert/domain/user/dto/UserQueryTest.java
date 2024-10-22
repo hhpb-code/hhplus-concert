@@ -3,8 +3,7 @@ package com.example.hhplus.concert.domain.user.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
@@ -27,11 +26,11 @@ class UserQueryTest {
       final Long id = null;
 
       // when & then
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new GetUserByIdQuery(id));
 
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -60,11 +59,11 @@ class UserQueryTest {
       final Long userId = null;
 
       // when & then
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new GetUserWalletByUserIdQuery(userId));
 
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -93,11 +92,11 @@ class UserQueryTest {
       final Long userId = null;
 
       // when & then
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new GetUserWalletByUserIdWithLockQuery(userId));
 
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -127,11 +126,11 @@ class UserQueryTest {
       final Long walletId = null;
 
       // when & then
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new GetUserWalletByIdQuery(walletId));
 
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test

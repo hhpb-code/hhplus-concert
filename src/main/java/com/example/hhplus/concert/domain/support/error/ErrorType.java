@@ -78,4 +78,38 @@ public enum ErrorType implements IErrorType {
       return logLevel;
     }
   }
+
+  @AllArgsConstructor
+  public enum User implements IErrorType {
+    USER_NOT_FOUND(ErrorCode.NOT_FOUND, "사용자를 찾을 수 없습니다.", LogLevel.WARN),
+    WALLET_NOT_FOUND(ErrorCode.NOT_FOUND, "지갑을 찾을 수 없습니다.", LogLevel.WARN),
+    WALLET_NOT_MATCH_USER(ErrorCode.BAD_REQUEST, "지갑이 사용자와 일치하지 않습니다.", LogLevel.WARN),
+    INVALID_AMOUNT(ErrorCode.BAD_REQUEST, "유효하지 않은 충전 금액입니다.", LogLevel.WARN),
+    EXCEED_LIMIT_AMOUNT(ErrorCode.BAD_REQUEST, "충전 금액이 한도를 초과했습니다.", LogLevel.WARN),
+    NOT_ENOUGH_BALANCE(ErrorCode.BAD_REQUEST, "잔액이 부족합니다.", LogLevel.WARN),
+    USER_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "사용자 ID는 null일 수 없습니다.", LogLevel.WARN),
+    WALLET_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "지갑 ID는 null일 수 없습니다.", LogLevel.WARN),
+    AMOUNT_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "금액은 null일 수 없습니다.", LogLevel.WARN),
+    AMOUNT_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "금액은 0보다 커야 합니다.", LogLevel.WARN),
+    ;
+
+    private final ErrorCode code;
+    private final String message;
+    private final LogLevel logLevel;
+
+    @Override
+    public ErrorCode getCode() {
+      return code;
+    }
+
+    @Override
+    public String getMessage() {
+      return message;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+      return logLevel;
+    }
+  }
 }

@@ -1,5 +1,8 @@
 package com.example.hhplus.concert.domain.support.error;
 
+import lombok.Getter;
+
+@Getter
 public class CoreException extends RuntimeException {
 
   private final IErrorType errorType;

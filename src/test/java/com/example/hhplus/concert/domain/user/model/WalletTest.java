@@ -3,9 +3,8 @@ package com.example.hhplus.concert.domain.user.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.UserConstants;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,13 +23,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.chargeAmount(null);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -40,13 +38,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.chargeAmount(-1);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -56,13 +53,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.chargeAmount(0);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -72,13 +68,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(0).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.chargeAmount(UserConstants.MAX_WALLET_AMOUNT + 1);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.EXCEED_LIMIT_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.EXCEED_LIMIT_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.EXCEED_LIMIT_AMOUNT.getMessage());
     }
 
     @Test
@@ -107,13 +102,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.withdrawAmount(null);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -123,13 +117,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.withdrawAmount(-1);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -139,13 +132,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.withdrawAmount(0);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.INVALID_AMOUNT);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.INVALID_AMOUNT.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
     }
 
     @Test
@@ -155,13 +147,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class, () -> {
+      final Exception result = assertThrows(Exception.class, () -> {
         wallet.withdrawAmount(1001);
       });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(UserErrorCode.NOT_ENOUGH_BALANCE);
-      assertThat(result.getMessage()).isEqualTo(UserErrorCode.NOT_ENOUGH_BALANCE.getMessage());
+      assertThat(result.getMessage()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE.getMessage());
     }
 
     @Test

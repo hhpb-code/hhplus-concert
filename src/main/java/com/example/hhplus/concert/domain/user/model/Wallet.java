@@ -1,9 +1,9 @@
 package com.example.hhplus.concert.domain.user.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import com.example.hhplus.concert.domain.user.UserConstants;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -35,11 +35,11 @@ public class Wallet extends BaseEntity {
 
   public void chargeAmount(Integer amount) {
     if (amount == null || amount <= 0) {
-      throw new BusinessException(UserErrorCode.INVALID_AMOUNT);
+      throw new CoreException(ErrorType.User.INVALID_AMOUNT);
     }
 
     if (this.amount + amount > UserConstants.MAX_WALLET_AMOUNT) {
-      throw new BusinessException(UserErrorCode.EXCEED_LIMIT_AMOUNT);
+      throw new CoreException(ErrorType.User.EXCEED_LIMIT_AMOUNT);
     }
 
     this.amount += amount;
@@ -47,11 +47,11 @@ public class Wallet extends BaseEntity {
 
   public void withdrawAmount(Integer amount) {
     if (amount == null || amount <= 0) {
-      throw new BusinessException(UserErrorCode.INVALID_AMOUNT);
+      throw new CoreException(ErrorType.User.INVALID_AMOUNT);
     }
 
     if (this.amount - amount < 0) {
-      throw new BusinessException(UserErrorCode.NOT_ENOUGH_BALANCE);
+      throw new CoreException(ErrorType.User.NOT_ENOUGH_BALANCE);
     }
 
     this.amount -= amount;
