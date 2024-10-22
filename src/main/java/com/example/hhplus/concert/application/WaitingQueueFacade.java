@@ -94,6 +94,10 @@ public class WaitingQueueFacade {
       Integer availableWaitingQueueCount =
           WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT - processingWaitingQueueCount;
 
+      if (availableWaitingQueueCount <= 0) {
+        continue;
+      }
+
       waitingQueueCommandService.activateWaitingQueues(
           new ActivateWaitingQueuesCommand(concertId, availableWaitingQueueCount));
     }

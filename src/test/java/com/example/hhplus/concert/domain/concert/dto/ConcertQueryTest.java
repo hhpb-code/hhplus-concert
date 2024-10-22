@@ -1,8 +1,10 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.concert.ConcertConstants;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
@@ -12,24 +14,12 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeat
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("콘서트 Query 단위 테스트")
 class ConcertQueryTest {
-
-  private Validator validator;
-
-  @BeforeEach
-  void setUp() {
-    validator = Validation.buildDefaultValidatorFactory().getValidator();
-  }
 
   @Nested
   @DisplayName("콘서트 조회 Query By Get")
@@ -44,18 +34,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenConcertIdIsNull() {
         // given
         final Long concertId = null;
-        final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
 
         // when
-        final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
-
-        final ConstraintViolation<GetConcertByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("id"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetConcertByIdQuery(concertId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.CONCERT_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -63,13 +49,13 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetConcertByIdQuery() {
         // given
         final Long concertId = 1L;
-        final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
 
         // when
-        final Set<ConstraintViolation<GetConcertByIdQuery>> violations = validator.validate(query);
+        final GetConcertByIdQuery query = new GetConcertByIdQuery(concertId);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.id()).isEqualTo(concertId);
       }
     }
 
@@ -82,19 +68,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenConcertIdIsNull() {
         // given
         final Long concertId = null;
-        final GetConcertByIdWithLockQuery query = new GetConcertByIdWithLockQuery(concertId);
 
         // when
-        final Set<ConstraintViolation<GetConcertByIdWithLockQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetConcertByIdWithLockQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("id"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetConcertByIdWithLockQuery(concertId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.CONCERT_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -102,17 +83,15 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetConcertByIdWithLockQuery() {
         // given
         final Long concertId = 1L;
-        final GetConcertByIdWithLockQuery query = new GetConcertByIdWithLockQuery(concertId);
 
         // when
-        final Set<ConstraintViolation<GetConcertByIdWithLockQuery>> violations = validator.validate(
-            query);
+        final GetConcertByIdWithLockQuery query = new GetConcertByIdWithLockQuery(concertId);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.id()).isEqualTo(concertId);
       }
     }
-
   }
 
   @Nested
@@ -124,20 +103,14 @@ class ConcertQueryTest {
     void shouldThrowExceptionWhenConcertScheduleIdIsNull() {
       // given
       final Long concertScheduleId = null;
-      final GetConcertScheduleByIdQuery query = new GetConcertScheduleByIdQuery(concertScheduleId);
 
       // when
-      final Set<ConstraintViolation<GetConcertScheduleByIdQuery>> violations = validator.validate(
-          query);
-
-      final ConstraintViolation<GetConcertScheduleByIdQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertScheduleId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetConcertScheduleByIdQuery(concertScheduleId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -145,16 +118,14 @@ class ConcertQueryTest {
     void shouldSuccessfullyCreateGetConcertScheduleByIdQuery() {
       // given
       final Long concertScheduleId = 1L;
-      final GetConcertScheduleByIdQuery query = new GetConcertScheduleByIdQuery(concertScheduleId);
 
       // when
-      final Set<ConstraintViolation<GetConcertScheduleByIdQuery>> violations = validator.validate(
-          query);
+      final GetConcertScheduleByIdQuery query = new GetConcertScheduleByIdQuery(concertScheduleId);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.concertScheduleId()).isEqualTo(concertScheduleId);
     }
-
   }
 
   @Nested
@@ -166,20 +137,13 @@ class ConcertQueryTest {
     void shouldThrowExceptionWhenConcertIdIsNull() {
       // given
       final Long concertId = null;
-      final FindReservableConcertSchedulesQuery query = new FindReservableConcertSchedulesQuery(
-          concertId);
 
       // when
-      final Set<ConstraintViolation<FindReservableConcertSchedulesQuery>> violations = validator.validate(
-          query);
-
-      final ConstraintViolation<FindReservableConcertSchedulesQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new FindReservableConcertSchedulesQuery(concertId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(ConcertErrorCode.CONCERT_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -187,21 +151,18 @@ class ConcertQueryTest {
     void shouldSuccessfullyCreateFindAvailableConcertSchedulesQuery() {
       // given
       final Long concertId = 1L;
+
+      // when
       final FindReservableConcertSchedulesQuery query = new FindReservableConcertSchedulesQuery(
           concertId);
 
-      // when
-      final Set<ConstraintViolation<FindReservableConcertSchedulesQuery>> violations = validator.validate(
-          query);
-
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.concertId()).isEqualTo(concertId);
     }
-
   }
 
-
-  @Nested()
+  @Nested
   @DisplayName("콘서트 좌석 조회 Query By Get")
   class GetConcertSeatQueryTest {
 
@@ -214,20 +175,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenConcertSeatIdIsNull() {
         // given
         final Long concertSeatId = null;
-        final GetConcertSeatByIdQuery query = new GetConcertSeatByIdQuery(concertSeatId);
 
         // when
-        final Set<ConstraintViolation<GetConcertSeatByIdQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetConcertSeatByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("concertSeatId"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetConcertSeatByIdQuery(concertSeatId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -235,18 +190,15 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetConcertSeatByIdQuery() {
         // given
         final Long concertSeatId = 1L;
-        final GetConcertSeatByIdQuery query = new GetConcertSeatByIdQuery(concertSeatId);
 
         // when
-        final Set<ConstraintViolation<GetConcertSeatByIdQuery>> violations = validator.validate(
-            query);
+        final GetConcertSeatByIdQuery query = new GetConcertSeatByIdQuery(concertSeatId);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.concertSeatId()).isEqualTo(concertSeatId);
       }
-
     }
-
 
     @Nested
     @DisplayName("콘서트 좌석 조회 Query By Id with Lock")
@@ -257,21 +209,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenConcertSeatIdIsNull() {
         // given
         final Long concertSeatId = null;
-        final GetConcertSeatByIdWithLockQuery query = new GetConcertSeatByIdWithLockQuery(
-            concertSeatId);
 
         // when
-        final Set<ConstraintViolation<GetConcertSeatByIdWithLockQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetConcertSeatByIdWithLockQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("concertSeatId"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetConcertSeatByIdWithLockQuery(concertSeatId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -279,17 +224,15 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetConcertSeatByIdWithLockQuery() {
         // given
         final Long concertSeatId = 1L;
+
+        // when
         final GetConcertSeatByIdWithLockQuery query = new GetConcertSeatByIdWithLockQuery(
             concertSeatId);
 
-        // when
-        final Set<ConstraintViolation<GetConcertSeatByIdWithLockQuery>> violations = validator.validate(
-            query);
-
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.concertSeatId()).isEqualTo(concertSeatId);
       }
-
     }
   }
 
@@ -302,21 +245,14 @@ class ConcertQueryTest {
     void shouldThrowExceptionWhenConcertScheduleIdIsNull() {
       // given
       final Long concertScheduleId = null;
-      final FindReservableConcertSeatsQuery query = new FindReservableConcertSeatsQuery(
-          concertScheduleId);
 
       // when
-      final Set<ConstraintViolation<FindReservableConcertSeatsQuery>> violations = validator.validate(
-          query);
-
-      final ConstraintViolation<FindReservableConcertSeatsQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertScheduleId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new FindReservableConcertSeatsQuery(concertScheduleId));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
+      assertThat(exception.getMessage()).isEqualTo(
+          ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -324,17 +260,15 @@ class ConcertQueryTest {
     void shouldSuccessfullyCreateFindReservableConcertSeatsQuery() {
       // given
       final Long concertScheduleId = 1L;
+
+      // when
       final FindReservableConcertSeatsQuery query = new FindReservableConcertSeatsQuery(
           concertScheduleId);
 
-      // when
-      final Set<ConstraintViolation<FindReservableConcertSeatsQuery>> violations = validator.validate(
-          query);
-
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.concertScheduleId()).isEqualTo(concertScheduleId);
     }
-
   }
 
   @Nested
@@ -350,20 +284,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenReservationIdIsNull() {
         // given
         final Long reservationId = null;
-        final GetReservationByIdQuery query = new GetReservationByIdQuery(reservationId);
 
         // when
-        final Set<ConstraintViolation<GetReservationByIdQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetReservationByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("reservationId"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetReservationByIdQuery(reservationId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -371,14 +299,13 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetReservationByIdQuery() {
         // given
         final Long reservationId = 1L;
-        final GetReservationByIdQuery query = new GetReservationByIdQuery(reservationId);
 
         // when
-        final Set<ConstraintViolation<GetReservationByIdQuery>> violations = validator.validate(
-            query);
+        final GetReservationByIdQuery query = new GetReservationByIdQuery(reservationId);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.reservationId()).isEqualTo(reservationId);
       }
     }
 
@@ -391,21 +318,14 @@ class ConcertQueryTest {
       void shouldThrowExceptionWhenReservationIdIsNull() {
         // given
         final Long reservationId = null;
-        final GetReservationByIdWithLockQuery query = new GetReservationByIdWithLockQuery(
-            reservationId);
 
         // when
-        final Set<ConstraintViolation<GetReservationByIdWithLockQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetReservationByIdWithLockQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("reservationId"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetReservationByIdWithLockQuery(reservationId));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL);
+        assertThat(exception.getMessage()).isEqualTo(
+            ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
       }
 
       @Test
@@ -413,18 +333,15 @@ class ConcertQueryTest {
       void shouldSuccessfullyCreateGetReservationByIdWithLockQuery() {
         // given
         final Long reservationId = 1L;
+
+        // when
         final GetReservationByIdWithLockQuery query = new GetReservationByIdWithLockQuery(
             reservationId);
 
-        // when
-        final Set<ConstraintViolation<GetReservationByIdWithLockQuery>> violations = validator.validate(
-            query);
-
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.reservationId()).isEqualTo(reservationId);
       }
     }
-
   }
-
 }

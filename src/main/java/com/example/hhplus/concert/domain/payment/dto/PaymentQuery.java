@@ -1,15 +1,16 @@
 package com.example.hhplus.concert.domain.payment.dto;
 
-import com.example.hhplus.concert.domain.payment.PaymentConstants;
-import jakarta.validation.constraints.NotNull;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.payment.PaymentErrorCode;
 
 public class PaymentQuery {
 
-  public record GetPaymentByIdQuery(
-      @NotNull(message = PaymentConstants.PAYMENT_ID_NULL_MESSAGE)
-      Long paymentId
-  ) {
+  public record GetPaymentByIdQuery(Long paymentId) {
 
+    public GetPaymentByIdQuery {
+      if (paymentId == null) {
+        throw new BusinessException(PaymentErrorCode.PAYMENT_NOT_FOUND);
+      }
+    }
   }
-
 }

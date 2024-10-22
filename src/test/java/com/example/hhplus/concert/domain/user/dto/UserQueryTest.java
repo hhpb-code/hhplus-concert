@@ -1,17 +1,14 @@
 package com.example.hhplus.concert.domain.user.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.user.UserConstants;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.user.UserErrorCode;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdWithLockQuery;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,184 +16,136 @@ import org.junit.jupiter.api.Test;
 @DisplayName("유저 Query 단위 테스트")
 class UserQueryTest {
 
-  private Validator validator;
-
-  @BeforeEach
-  void setUp() {
-    validator = Validation.buildDefaultValidatorFactory().getValidator();
-  }
-
-
   @Nested
-  @DisplayName("유저 조회 Query By get")
-  class GetUserQueryTest {
+  @DisplayName("유저 조회 Query 테스트")
+  class GetUserByIdQueryTest {
 
-    @Nested
-    @DisplayName("유저 조회 Query By id")
-    class GetUserByIdQueryTest {
+    @Test
+    @DisplayName("유저 조회 Query 생성 실패 - id가 null인 경우")
+    void shouldThrowBusinessExceptionWhenIdIsNull() {
+      // given
+      final Long id = null;
 
-      @Test
-      @DisplayName("유저 조회 Query 생성 실패 - id가 null")
-      void shouldThrowExceptionWhenIdIsNull() {
-        // given
-        final Long id = null;
-        final GetUserByIdQuery query = new GetUserByIdQuery(id);
+      // when & then
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetUserByIdQuery(id));
 
-        // when
-        final Set<ConstraintViolation<GetUserByIdQuery>> violations = validator.validate(query);
-
-        final ConstraintViolation<GetUserByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("id"))
-            .findFirst()
-            .get();
-
-        // then
-        assertThat(violation.getMessage()).isEqualTo(UserConstants.USER_ID_NULL_MESSAGE);
-      }
-
-      @Test
-      @DisplayName("유저 조회 Query 생성 성공")
-      void shouldSuccessfullyCreateGetUserByIdQuery() {
-        // given
-        final Long id = 1L;
-        final GetUserByIdQuery query = new GetUserByIdQuery(id);
-
-        // when
-        final Set<ConstraintViolation<GetUserByIdQuery>> violations = validator.validate(query);
-
-        // then
-        assertThat(violations).isEmpty();
-      }
+      assertThat(exception.getMessage()).isEqualTo(
+          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
+    @Test
+    @DisplayName("유저 조회 Query 생성 성공")
+    void shouldSuccessfullyCreateGetUserByIdQuery() {
+      // given
+      final Long id = 1L;
+
+      // when
+      final GetUserByIdQuery query = new GetUserByIdQuery(id);
+
+      // then
+      assertThat(query).isNotNull();
+      assertThat(query.id()).isEqualTo(id);
+    }
   }
 
   @Nested
-  @DisplayName("유저 지갑 조회 Query By get")
-  class GetUserWalletQueryTest {
+  @DisplayName("유저 지갑 조회 Query 테스트")
+  class GetUserWalletByUserIdQueryTest {
 
-    @Nested
-    @DisplayName("유저 지갑 조회 Query By userId")
-    class GetUserWalletByUserIdQueryTest {
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 실패 - userId가 null인 경우")
+    void shouldThrowBusinessExceptionWhenUserIdIsNull() {
+      // given
+      final Long userId = null;
 
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 실패 - id가 null")
-      void shouldThrowExceptionWhenIdIsNull() {
-        // given
-        final Long id = null;
-        final GetUserWalletByUserIdQuery query = new GetUserWalletByUserIdQuery(id);
+      // when & then
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetUserWalletByUserIdQuery(userId));
 
-        // when
-        final Set<ConstraintViolation<GetUserWalletByUserIdQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetUserWalletByUserIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("userId"))
-            .findFirst()
-            .get();
-
-        // then
-        assertThat(violation.getMessage()).isEqualTo(UserConstants.USER_ID_NULL_MESSAGE);
-      }
-
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 성공")
-      void shouldSuccessfullyCreateGetUserWalletWithLockQuery() {
-        // given
-        final Long id = 1L;
-        final GetUserWalletByUserIdQuery query = new GetUserWalletByUserIdQuery(id);
-
-        // when
-        final Set<ConstraintViolation<GetUserWalletByUserIdQuery>> violations = validator.validate(
-            query);
-
-        // then
-        assertThat(violations).isEmpty();
-      }
-
+      assertThat(exception.getMessage()).isEqualTo(
+          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
-    @Nested
-    @DisplayName("유저 지갑 조회 Query By userId with lock")
-    class GetUserWalletByUserIdWithLockQueryTest {
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 성공")
+    void shouldSuccessfullyCreateGetUserWalletByUserIdQuery() {
+      // given
+      final Long userId = 1L;
 
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 실패 - id가 null")
-      void shouldThrowExceptionWhenIdIsNull() {
-        // given
-        final Long id = null;
-        final GetUserWalletByUserIdWithLockQuery query = new GetUserWalletByUserIdWithLockQuery(id);
+      // when
+      final GetUserWalletByUserIdQuery query = new GetUserWalletByUserIdQuery(userId);
 
-        // when
-        final Set<ConstraintViolation<GetUserWalletByUserIdWithLockQuery>> violations = validator.validate(
-            query);
+      // then
+      assertThat(query).isNotNull();
+      assertThat(query.userId()).isEqualTo(userId);
+    }
+  }
 
-        final ConstraintViolation<GetUserWalletByUserIdWithLockQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("userId"))
-            .findFirst()
-            .get();
+  @Nested
+  @DisplayName("유저 지갑 조회 Query 테스트 (with lock)")
+  class GetUserWalletByUserIdWithLockQueryTest {
 
-        // then
-        assertThat(violation.getMessage()).isEqualTo(UserConstants.USER_ID_NULL_MESSAGE);
-      }
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 실패 - userId가 null인 경우")
+    void shouldThrowBusinessExceptionWhenUserIdIsNull() {
+      // given
+      final Long userId = null;
 
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 성공")
-      void shouldSuccessfullyCreateGetUserWalletByUserIdWithLockQuery() {
-        // given
-        final Long id = 1L;
-        final GetUserWalletByUserIdWithLockQuery query = new GetUserWalletByUserIdWithLockQuery(id);
+      // when & then
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetUserWalletByUserIdWithLockQuery(userId));
 
-        // when
-        final Set<ConstraintViolation<GetUserWalletByUserIdWithLockQuery>> violations = validator.validate(
-            query);
-
-        // then
-        assertThat(violations).isEmpty();
-      }
-
+      assertThat(exception.getMessage()).isEqualTo(
+          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
-    @Nested
-    @DisplayName("유저 지갑 조회 Query By walletId")
-    class GetUserWalletByIdQueryTest {
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 성공")
+    void shouldSuccessfullyCreateGetUserWalletByUserIdWithLockQuery() {
+      // given
+      final Long userId = 1L;
 
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 실패 - id가 null")
-      void shouldThrowExceptionWhenIdIsNull() {
-        // given
-        final Long id = null;
-        final GetUserWalletByIdQuery query = new GetUserWalletByIdQuery(id);
+      // when
+      final GetUserWalletByUserIdWithLockQuery query = new GetUserWalletByUserIdWithLockQuery(
+          userId);
 
-        // when
-        final Set<ConstraintViolation<GetUserWalletByIdQuery>> violations = validator.validate(
-            query);
+      // then
+      assertThat(query).isNotNull();
+      assertThat(query.userId()).isEqualTo(userId);
+    }
+  }
 
-        final ConstraintViolation<GetUserWalletByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("walletId"))
-            .findFirst()
-            .get();
+  @Nested
+  @DisplayName("유저 지갑 조회 Query 테스트 (by walletId)")
+  class GetUserWalletByIdQueryTest {
 
-        // then
-        assertThat(violation.getMessage()).isEqualTo(UserConstants.WALLET_ID_NULL_MESSAGE);
-      }
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 실패 - walletId가 null인 경우")
+    void shouldThrowBusinessExceptionWhenWalletIdIsNull() {
+      // given
+      final Long walletId = null;
 
-      @Test
-      @DisplayName("유저 지갑 조회 Query 생성 성공")
-      void shouldSuccessfullyCreateGetUserWalletByIdQuery() {
-        // given
-        final Long id = 1L;
-        final GetUserWalletByIdQuery query = new GetUserWalletByIdQuery(id);
+      // when & then
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetUserWalletByIdQuery(walletId));
 
-        // when
-        final Set<ConstraintViolation<GetUserWalletByIdQuery>> violations = validator.validate(
-            query);
-
-        // then
-        assertThat(violations).isEmpty();
-      }
-
+      assertThat(exception.getMessage()).isEqualTo(
+          UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
+    @Test
+    @DisplayName("유저 지갑 조회 Query 생성 성공")
+    void shouldSuccessfullyCreateGetUserWalletByIdQuery() {
+      // given
+      final Long walletId = 1L;
+
+      // when
+      final GetUserWalletByIdQuery query = new GetUserWalletByIdQuery(walletId);
+
+      // then
+      assertThat(query).isNotNull();
+      assertThat(query.walletId()).isEqualTo(walletId);
+    }
   }
 }

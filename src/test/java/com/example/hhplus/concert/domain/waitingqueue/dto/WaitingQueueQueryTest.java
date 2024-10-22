@@ -1,32 +1,22 @@
 package com.example.hhplus.concert.domain.waitingqueue.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.CountWaitingQueueByConcertIdAndStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.FindDistinctConcertIdsByStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByIdQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("대기열 query 단위 테스트")
 class WaitingQueueQueryTest {
-
-  private Validator validator;
-
-  @BeforeEach
-  void setUp() {
-    validator = Validation.buildDefaultValidatorFactory().getValidator();
-  }
 
   @Nested
   @DisplayName("대기열 조회 query By get")
@@ -41,20 +31,14 @@ class WaitingQueueQueryTest {
       void shouldThrowExceptionWhenIdIsNull() {
         // given
         final Long id = null;
-        final GetWaitingQueueByIdQuery query = new GetWaitingQueueByIdQuery(id);
 
         // when
-        final Set<ConstraintViolation<GetWaitingQueueByIdQuery>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetWaitingQueueByIdQuery> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("id"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetWaitingQueueByIdQuery(id));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            WaitingQueueConstants.WAITING_QUEUE_ID_NULL_MESSAGE);
+        assertThat(exception.getMessage()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_ID_MUST_NOT_BE_NULL.getMessage());
       }
 
       @Test
@@ -62,14 +46,13 @@ class WaitingQueueQueryTest {
       void shouldSuccessfullyCreateGetWaitingQueueByIdQuery() {
         // given
         final Long id = 1L;
-        final GetWaitingQueueByIdQuery query = new GetWaitingQueueByIdQuery(id);
 
         // when
-        final Set<ConstraintViolation<GetWaitingQueueByIdQuery>> violations = validator.validate(
-            query);
+        final GetWaitingQueueByIdQuery query = new GetWaitingQueueByIdQuery(id);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.id()).isEqualTo(id);
       }
     }
 
@@ -82,20 +65,14 @@ class WaitingQueueQueryTest {
       void shouldThrowExceptionWhenUuidIsNull() {
         // given
         final String uuid = null;
-        final GetWaitingQueueByUuid query = new GetWaitingQueueByUuid(uuid);
 
         // when
-        final Set<ConstraintViolation<GetWaitingQueueByUuid>> violations = validator.validate(
-            query);
-
-        final ConstraintViolation<GetWaitingQueueByUuid> violation = violations.stream()
-            .filter(v -> v.getPropertyPath().toString().equals("uuid"))
-            .findFirst()
-            .get();
+        final BusinessException exception = assertThrows(BusinessException.class,
+            () -> new GetWaitingQueueByUuid(uuid));
 
         // then
-        assertThat(violation.getMessage()).isEqualTo(
-            WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE);
+        assertThat(exception.getMessage()).isEqualTo(
+            WaitingQueueErrorCode.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY.getMessage());
       }
 
       @Test
@@ -103,14 +80,13 @@ class WaitingQueueQueryTest {
       void shouldSuccessfullyCreateGetWaitingQueueByUuidQuery() {
         // given
         final String uuid = "uuid";
-        final GetWaitingQueueByUuid query = new GetWaitingQueueByUuid(uuid);
 
         // when
-        final Set<ConstraintViolation<GetWaitingQueueByUuid>> violations = validator.validate(
-            query);
+        final GetWaitingQueueByUuid query = new GetWaitingQueueByUuid(uuid);
 
         // then
-        assertThat(violations).isEmpty();
+        assertThat(query).isNotNull();
+        assertThat(query.uuid()).isEqualTo(uuid);
       }
     }
   }
@@ -124,20 +100,14 @@ class WaitingQueueQueryTest {
     void shouldThrowExceptionWhenUuidIsNull() {
       // given
       final String uuid = null;
-      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
 
       // when
-      final Set<ConstraintViolation<GetWaitingQueuePositionByUuid>> violations = validator
-          .validate(query);
-
-      final ConstraintViolation<GetWaitingQueuePositionByUuid> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("uuid"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new GetWaitingQueuePositionByUuid(uuid));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          WaitingQueueConstants.WAITING_QUEUE_UUID_EMPTY_MESSAGE);
+      assertThat(exception.getMessage()).isEqualTo(
+          WaitingQueueErrorCode.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY.getMessage());
     }
 
     @Test
@@ -145,14 +115,13 @@ class WaitingQueueQueryTest {
     void shouldSuccessfullyCreateGetWaitingQueuePositionByUuidQuery() {
       // given
       final String uuid = "uuid";
-      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
 
       // when
-      final Set<ConstraintViolation<GetWaitingQueuePositionByUuid>> violations = validator
-          .validate(query);
+      final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
 
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.uuid()).isEqualTo(uuid);
     }
   }
 
@@ -165,21 +134,14 @@ class WaitingQueueQueryTest {
     void shouldThrowExceptionWhenStatusIsNull() {
       // given
       final WaitingQueueStatus status = null;
-      final FindDistinctConcertIdsByStatusQuery query = new FindDistinctConcertIdsByStatusQuery(
-          status);
 
       // when
-      final Set<ConstraintViolation<FindDistinctConcertIdsByStatusQuery>> violations = validator
-          .validate(query);
-
-      final ConstraintViolation<FindDistinctConcertIdsByStatusQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("status"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new FindDistinctConcertIdsByStatusQuery(status));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE);
+      assertThat(exception.getMessage()).isEqualTo(
+          WaitingQueueErrorCode.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -187,15 +149,14 @@ class WaitingQueueQueryTest {
     void shouldSuccessfullyCreateFindConcertIdsByStatusQuery() {
       // given
       final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
+
+      // when
       final FindDistinctConcertIdsByStatusQuery query = new FindDistinctConcertIdsByStatusQuery(
           status);
 
-      // when
-      final Set<ConstraintViolation<FindDistinctConcertIdsByStatusQuery>> violations = validator
-          .validate(query);
-
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.status()).isEqualTo(status);
     }
   }
 
@@ -209,21 +170,14 @@ class WaitingQueueQueryTest {
       // given
       final Long concertId = null;
       final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
-      final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
-          concertId, status);
 
       // when
-      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
-          .validate(query);
-
-      final ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("concertId"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CountWaitingQueueByConcertIdAndStatusQuery(concertId, status));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          WaitingQueueConstants.CONCERT_ID_NULL_MESSAGE);
+      assertThat(exception.getMessage()).isEqualTo(
+          WaitingQueueErrorCode.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
 
@@ -233,21 +187,14 @@ class WaitingQueueQueryTest {
       // given
       final Long concertId = 1L;
       final WaitingQueueStatus status = null;
-      final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
-          concertId, status);
 
       // when
-      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
-          .validate(query);
-
-      final ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery> violation = violations.stream()
-          .filter(v -> v.getPropertyPath().toString().equals("status"))
-          .findFirst()
-          .get();
+      final BusinessException exception = assertThrows(BusinessException.class,
+          () -> new CountWaitingQueueByConcertIdAndStatusQuery(concertId, status));
 
       // then
-      assertThat(violation.getMessage()).isEqualTo(
-          WaitingQueueConstants.WAITING_QUEUE_STATUS_NULL_MESSAGE);
+      assertThat(exception.getMessage()).isEqualTo(
+          WaitingQueueErrorCode.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -256,17 +203,15 @@ class WaitingQueueQueryTest {
       // given
       final Long concertId = 1L;
       final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
+
+      // when
       final CountWaitingQueueByConcertIdAndStatusQuery query = new CountWaitingQueueByConcertIdAndStatusQuery(
           concertId, status);
 
-      // when
-      final Set<ConstraintViolation<CountWaitingQueueByConcertIdAndStatusQuery>> violations = validator
-          .validate(query);
-
       // then
-      assertThat(violations).isEmpty();
+      assertThat(query).isNotNull();
+      assertThat(query.concertId()).isEqualTo(concertId);
+      assertThat(query.status()).isEqualTo(status);
     }
   }
-
-
 }

@@ -1,75 +1,92 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
-import com.example.hhplus.concert.domain.concert.ConcertConstants;
-import jakarta.validation.constraints.NotNull;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 
 public class ConcertQuery {
 
-  public record GetConcertByIdQuery(
-      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
-      Long id
-  ) {
+  public record GetConcertByIdQuery(Long id) {
 
+    public GetConcertByIdQuery {
+      if (id == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetConcertByIdWithLockQuery(
-      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
-      Long id
-  ) {
+  public record GetConcertByIdWithLockQuery(Long id) {
 
+    public GetConcertByIdWithLockQuery {
+      if (id == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetConcertScheduleByIdQuery(
-      @NotNull(message = ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL)
-      Long concertScheduleId
-  ) {
+  public record GetConcertScheduleByIdQuery(Long concertScheduleId) {
 
+    public GetConcertScheduleByIdQuery {
+      if (concertScheduleId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+      }
+    }
   }
 
-  public record FindReservableConcertSchedulesQuery(
-      @NotNull(message = ConcertConstants.CONCERT_ID_MUST_NOT_BE_NULL)
-      Long concertId
-  ) {
+  public record FindReservableConcertSchedulesQuery(Long concertId) {
 
+    public FindReservableConcertSchedulesQuery {
+      if (concertId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetConcertSeatByIdQuery(
-      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
-      Long concertSeatId
-  ) {
+  public record GetConcertSeatByIdQuery(Long concertSeatId) {
 
+    public GetConcertSeatByIdQuery {
+      if (concertSeatId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetConcertSeatByIdWithLockQuery(
-      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_MUST_NOT_BE_NULL)
-      Long concertSeatId
-  ) {
+  public record GetConcertSeatByIdWithLockQuery(Long concertSeatId) {
 
+    public GetConcertSeatByIdWithLockQuery {
+      if (concertSeatId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      }
+    }
   }
 
+  public record FindReservableConcertSeatsQuery(Long concertScheduleId) {
 
-  public record FindReservableConcertSeatsQuery(
-      @NotNull(message = ConcertConstants.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL)
-      Long concertScheduleId
-  ) {
-
+    public FindReservableConcertSeatsQuery {
+      if (concertScheduleId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetReservationByIdQuery(
-      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
-      Long reservationId
-  ) {
+  public record GetReservationByIdQuery(Long reservationId) {
 
+    public GetReservationByIdQuery {
+      if (reservationId == null) {
+        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+      }
+    }
   }
 
-  public record GetReservationByIdWithLockQuery(
-      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
-      Long reservationId
-  ) {
+  public record GetReservationByIdWithLockQuery(Long reservationId) {
 
+    public GetReservationByIdWithLockQuery {
+      if (reservationId == null) {
+        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+      }
+    }
   }
 
   public record FindAllExpiredReservationsWithLockQuery() {
-
+    // 이 경우에는 특별한 필드가 없으므로 유효성 검사는 불필요
   }
 }

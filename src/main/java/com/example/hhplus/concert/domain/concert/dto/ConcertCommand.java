@@ -1,48 +1,56 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
-import com.example.hhplus.concert.domain.concert.ConcertConstants;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import java.util.List;
 
 public class ConcertCommand {
 
-  public record ReserveConcertSeatCommand(
-      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_NOT_NULL)
-      Long concertSeatId
-  ) {
+  public record ReserveConcertSeatCommand(Long concertSeatId) {
 
+    public ReserveConcertSeatCommand {
+      if (concertSeatId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      }
+    }
   }
 
-  public record CreateReservationCommand(
-      @NotNull(message = ConcertConstants.CONCERT_SEAT_ID_NOT_NULL)
-      Long concertSeatId,
+  public record CreateReservationCommand(Long concertSeatId, Long userId) {
 
-      @NotNull(message = ConcertConstants.USER_ID_NOT_NULL)
-      Long userId
-  ) {
-
+    public CreateReservationCommand {
+      if (concertSeatId == null) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+      }
+      if (userId == null) {
+        throw new BusinessException(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+      }
+    }
   }
 
-  public record ConfirmReservationCommand(
-      @NotNull(message = ConcertConstants.RESERVATION_ID_MUST_NOT_BE_NULL)
-      Long reservationId
-  ) {
+  public record ConfirmReservationCommand(Long reservationId) {
 
+    public ConfirmReservationCommand {
+      if (reservationId == null) {
+        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+      }
+    }
   }
 
-  public record CancelReservationsByIdsCommand(
-      @NotEmpty(message = ConcertConstants.RESERVATION_IDS_MUST_NOT_BE_NULL)
-      List<Long> reservationIds
-  ) {
+  public record CancelReservationsByIdsCommand(List<Long> reservationIds) {
 
+    public CancelReservationsByIdsCommand {
+      if (reservationIds == null || reservationIds.isEmpty()) {
+        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+      }
+    }
   }
 
-  public record ReleaseConcertSeatsByIdsCommand(
-      @NotEmpty(message = ConcertConstants.CONCERT_SEAT_IDS_MUST_NOT_BE_NULL)
-      List<Long> concertSeatIds
-  ) {
+  public record ReleaseConcertSeatsByIdsCommand(List<Long> concertSeatIds) {
 
+    public ReleaseConcertSeatsByIdsCommand {
+      if (concertSeatIds == null || concertSeatIds.isEmpty()) {
+        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      }
+    }
   }
-
 }
