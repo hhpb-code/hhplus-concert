@@ -34,7 +34,6 @@ public class WaitingQueueQueryService {
     return waitingQueueRepository.getWaitingQueue(new GetWaitingQueueByUuidParam(query.uuid()));
   }
 
-  @Transactional
   public WaitingQueueWithPosition getWaitingQueuePosition(
       GetWaitingQueuePositionByUuid query) {
     final WaitingQueue waitingQueue = waitingQueueRepository.getWaitingQueue(
