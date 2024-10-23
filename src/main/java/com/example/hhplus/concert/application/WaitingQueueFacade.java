@@ -79,7 +79,6 @@ public class WaitingQueueFacade {
     waitingQueue.validateConcertId(concertSchedule.getConcertId());
   }
 
-  // NOTE: 이 메서드는 스케줄러로 주기적으로 실행되어야 합니다.
   @Transactional
   public void activateWaitingQueues() {
     final List<Long> concertIds = waitingQueueQueryService.findDistinctConcertIds(
@@ -103,7 +102,6 @@ public class WaitingQueueFacade {
     }
   }
 
-  // NOTE: 이 메서드는 스케줄러로 주기적으로 실행되어야 합니다.
   @Transactional
   public void expireWaitingQueues() {
     waitingQueueCommandService.expireWaitingQueues();
