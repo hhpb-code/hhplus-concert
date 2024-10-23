@@ -3,13 +3,12 @@ package com.example.hhplus.concert.domain.concert.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CancelReservationsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConcertSeatsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,12 +28,12 @@ class ConcertCommandTest {
       final Long concertSeatId = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ReserveConcertSeatCommand(concertSeatId));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -64,12 +63,12 @@ class ConcertCommandTest {
       final Long userId = 1L;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_FOUND.getMessage());
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -80,12 +79,12 @@ class ConcertCommandTest {
       final Long userId = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.RESERVATION_USER_NOT_MATCHED.getMessage());
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -116,12 +115,12 @@ class ConcertCommandTest {
       final Long reservationId = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ConfirmReservationCommand(reservationId));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -150,12 +149,12 @@ class ConcertCommandTest {
       final List<Long> reservationIds = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -165,12 +164,12 @@ class ConcertCommandTest {
       final List<Long> reservationIds = List.of();
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.RESERVATION_NOT_FOUND.getMessage());
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -200,12 +199,12 @@ class ConcertCommandTest {
       final List<Long> concertSeatIds = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED.getMessage());
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -215,12 +214,12 @@ class ConcertCommandTest {
       final List<Long> concertSeatIds = List.of();
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED.getMessage());
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test

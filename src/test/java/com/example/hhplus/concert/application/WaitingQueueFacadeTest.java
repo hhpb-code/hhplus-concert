@@ -3,12 +3,11 @@ package com.example.hhplus.concert.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
 import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
@@ -90,14 +89,14 @@ class WaitingQueueFacadeTest {
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
 
       // when
-      final BusinessException result = assertThrows(
-          BusinessException.class, () -> {
+      final Exception result = assertThrows(
+          Exception.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(
-          WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND
+          .getMessage());
     }
 
     @Test
@@ -113,14 +112,14 @@ class WaitingQueueFacadeTest {
           .build());
 
       // when
-      final BusinessException result = assertThrows(
-          BusinessException.class, () -> {
+      final Exception result = assertThrows(
+          Exception.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(
-          WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+          .getMessage());
     }
 
     @Test
@@ -136,14 +135,14 @@ class WaitingQueueFacadeTest {
           .build());
 
       // when
-      final BusinessException result = assertThrows(
-          BusinessException.class, () -> {
+      final Exception result = assertThrows(
+          Exception.class, () -> {
             waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
           });
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(
-          WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+          .getMessage());
     }
 
     @Test
@@ -228,15 +227,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
                   concertId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
       }
 
       @Test
@@ -252,15 +251,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
                   concertId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_STATUS);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
+            .getMessage());
       }
 
       @Test
@@ -277,15 +276,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
                   concertId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
 
       }
 
@@ -304,15 +303,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
                   notMatchConcertId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
+            .getMessage());
       }
 
       @Test
@@ -357,15 +356,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
                   scheduleId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
       }
 
       @Test
@@ -381,15 +380,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
                   scheduleId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_STATUS);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
+            .getMessage());
       }
 
       @Test
@@ -406,15 +405,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
                   scheduleId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
 
       }
 
@@ -440,15 +439,15 @@ class WaitingQueueFacadeTest {
         final Long scheduleId = concertSchedule.getId();
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
                   scheduleId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
+            .getMessage());
       }
 
       @Test
@@ -501,15 +500,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
                   seatId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
       }
 
       @Test
@@ -525,15 +524,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
                   seatId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_STATUS);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
+            .getMessage());
       }
 
       @Test
@@ -550,15 +549,15 @@ class WaitingQueueFacadeTest {
             .build());
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
                   seatId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
+            .getMessage());
 
       }
 
@@ -590,15 +589,15 @@ class WaitingQueueFacadeTest {
         final Long seatId = concertSeat.getId();
 
         // when
-        final BusinessException result = assertThrows(
-            BusinessException.class, () -> {
+        final Exception result = assertThrows(
+            Exception.class, () -> {
               waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
                   seatId);
             });
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(
-            WaitingQueueErrorCode.INVALID_CONCERT_ID);
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.Concert.INVALID_CONCERT_ID.getMessage());
       }
 
       @Test

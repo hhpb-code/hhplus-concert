@@ -1,8 +1,8 @@
 package com.example.hhplus.concert.domain.concert.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
+import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -43,7 +43,7 @@ public class ConcertSchedule extends BaseEntity {
   public void validateReservationTime() {
     LocalDateTime now = LocalDateTime.now();
     if (now.isBefore(reservationStartAt) || now.isAfter(reservationEndAt)) {
-      throw new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_RESERVABLE);
+      throw new CoreException(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE);
     }
   }
 }

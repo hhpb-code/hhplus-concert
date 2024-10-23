@@ -3,8 +3,7 @@ package com.example.hhplus.concert.domain.concert.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,12 +24,12 @@ class ConcertSeatTest {
           .build();
 
       // when
-      BusinessException businessException = assertThrows(BusinessException.class,
+      Exception exception = assertThrows(Exception.class,
           concertSeat::reserve);
 
       // then
-      assertThat(businessException.getErrorCode()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED);
+      assertThat(exception.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED.getMessage());
     }
 
     @Test
@@ -63,12 +62,12 @@ class ConcertSeatTest {
           .build();
 
       // when
-      BusinessException businessException = assertThrows(BusinessException.class,
+      Exception exception = assertThrows(Exception.class,
           concertSeat::release);
 
       // then
-      assertThat(businessException.getErrorCode()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      assertThat(exception.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test
@@ -101,12 +100,12 @@ class ConcertSeatTest {
           .build();
 
       // when
-      BusinessException businessException = assertThrows(BusinessException.class,
+      Exception exception = assertThrows(Exception.class,
           concertSeat::validateReserved);
 
       // then
-      assertThat(businessException.getErrorCode()).isEqualTo(
-          ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      assertThat(exception.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
     }
 
     @Test

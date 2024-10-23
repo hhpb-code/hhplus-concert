@@ -1,8 +1,8 @@
 package com.example.hhplus.concert.domain.concert.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
+import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,11 +44,11 @@ public class Reservation extends BaseEntity {
 
   public void confirm() {
     if (status == ReservationStatus.CONFIRMED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_PAID);
     }
 
     if (status == ReservationStatus.CANCELED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
     }
 
     this.status = ReservationStatus.CONFIRMED;
@@ -56,11 +56,11 @@ public class Reservation extends BaseEntity {
 
   public void cancel() {
     if (status == ReservationStatus.CANCELED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
     }
 
     if (status == ReservationStatus.CONFIRMED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_PAID);
     }
 
     this.status = ReservationStatus.CANCELED;
@@ -68,15 +68,15 @@ public class Reservation extends BaseEntity {
 
   public void validateConfirmConditions(Long userId) {
     if (!this.userId.equals(userId)) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+      throw new CoreException(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
     }
 
     if (status == ReservationStatus.CANCELED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_CANCELED);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
     }
 
     if (status == ReservationStatus.CONFIRMED) {
-      throw new BusinessException(ConcertErrorCode.RESERVATION_ALREADY_PAID);
+      throw new CoreException(ErrorType.Concert.RESERVATION_ALREADY_PAID);
     }
   }
 }

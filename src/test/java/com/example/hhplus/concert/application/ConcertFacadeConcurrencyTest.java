@@ -2,14 +2,13 @@ package com.example.hhplus.concert.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import com.example.hhplus.concert.domain.payment.model.Payment;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
@@ -106,8 +105,8 @@ class ConcertFacadeConcurrencyTest {
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
               concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
-            } catch (BusinessException e) {
-              if (e.getErrorCode().equals(ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED)) {
+            } catch (CoreException e) {
+              if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
                 return;
               }
 
@@ -179,8 +178,8 @@ class ConcertFacadeConcurrencyTest {
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
               concertFacade.payReservation(reservation.getId(), user.getId());
-            } catch (BusinessException e) {
-              if (e.getErrorCode().equals(ConcertErrorCode.RESERVATION_ALREADY_PAID)) {
+            } catch (CoreException e) {
+              if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
                 return;
               }
 
@@ -252,8 +251,8 @@ class ConcertFacadeConcurrencyTest {
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
               concertFacade.payReservation(reservations.get(i).getId(), user.getId());
-            } catch (BusinessException e) {
-              if (e.getErrorCode().equals(UserErrorCode.NOT_ENOUGH_BALANCE)) {
+            } catch (CoreException e) {
+              if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
                 return;
               }
 

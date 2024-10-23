@@ -3,9 +3,8 @@ package com.example.hhplus.concert.domain.payment.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.payment.PaymentErrorCode;
 import com.example.hhplus.concert.domain.payment.dto.PaymentCommand.CreatePaymentCommand;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,12 +25,12 @@ class PaymentCommandTest {
       final Integer amount = 1000;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreatePaymentCommand(reservationId, userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          PaymentErrorCode.RESERVATION_ID_NULL.getMessage());
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -43,11 +42,12 @@ class PaymentCommandTest {
       final Integer amount = 1000;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreatePaymentCommand(reservationId, userId, amount));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(PaymentErrorCode.USER_ID_NULL.getMessage());
+      assertThat(exception.getMessage()).isEqualTo(
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -59,12 +59,12 @@ class PaymentCommandTest {
       final Integer amount = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreatePaymentCommand(reservationId, userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          PaymentErrorCode.AMOUNT_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.AMOUNT_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -76,11 +76,11 @@ class PaymentCommandTest {
       final Integer amount = -1;
 
       // when & then
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreatePaymentCommand(reservationId, userId, amount));
 
       assertThat(exception.getMessage()).isEqualTo(
-          PaymentErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
@@ -92,12 +92,12 @@ class PaymentCommandTest {
       final Integer amount = 0;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new CreatePaymentCommand(reservationId, userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          PaymentErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test

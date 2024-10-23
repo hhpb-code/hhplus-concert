@@ -3,9 +3,8 @@ package com.example.hhplus.concert.domain.payment.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.payment.PaymentErrorCode;
 import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentByIdQuery;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,11 +23,12 @@ class PaymentQueryTest {
       final Long paymentId = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new GetPaymentByIdQuery(paymentId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(PaymentErrorCode.PAYMENT_NOT_FOUND.getMessage());
+      assertThat(exception.getMessage()).isEqualTo(
+          ErrorType.Payment.PAYMENT_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test

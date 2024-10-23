@@ -1,4 +1,4 @@
-package com.example.hhplus.concert.domain.common.exception.model;
+package com.example.hhplus.concert.domain.support.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

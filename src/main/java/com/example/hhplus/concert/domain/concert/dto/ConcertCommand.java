@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import java.util.List;
 
 public class ConcertCommand {
@@ -10,7 +10,7 @@ public class ConcertCommand {
 
     public ReserveConcertSeatCommand {
       if (concertSeatId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -19,10 +19,10 @@ public class ConcertCommand {
 
     public CreateReservationCommand {
       if (concertSeatId == null) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
       if (userId == null) {
-        throw new BusinessException(ConcertErrorCode.RESERVATION_USER_NOT_MATCHED);
+        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -31,7 +31,7 @@ public class ConcertCommand {
 
     public ConfirmReservationCommand {
       if (reservationId == null) {
-        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -40,7 +40,7 @@ public class ConcertCommand {
 
     public CancelReservationsByIdsCommand {
       if (reservationIds == null || reservationIds.isEmpty()) {
-        throw new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND);
+        throw new CoreException(ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -49,7 +49,7 @@ public class ConcertCommand {
 
     public ReleaseConcertSeatsByIdsCommand {
       if (concertSeatIds == null || concertSeatIds.isEmpty()) {
-        throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+        throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
     }
   }

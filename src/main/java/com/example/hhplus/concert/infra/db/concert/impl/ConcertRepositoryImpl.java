@@ -1,7 +1,5 @@
 package com.example.hhplus.concert.infra.db.concert.impl;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllExpiredReservationsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
@@ -19,6 +17,8 @@ import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.repository.ConcertRepository;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertScheduleJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
@@ -62,21 +62,20 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
   @Override
   public Concert getConcert(GetConcertByIdParam param) {
-    return concertJpaRepository.findById(param.id()).orElseThrow(() -> new BusinessException(
-        ConcertErrorCode.CONCERT_NOT_FOUND));
+    return concertJpaRepository.findById(param.id())
+        .orElseThrow(() -> new CoreException(ErrorType.Concert.CONCERT_NOT_FOUND));
   }
 
   @Override
   public Concert getConcert(GetConcertByIdWithLockParam param) {
     return concertJpaRepository.findByIdWithLock(param.id())
-        .orElseThrow(() -> new BusinessException(
-            ConcertErrorCode.CONCERT_NOT_FOUND));
+        .orElseThrow(() -> new CoreException(ErrorType.Concert.CONCERT_NOT_FOUND));
   }
 
   @Override
   public ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param) {
     return concertScheduleJpaRepository.findById(param.concertScheduleId()).orElseThrow(
-        () -> new BusinessException(ConcertErrorCode.CONCERT_SCHEDULE_NOT_FOUND));
+        () -> new CoreException(ErrorType.Concert.CONCERT_SCHEDULE_NOT_FOUND));
   }
 
   @Override
@@ -90,13 +89,13 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   @Override
   public ConcertSeat getConcertSeat(GetConcertSeatByIdParam param) {
     return concertSeatJpaRepository.findById(param.concertSeatId()).orElseThrow(
-        () -> new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND));
+        () -> new CoreException(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND));
   }
 
   @Override
   public ConcertSeat getConcertSeat(GetConcertSeatByIdWithLockParam param) {
     return concertSeatJpaRepository.findByIdWithLock(param.concertSeatId()).orElseThrow(
-        () -> new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_FOUND));
+        () -> new CoreException(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND));
   }
 
   @Override
@@ -109,13 +108,13 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   @Override
   public Reservation getReservation(GetReservationByIdParam param) {
     return reservationJpaRepository.findById(param.reservationId()).orElseThrow(
-        () -> new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND));
+        () -> new CoreException(ErrorType.Concert.RESERVATION_NOT_FOUND));
   }
 
   @Override
   public Reservation getReservation(GetReservationByIdWithLockParam param) {
     return reservationJpaRepository.findByIdWithLock(param.reservationId()).orElseThrow(
-        () -> new BusinessException(ConcertErrorCode.RESERVATION_NOT_FOUND));
+        () -> new CoreException(ErrorType.Concert.RESERVATION_NOT_FOUND));
   }
 
   @Override

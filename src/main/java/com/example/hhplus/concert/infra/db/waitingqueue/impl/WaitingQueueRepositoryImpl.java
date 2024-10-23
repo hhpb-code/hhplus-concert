@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.infra.db.waitingqueue.impl;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.CountWaitingQueueByConcertIdAndStatusParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam;
@@ -40,22 +40,20 @@ public class WaitingQueueRepositoryImpl implements WaitingQueueRepository {
 
   @Override
   public WaitingQueue getWaitingQueue(GetWaitingQueueByIdParam param) {
-    return waitingQueueJpaRepository.findById(param.id()).orElseThrow(() -> new BusinessException(
-        WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
+    return waitingQueueJpaRepository.findById(param.id())
+        .orElseThrow(() -> new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override
   public WaitingQueue getWaitingQueue(GetWaitingQueueByUuidParam param) {
     return waitingQueueJpaRepository.findByUuid(param.uuid())
-        .orElseThrow(() -> new BusinessException(
-            WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
+        .orElseThrow(() -> new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override
   public WaitingQueue getWaitingQueue(GetWaitingQueueByUuidWithLockParam param) {
     return waitingQueueJpaRepository.findByUuid(param.uuid())
-        .orElseThrow(() -> new BusinessException(
-            WaitingQueueErrorCode.WAITING_QUEUE_NOT_FOUND));
+        .orElseThrow(() -> new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND));
   }
 
   @Override

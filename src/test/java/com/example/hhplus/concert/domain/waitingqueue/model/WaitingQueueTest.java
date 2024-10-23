@@ -3,9 +3,8 @@ package com.example.hhplus.concert.domain.waitingqueue.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueErrorCode;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,11 +30,12 @@ class WaitingQueueTest {
           .plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_STATUS);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_ALREADY_ACTIVATED.getMessage());
     }
 
     @Test
@@ -52,11 +52,12 @@ class WaitingQueueTest {
           .plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_STATUS);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.INVALID_STATUS.getMessage());
     }
 
     @Test
@@ -72,11 +73,12 @@ class WaitingQueueTest {
           .minusMinutes(1);
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_EXPIRED_AT);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.INVALID_EXPIRED_AT.getMessage());
     }
 
 
@@ -117,11 +119,12 @@ class WaitingQueueTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           waitingQueue::validateNotExpired);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
     }
 
     @Test
@@ -136,11 +139,12 @@ class WaitingQueueTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           waitingQueue::validateNotExpired);
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
     }
 
     @Test
@@ -240,11 +244,12 @@ class WaitingQueueTest {
             .build();
 
         // when
-        final BusinessException result = assertThrows(BusinessException.class,
+        final Exception result = assertThrows(Exception.class,
             waitingQueue::validateProcessing);
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_STATUS);
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.INVALID_STATUS.getMessage());
       }
 
       @Test
@@ -259,11 +264,12 @@ class WaitingQueueTest {
             .build();
 
         // when
-        final BusinessException result = assertThrows(BusinessException.class,
+        final Exception result = assertThrows(Exception.class,
             waitingQueue::validateProcessing);
 
         // then
-        assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.WAITING_QUEUE_EXPIRED);
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
       }
 
       @Test
@@ -301,11 +307,12 @@ class WaitingQueueTest {
           .build();
 
       // when
-      final BusinessException result = assertThrows(BusinessException.class,
+      final Exception result = assertThrows(Exception.class,
           () -> waitingQueue.validateConcertId(2L));
 
       // then
-      assertThat(result.getErrorCode()).isEqualTo(WaitingQueueErrorCode.INVALID_CONCERT_ID);
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.INVALID_CONCERT_ID.getMessage());
     }
 
     @Test

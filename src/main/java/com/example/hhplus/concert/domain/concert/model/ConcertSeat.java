@@ -1,8 +1,8 @@
 package com.example.hhplus.concert.domain.concert.model;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.common.exception.model.BaseEntity;
-import com.example.hhplus.concert.domain.concert.ConcertErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
+import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -41,7 +41,7 @@ public class ConcertSeat extends BaseEntity {
 
   public void reserve() {
     if (this.isReserved) {
-      throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_ALREADY_RESERVED);
+      throw new CoreException(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED);
     }
 
     this.isReserved = true;
@@ -49,7 +49,7 @@ public class ConcertSeat extends BaseEntity {
 
   public void release() {
     if (!this.isReserved) {
-      throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      throw new CoreException(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
 
     this.isReserved = false;
@@ -57,7 +57,7 @@ public class ConcertSeat extends BaseEntity {
 
   public void validateReserved() {
     if (!this.isReserved) {
-      throw new BusinessException(ConcertErrorCode.CONCERT_SEAT_NOT_RESERVED);
+      throw new CoreException(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
   }
 }

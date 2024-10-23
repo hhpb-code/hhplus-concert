@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.user.dto;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 
 public class UserCommand {
 
@@ -9,13 +9,13 @@ public class UserCommand {
 
     public ChargeUserWalletAmountByWalletIdCommand {
       if (walletId == null) {
-        throw new BusinessException(UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL);
       }
       if (amount == null) {
-        throw new BusinessException(UserErrorCode.AMOUNT_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.AMOUNT_MUST_NOT_BE_NULL);
       }
       if (amount <= 0) {
-        throw new BusinessException(UserErrorCode.AMOUNT_MUST_BE_POSITIVE);
+        throw new CoreException(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
       }
     }
   }
@@ -24,13 +24,13 @@ public class UserCommand {
 
     public WithdrawUserWalletAmountCommand {
       if (userId == null) {
-        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
       if (amount == null) {
-        throw new BusinessException(UserErrorCode.AMOUNT_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.AMOUNT_MUST_NOT_BE_NULL);
       }
       if (amount <= 0) {
-        throw new BusinessException(UserErrorCode.AMOUNT_MUST_BE_POSITIVE);
+        throw new CoreException(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
       }
     }
   }

@@ -3,8 +3,7 @@ package com.example.hhplus.concert.domain.user.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.ChargeUserWalletAmountByWalletIdCommand;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.WithdrawUserWalletAmountCommand;
 import org.junit.jupiter.api.DisplayName;
@@ -26,12 +25,12 @@ class UserCommandTest {
       final Integer amount = 1000;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ChargeUserWalletAmountByWalletIdCommand(walletId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -42,12 +41,12 @@ class UserCommandTest {
       final Integer amount = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ChargeUserWalletAmountByWalletIdCommand(walletId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.AMOUNT_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -58,12 +57,12 @@ class UserCommandTest {
       final Integer amount = -1;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ChargeUserWalletAmountByWalletIdCommand(walletId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
@@ -74,12 +73,12 @@ class UserCommandTest {
       final Integer amount = 0;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new ChargeUserWalletAmountByWalletIdCommand(walletId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
@@ -113,12 +112,12 @@ class UserCommandTest {
       final Integer amount = 1000;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new WithdrawUserWalletAmountCommand(userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.USER_ID_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -129,12 +128,12 @@ class UserCommandTest {
       final Integer amount = null;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new WithdrawUserWalletAmountCommand(userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_NOT_BE_NULL.getMessage());
+          ErrorType.User.AMOUNT_MUST_NOT_BE_NULL.getMessage());
     }
 
     @Test
@@ -145,12 +144,12 @@ class UserCommandTest {
       final Integer amount = -1;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new WithdrawUserWalletAmountCommand(userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test
@@ -161,12 +160,12 @@ class UserCommandTest {
       final Integer amount = 0;
 
       // when
-      final BusinessException exception = assertThrows(BusinessException.class,
+      final Exception exception = assertThrows(Exception.class,
           () -> new WithdrawUserWalletAmountCommand(userId, amount));
 
       // then
       assertThat(exception.getMessage()).isEqualTo(
-          UserErrorCode.AMOUNT_MUST_BE_POSITIVE.getMessage());
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
     }
 
     @Test

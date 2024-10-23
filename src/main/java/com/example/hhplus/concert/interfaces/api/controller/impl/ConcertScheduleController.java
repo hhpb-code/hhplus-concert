@@ -1,11 +1,10 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
-import com.example.hhplus.concert.application.WaitingQueueFacade;
-import com.example.hhplus.concert.interfaces.api.CommonHttpHeader;
 import com.example.hhplus.concert.interfaces.api.controller.IConcertScheduleController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ConcertSeatResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.GetAvailableSeatsResponse;
+import com.example.hhplus.concert.interfaces.api.support.CommonHttpHeader;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +21,13 @@ public class ConcertScheduleController implements IConcertScheduleController {
 
   private final ConcertFacade concertFacade;
 
-  private final WaitingQueueFacade waitingQueueFacade;
-
-  @GetMapping("{scheduleId}/available-seats")
+  @GetMapping("{concertScheduleId}/available-seats")
   public ResponseEntity<GetAvailableSeatsResponse> getAvailableSeats(
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid,
-      @PathVariable Long scheduleId
+      @PathVariable Long concertScheduleId
   ) {
-    waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-        scheduleId);
-
-    List<ConcertSeatResponse> concertSeats = concertFacade.getReservableConcertSeats(scheduleId)
+    List<ConcertSeatResponse> concertSeats = concertFacade.getReservableConcertSeats(
+            concertScheduleId)
         .stream()
         .map(ConcertSeatResponse::new)
         .toList();

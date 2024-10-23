@@ -13,8 +13,8 @@ public interface IConcertScheduleController {
   ResponseEntity<GetAvailableSeatsResponse> getAvailableSeats(
       @Schema(description = "대기열 토큰 UUID", example = "123e4567-e89b-12d3-a456-426614174000")
       String waitingQueueTokenUuid,
-      
+
       @Schema(description = "콘서트 일정 ID", example = "1")
-      Long scheduleId);
+      Long concertScheduleId);
 
 }

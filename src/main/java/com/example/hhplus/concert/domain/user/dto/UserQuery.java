@@ -1,7 +1,7 @@
 package com.example.hhplus.concert.domain.user.dto;
 
-import com.example.hhplus.concert.domain.common.exception.BusinessException;
-import com.example.hhplus.concert.domain.user.UserErrorCode;
+import com.example.hhplus.concert.domain.support.error.CoreException;
+import com.example.hhplus.concert.domain.support.error.ErrorType;
 
 public class UserQuery {
 
@@ -9,7 +9,7 @@ public class UserQuery {
 
     public GetUserByIdQuery {
       if (id == null) {
-        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -18,7 +18,7 @@ public class UserQuery {
 
     public GetUserWalletByUserIdQuery {
       if (userId == null) {
-        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -27,7 +27,7 @@ public class UserQuery {
 
     public GetUserWalletByUserIdWithLockQuery {
       if (userId == null) {
-        throw new BusinessException(UserErrorCode.USER_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
     }
   }
@@ -36,7 +36,7 @@ public class UserQuery {
 
     public GetUserWalletByIdQuery {
       if (walletId == null) {
-        throw new BusinessException(UserErrorCode.WALLET_ID_MUST_NOT_BE_NULL);
+        throw new CoreException(ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL);
       }
     }
   }
