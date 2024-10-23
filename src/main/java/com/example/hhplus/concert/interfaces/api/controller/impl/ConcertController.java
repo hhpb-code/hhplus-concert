@@ -1,7 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
-import com.example.hhplus.concert.application.WaitingQueueFacade;
 import com.example.hhplus.concert.interfaces.api.controller.IConcertController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ConcertScheduleResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.GetAvailableSchedulesResponse;
@@ -21,15 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConcertController implements IConcertController {
 
   private final ConcertFacade concertFacade;
-  private final WaitingQueueFacade waitingQueueFacade;
 
   @GetMapping("/{concertId}/available-schedules")
   public ResponseEntity<GetAvailableSchedulesResponse> getAvailableSchedules(
       @PathVariable Long concertId,
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
-    waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid, concertId);
-
     List<ConcertScheduleResponse> concertSchedules = concertFacade.getReservableConcertSchedules(
             concertId)
         .stream()

@@ -1,7 +1,6 @@
 package com.example.hhplus.concert.interfaces.api.controller.impl;
 
 import com.example.hhplus.concert.application.ConcertFacade;
-import com.example.hhplus.concert.application.WaitingQueueFacade;
 import com.example.hhplus.concert.interfaces.api.controller.IConcertSeatController;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ReservationResponse;
 import com.example.hhplus.concert.interfaces.api.dto.ConcertControllerDto.ReserveSeatResponse;
@@ -22,17 +21,12 @@ public class ConcertSeatController implements IConcertSeatController {
 
   private final ConcertFacade concertFacade;
 
-  private final WaitingQueueFacade waitingQueueFacade;
-
   @PostMapping("/{concertSeatId}/reservation")
   public ResponseEntity<ReserveSeatResponse> reserveSeat(
       @PathVariable Long concertSeatId,
       @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId,
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
-    waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-        concertSeatId);
-
     ReservationResponse reservation = new ReservationResponse(
         concertFacade.reserveConcertSeat(concertSeatId, userId));
 

@@ -8,6 +8,7 @@ import org.springframework.boot.logging.LogLevel;
 @AllArgsConstructor
 @Getter
 public enum ErrorType implements IErrorType {
+  INVALID_REQUEST(ErrorCode.BAD_REQUEST, "유효하지 않은 요청입니다.", LogLevel.WARN),
   ;
 
   private final ErrorCode code;
@@ -31,6 +32,7 @@ public enum ErrorType implements IErrorType {
         LogLevel.WARN),
     AVAILABLE_SLOTS_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "사용 가능한 슬롯은 0보다 커야 합니다.",
         LogLevel.WARN),
+    WAITING_QUEUE_TOKEN_UUID_REQUIRED(ErrorCode.BAD_REQUEST, "대기열 토큰 UUID는 필수입니다.", LogLevel.WARN),
     ;
 
     private final ErrorCode code;
