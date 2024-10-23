@@ -58,6 +58,23 @@ class WaitingQueueFacadeTest {
   class CreateWaitingQueueToken {
 
     @Test
+    @DisplayName("대기열 토큰 생성 실패 - concertId가 null인 경우")
+    void shouldThrowBusinessExceptionWhenCreateWaitingQueueTokenWithNullConcertId() {
+      // given
+      final Long concertId = null;
+
+      // when
+      final Exception result = assertThrows(
+          Exception.class, () -> {
+            waitingQueueFacade.createWaitingQueueToken(concertId);
+          });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL
+          .getMessage());
+    }
+
+    @Test
     @DisplayName("대기열 토큰 생성 성공")
     void shouldCreateWaitingQueueToken() {
       // given
@@ -81,6 +98,42 @@ class WaitingQueueFacadeTest {
   @Nested
   @DisplayName("대기열 토큰 순서 조회")
   class GetWaitingQueuePosition {
+
+    @Test
+    @DisplayName("대기열 토큰 순서 조회 실패 - waitingQueueTokenUuid가 null인 경우")
+    void shouldThrowBusinessExceptionWhenGetWaitingQueuePositionWithNullToken() {
+      // given
+      final String waitingQueueTokenUuid = null;
+
+      // when
+      final Exception result = assertThrows(
+          Exception.class, () -> {
+            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+          });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+              .getMessage());
+    }
+
+    @Test
+    @DisplayName("대기열 토큰 순서 조회 실패 - waitingQueueTokenUuid가 빈 문자열인 경우")
+    void shouldThrowBusinessExceptionWhenGetWaitingQueuePositionWithEmptyToken() {
+      // given
+      final String waitingQueueTokenUuid = "";
+
+      // when
+      final Exception result = assertThrows(
+          Exception.class, () -> {
+            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+          });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+              .getMessage());
+    }
 
     @Test
     @DisplayName("대기열 토큰 순서 조회 실패 - 존재하지 않는 토큰")
@@ -214,6 +267,90 @@ class WaitingQueueFacadeTest {
     class validateWaitingQueueProcessingAndConcertIdTest {
 
       @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullToken() {
+        // given
+        final String waitingQueueTokenUuid = null;
+        final Long concertId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 빈 문자열인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithEmptyToken() {
+        // given
+        final String waitingQueueTokenUuid = "";
+        final Long concertId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 -  concertId가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullConcertId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final Long concertId = null;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
+            .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - 존재하지 않는 토큰")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNotExistsToken() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        final Long concertId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+                  concertId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND
+            .getMessage());
+      }
+
+      @Test
       @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")
       void shouldThrowBusinessExceptionWhenValidateProcessingWithExpiredToken() {
         // given
@@ -341,6 +478,73 @@ class WaitingQueueFacadeTest {
     @Nested
     @DisplayName("대기열 활성 여부 검증 by scheduleId")
     class validateWaitingQueueProcessingAndScheduleIdTest {
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullToken() {
+        // given
+        final String waitingQueueTokenUuid = null;
+        final Long scheduleId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 빈 문자열인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithEmptyToken() {
+        // given
+        final String waitingQueueTokenUuid = "";
+        final Long scheduleId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - scheduleId가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullScheduleId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final Long scheduleId = null;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+                  scheduleId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL
+                .getMessage());
+      }
+
 
       @Test
       @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")
@@ -485,6 +689,72 @@ class WaitingQueueFacadeTest {
     @Nested
     @DisplayName("대기열 활성 여부 검증 by seatId")
     class validateWaitingQueueProcessingAndSeatIdTest {
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullToken() {
+        // given
+        final String waitingQueueTokenUuid = null;
+        final Long seatId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - waitingQueueTokenUuid가 빈 문자열인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithEmptyToken() {
+        // given
+        final String waitingQueueTokenUuid = "";
+        final Long seatId = 1L;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
+                .getMessage());
+      }
+
+      @Test
+      @DisplayName("대기열 활성 여부 검증 실패 - seatId가 null인 경우")
+      void shouldThrowBusinessExceptionWhenValidateProcessingWithNullSeatId() {
+        // given
+        final String waitingQueueTokenUuid = UUID.randomUUID().toString();
+        waitingQueueJpaRepository.save(WaitingQueue.builder()
+            .uuid(waitingQueueTokenUuid)
+            .concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING)
+            .expiredAt(LocalDateTime.now().plusMinutes(1))
+            .build());
+        final Long seatId = null;
+
+        // when
+        final Exception result = assertThrows(
+            Exception.class, () -> {
+              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
+                  seatId);
+            });
+
+        // then
+        assertThat(result.getMessage()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL
+                .getMessage());
+      }
 
       @Test
       @DisplayName("대기열 활성 여부 검증 실패 - 대기열 상태가 EXPIRED")

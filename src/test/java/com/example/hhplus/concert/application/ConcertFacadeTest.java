@@ -68,6 +68,22 @@ class ConcertFacadeTest {
   class GetReservableConcertSchedulesTest {
 
     @Test
+    @DisplayName("예약 가능한 콘서트 일정 조회 실패 - 콘서트 ID가 null")
+    void shouldThrowConcertIdMustNotBeNullException() {
+      // given
+      final Long concertId = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.getReservableConcertSchedules(concertId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+    }
+
+    @Test
     @DisplayName("예약 가능한 콘서트 일정 조회 실패 - 콘서트가 존재하지 않음")
     void shouldThrowConcertNotFoundException() {
       // given
@@ -141,6 +157,22 @@ class ConcertFacadeTest {
   @Nested
   @DisplayName("예약 가능한 좌석 조회")
   class GetReservableConcertSeatsTest {
+
+    @Test
+    @DisplayName("예약 가능한 좌석 조회 실패 - 콘서트 일정 ID가 null")
+    void shouldThrowConcertScheduleIdMustNotBeNullException() {
+      // given
+      final Long concertScheduleId = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.getReservableConcertSeats(concertScheduleId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL.getMessage());
+    }
 
     @Test
     @DisplayName("예약 가능한 좌석 조회 실패 - 콘서트 일정이 존재하지 않음")
@@ -222,6 +254,9 @@ class ConcertFacadeTest {
               .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
       final Long concertScheduleId = concertSchedule.getId();
 
+      ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
+          .isReserved(true).build();
+
       final List<ConcertSeat> concertSeats = concertSeatJpaRepository.saveAll(
           List.of(
               ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
@@ -254,6 +289,41 @@ class ConcertFacadeTest {
   @Nested
   @DisplayName("콘서트 좌석 예약")
   class ReserveConcertSeatTest {
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 실패 - 좌석 ID가 null")
+    void shouldThrowConcertSeatIdMustNotBeNullException() {
+      // given
+      final Long concertSeatId = null;
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Long userId = user.getId();
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.reserveConcertSeat(concertSeatId, userId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 실패 - 사용자 ID가 null")
+    void shouldThrowUserIdMustNotBeNullException() {
+      // given
+      final Long concertSeatId = 1L;
+      final Long userId = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.reserveConcertSeat(concertSeatId, userId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+    }
 
     @Test
     @DisplayName("콘서트 좌석 예약 실패 - 사용자가 존재하지 않음")
@@ -396,6 +466,44 @@ class ConcertFacadeTest {
   @Nested
   @DisplayName("콘서트 좌석 예약 내역 결제 테스트")
   class PayReservationTest {
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 ID가 null")
+    void shouldThrowReservationIdMustNotBeNullException() {
+      // given
+      final Long reservationId = null;
+      final Long userId = 1L;
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.payReservation(reservationId, userId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자 ID가 null")
+    void shouldThrowUserIdMustNotBeNullException() {
+      // given
+      final Reservation reservation = reservationJpaRepository.save(
+          Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
+              .status(ReservationStatus.WAITING)
+              .build());
+      final Long reservationId = reservation.getId();
+      final Long userId = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class, () -> {
+        concertFacade.payReservation(reservationId, userId);
+      });
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.Concert.RESERVATION_USER_NOT_MATCHED.getMessage());
+    }
 
     @Test
     @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 내역이 존재하지 않음")

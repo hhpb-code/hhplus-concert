@@ -41,6 +41,99 @@ class UserFacadeTest {
   class ChargeUserWalletAmount {
 
     @Test
+    @DisplayName("사용자 지갑 잔액 충전 실패 - userId가 null")
+    void shouldThrowUserIdMustNotBeNullException() {
+      // given
+      final Long userId = null;
+      final Long walletId = 1L;
+      final Integer amount = 1000;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 잔액 충전 실패 - walletId가 null")
+    void shouldThrowWalletIdMustNotBeNullException() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Long userId = user.getId();
+      walletJpaRepository.save(Wallet.builder().userId(user.getId()).build());
+      final Long walletId = null;
+      final Integer amount = 1000;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.WALLET_NOT_MATCH_USER.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 잔액 충전 실패 - amount가 null")
+    void shouldThrowAmountMustNotBeNullException() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Long userId = user.getId();
+      final Wallet wallet = walletJpaRepository.save(Wallet.builder().userId(user.getId()).build());
+      final Long walletId = wallet.getId();
+      final Integer amount = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.AMOUNT_MUST_NOT_BE_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 잔액 충전 실패 - amount가 0보다 작음")
+    void shouldThrowAmountMustBePositiveException() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Long userId = user.getId();
+      final Wallet wallet = walletJpaRepository.save(Wallet.builder().userId(user.getId()).build());
+      final Long walletId = wallet.getId();
+      final Integer amount = -1;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자 지갑 잔액 충전 실패 - amount가 0")
+    void shouldThrowAmountMustNotBeZeroException() {
+      // given
+      final User user = userJpaRepository.save(User.builder().name("name").build());
+      final Long userId = user.getId();
+      final Wallet wallet = walletJpaRepository.save(Wallet.builder().userId(user.getId()).build());
+      final Long walletId = wallet.getId();
+      final Integer amount = 0;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+    }
+
+    @Test
     @DisplayName("사용자 지갑 잔액 충전 실패 - 사용자가 존재하지 않음")
     void shouldThrowUserNotFoundException() {
       // given
@@ -163,6 +256,21 @@ class UserFacadeTest {
   @Nested
   @DisplayName("사용자 지갑 조회")
   class GetWallet {
+
+    @Test
+    @DisplayName("사용자 지갑 조회 실패 - userId가 null")
+    void shouldThrowUserIdMustNotBeNullException() {
+      // given
+      final Long userId = null;
+
+      // when
+      final Exception result = assertThrows(Exception.class,
+          () -> userFacade.getWallet(userId));
+
+      // then
+      assertThat(result.getMessage()).isEqualTo(
+          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+    }
 
     @Test
     @DisplayName("사용자 지갑 조회 실패 - 사용자가 존재하지 않음")
