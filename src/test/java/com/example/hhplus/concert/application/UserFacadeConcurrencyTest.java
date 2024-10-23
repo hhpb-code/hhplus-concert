@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@DisplayName("UserFacade 동이성 테스트")
+@DisplayName("UserFacade 동시성 테스트")
 class UserFacadeConcurrencyTest {
 
   @Autowired
