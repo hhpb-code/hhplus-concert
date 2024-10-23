@@ -66,7 +66,7 @@ public class ConcertFacade {
   }
 
   @Transactional
-  public Reservation reserveConcertSeat(Long concertSeatId, Long userId) {
+  public Reservation reserveConcertSeatWithPessimisticLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 
     var concertSeat = concertQueryService.getConcertSeat(

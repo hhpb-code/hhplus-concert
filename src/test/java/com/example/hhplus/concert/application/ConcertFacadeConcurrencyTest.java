@@ -75,9 +75,9 @@ class ConcertFacadeConcurrencyTest {
 
     @Test
     @DisplayName("동시성 테스트 - 동일 좌석 동시 예약")
-    void shouldSuccessfullyReserveConcertSeat() {
+    void shouldSuccessfullyReserveConcertSeatWithPessimisticLock() {
       // given
-      final int threadCount = 10;
+      final int threadCount = 1000;
       ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
           ConcertSchedule.builder()
               .concertId(1L)
@@ -104,7 +104,8 @@ class ConcertFacadeConcurrencyTest {
       final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
           .mapToObj(i -> CompletableFuture.runAsync(() -> {
             try {
-              concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
+              concertFacade.reserveConcertSeatWithPessimisticLock(concertSeat.getId(),
+                  users.get(i).getId());
             } catch (CoreException e) {
               if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
                 return;

@@ -28,7 +28,7 @@ public class ConcertSeatController implements IConcertSeatController {
       @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String waitingQueueTokenUuid
   ) {
     ReservationResponse reservation = new ReservationResponse(
-        concertFacade.reserveConcertSeat(concertSeatId, userId));
+        concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId));
 
     return ResponseEntity.status(HttpStatus.CREATED).body(new ReserveSeatResponse(reservation));
   }
