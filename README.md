@@ -9,3 +9,4 @@
 - [ERD Diagram](./docs/ERD.md)
 - [API Spec](./docs/API_SPEC.md)
 - [Swagger](./docs/SWAGGER.md)
+- [CHAPTER2 LEARN LOG](./docs/CHAPTER2_LEARN_LOG.md)
