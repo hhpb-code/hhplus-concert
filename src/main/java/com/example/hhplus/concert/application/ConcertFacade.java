@@ -10,6 +10,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservable
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
@@ -23,12 +24,15 @@ import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentById
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import com.example.hhplus.concert.domain.payment.service.PaymentCommandService;
 import com.example.hhplus.concert.domain.payment.service.PaymentQueryService;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.WithdrawUserWalletAmountCommand;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.service.UserCommandService;
 import com.example.hhplus.concert.domain.user.service.UserQueryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +69,10 @@ public class ConcertFacade {
         new FindReservableConcertSeatsQuery(concertScheduleId));
   }
 
+  /*
+   * @deprecated Pessimistic Locking을 사용한 예약 기능은 성능 이슈가 있어서 사용하지 않습니다.
+   */
+  @Deprecated(forRemoval = false)
   @Transactional
   public Reservation reserveConcertSeatWithPessimisticLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
@@ -79,6 +87,31 @@ public class ConcertFacade {
 
     concertCommandService.reserveConcertSeat(
         new ReserveConcertSeatCommand(concertSeat.getId()));
+
+    Long reservationId = concertCommandService.createReservation(
+        new CreateReservationCommand(concertSeat.getId(), user.getId()));
+
+    return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
+  }
+
+  @Retryable(
+      retryFor = RuntimeException.class,
+      noRetryFor = CoreException.class,
+      backoff = @Backoff(50)
+  )
+  @Transactional
+  public Reservation reserveConcertSeat(Long concertSeatId, Long userId) {
+    var user = userQueryService.getUser(new GetUserByIdQuery(userId));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(concertSeatId));
+
+    var concertSchedule = concertQueryService.getConcertSchedule(
+        new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
+
+    concertSchedule.validateReservationTime();
+
+    concertSeat.reserve();
 
     Long reservationId = concertCommandService.createReservation(
         new CreateReservationCommand(concertSeat.getId(), user.getId()));
