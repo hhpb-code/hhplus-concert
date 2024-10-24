@@ -21,6 +21,7 @@ import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +33,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 @DisplayName("ConcertFacade 동시성 테스트")
 class ConcertFacadeConcurrencyTest {
+
+  private static final Logger logger = Logger.getLogger(
+      ConcertFacadeConcurrencyTest.class.getName());
 
   @Autowired
   private ConcertFacade concertFacade;
@@ -73,63 +77,151 @@ class ConcertFacadeConcurrencyTest {
   @DisplayName("콘서트 좌석 예약 동시성 테스트")
   class ReserveConcertSeatConcurrencyTest {
 
-    @Test
-    @DisplayName("동시성 테스트 - 동일 좌석 동시 예약")
-    void shouldSuccessfullyReserveConcertSeat() {
-      // given
-      final int threadCount = 10;
-      ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder()
-              .concertId(1L)
-              .concertAt(LocalDateTime.now().plusDays(1))
-              .reservationStartAt(LocalDateTime.now().minusDays(1))
-              .reservationEndAt(LocalDateTime.now().plusDays(1))
-              .build()
-      );
+    @Nested
+    @DisplayName("동시성 테스트 - 동일 좌석 동시 예약 비관적 락")
+    class ReserveConcertSeatWithPessimisticLock {
 
-      ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder()
-              .concertScheduleId(concertSchedule.getId())
-              .number(1)
-              .isReserved(false)
-              .price(10000)
-              .build()
-      );
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 예약")
+      void shouldSuccessfullyReserveConcertSeatWithPessimisticLock() {
 
-      List<User> users = IntStream.range(0, threadCount)
-          .mapToObj(i -> userJpaRepository.save(User.builder().name("user" + i).build()))
-          .toList();
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
 
-      // when
-      final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
-          .mapToObj(i -> CompletableFuture.runAsync(() -> {
-            try {
-              concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
-            } catch (CoreException e) {
-              if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
-                return;
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(false)
+                .price(10000)
+                .build()
+        );
+
+        List<User> users = IntStream.range(0, threadCount)
+            .mapToObj(i -> userJpaRepository.save(User.builder().name("user" + i).build()))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.reserveConcertSeatWithPessimisticLock(concertSeat.getId(),
+                    users.get(i).getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
+                  return;
+                }
+
+                throw e;
               }
+            }))
+            .toList();
 
-              throw e;
-            }
-          }))
-          .toList();
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        long start = System.currentTimeMillis();
 
-      // then
-      final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(concertSeat.getId())
-          .get();
-      assertThat(reservedConcertSeat.getIsReserved()).isTrue();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-      final List<Reservation> reservations = reservationJpaRepository.findAll();
-      assertThat(reservations).hasSize(1);
+        long end = System.currentTimeMillis();
 
-      final Reservation reservation = reservations.get(0);
-      assertThat(reservation.getConcertSeatId()).isEqualTo(concertSeat.getId());
-      assertThat(reservation.getUserId()).isNotNull();
-      assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        logger.info("비관적 락 Execution Time: " + (end - start) + "ms");
 
+        // then
+        final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(
+                concertSeat.getId())
+            .get();
+        assertThat(reservedConcertSeat.getIsReserved()).isTrue();
+
+        final List<Reservation> reservations = reservationJpaRepository.findAll();
+        assertThat(reservations).hasSize(1);
+
+        final Reservation reservation = reservations.get(0);
+        assertThat(reservation.getConcertSeatId()).isEqualTo(concertSeat.getId());
+        assertThat(reservation.getUserId()).isNotNull();
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+
+      }
     }
+
+    @Nested
+    @DisplayName("동시성 테스트 - 동일 좌석 동시 예약 낙관적 락")
+    class ReserveConcertSeatWithOptimisticLock {
+
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 예약")
+      void shouldSuccessfullyReserveConcertSeat() {
+
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(false)
+                .price(10000)
+                .build()
+        );
+
+        List<User> users = IntStream.range(0, threadCount)
+            .mapToObj(i -> userJpaRepository.save(User.builder().name("user" + i).build()))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        logger.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(
+                concertSeat.getId())
+            .get();
+        assertThat(reservedConcertSeat.getIsReserved()).isTrue();
+
+        final List<Reservation> reservations = reservationJpaRepository.findAll();
+        assertThat(reservations).hasSize(1);
+
+        final Reservation reservation = reservations.get(0);
+        assertThat(reservation.getConcertSeatId()).isEqualTo(concertSeat.getId());
+        assertThat(reservation.getUserId()).isNotNull();
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+
+      }
+    }
+
   }
 
   @Nested

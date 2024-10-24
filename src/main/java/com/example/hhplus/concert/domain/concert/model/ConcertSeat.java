@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,9 @@ public class ConcertSeat extends BaseEntity {
 
   @Column(nullable = false)
   private Boolean isReserved;
+
+  @Version
+  private Long version;
 
   @Builder
   public ConcertSeat(Long id, Long concertScheduleId, Integer number, Integer price,
