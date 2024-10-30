@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentByIdQuery;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,12 +24,11 @@ class PaymentQueryTest {
       final Long paymentId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetPaymentByIdQuery(paymentId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Payment.PAYMENT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Payment.PAYMENT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test

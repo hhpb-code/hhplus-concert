@@ -12,6 +12,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeat
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,12 +36,12 @@ class ConcertQueryTest {
         final Long concertId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetConcertByIdQuery(concertId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -69,12 +70,12 @@ class ConcertQueryTest {
         final Long concertId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetConcertByIdWithLockQuery(concertId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -104,12 +105,12 @@ class ConcertQueryTest {
       final Long concertScheduleId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetConcertScheduleByIdQuery(concertScheduleId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -138,12 +139,11 @@ class ConcertQueryTest {
       final Long concertId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new FindReservableConcertSchedulesQuery(concertId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -177,12 +177,12 @@ class ConcertQueryTest {
         final Long concertSeatId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetConcertSeatByIdQuery(concertSeatId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -211,12 +211,12 @@ class ConcertQueryTest {
         final Long concertSeatId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetConcertSeatByIdWithLockQuery(concertSeatId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -247,12 +247,12 @@ class ConcertQueryTest {
       final Long concertScheduleId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new FindReservableConcertSeatsQuery(concertScheduleId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -286,12 +286,12 @@ class ConcertQueryTest {
         final Long reservationId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetReservationByIdQuery(reservationId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -320,12 +320,12 @@ class ConcertQueryTest {
         final Long reservationId = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetReservationByIdWithLockQuery(reservationId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
       }
 
       @Test

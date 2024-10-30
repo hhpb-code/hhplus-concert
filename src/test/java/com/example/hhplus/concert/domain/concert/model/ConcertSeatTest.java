@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.concert.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,26 +20,21 @@ class ConcertSeatTest {
     @DisplayName("예약 실패")
     void shouldThrowExceptionWhenReserve() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(true)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(true).build();
 
       // when
-      Exception exception = assertThrows(Exception.class,
-          concertSeat::reserve);
+      final CoreException exception = assertThrows(CoreException.class, concertSeat::reserve);
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED);
     }
 
     @Test
     @DisplayName("예약 성공")
     void shouldSuccessfullyReserve() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(false)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(false).build();
 
       // when
       concertSeat.reserve();
@@ -57,26 +53,20 @@ class ConcertSeatTest {
     @DisplayName("예약 해지 실패 - 이미 해지된 좌석")
     void shouldThrowExceptionWhenRelease() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(false)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(false).build();
 
       // when
-      Exception exception = assertThrows(Exception.class,
-          concertSeat::release);
+      final CoreException exception = assertThrows(CoreException.class, concertSeat::release);
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
 
     @Test
     @DisplayName("예약 해지 성공")
     void shouldSuccessfullyRelease() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(true)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(true).build();
 
       // when
       concertSeat.release();
@@ -95,26 +85,21 @@ class ConcertSeatTest {
     @DisplayName("예약된 좌석 확인 실패")
     void shouldThrowExceptionWhenValidateReserved() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(false)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(false).build();
 
       // when
-      Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           concertSeat::validateReserved);
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
 
     @Test
     @DisplayName("예약된 좌석 확인 성공")
     void shouldSuccessfullyValidateReserved() {
       // given
-      ConcertSeat concertSeat = ConcertSeat.builder()
-          .isReserved(true)
-          .build();
+      ConcertSeat concertSeat = ConcertSeat.builder().isReserved(true).build();
 
       // when
       concertSeat.validateReserved();

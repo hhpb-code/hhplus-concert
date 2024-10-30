@@ -3,6 +3,7 @@ package com.example.hhplus.concert.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.UserConstants;
 import com.example.hhplus.concert.domain.user.model.User;
@@ -49,12 +50,11 @@ class UserFacadeTest {
       final Integer amount = 1000;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -68,12 +68,11 @@ class UserFacadeTest {
       final Integer amount = 1000;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.WALLET_NOT_MATCH_USER.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.WALLET_NOT_MATCH_USER);
     }
 
     @Test
@@ -87,12 +86,11 @@ class UserFacadeTest {
       final Integer amount = null;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.AMOUNT_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.AMOUNT_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -106,12 +104,11 @@ class UserFacadeTest {
       final Integer amount = -1;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
     }
 
     @Test
@@ -125,12 +122,11 @@ class UserFacadeTest {
       final Integer amount = 0;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
     }
 
     @Test
@@ -142,11 +138,11 @@ class UserFacadeTest {
       final Integer amount = 1000;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(userId, walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
     }
 
     @Test
@@ -158,11 +154,11 @@ class UserFacadeTest {
       final Integer amount = 1000;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(user.getId(), walletId, amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.WALLET_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.WALLET_NOT_FOUND);
     }
 
 
@@ -177,11 +173,11 @@ class UserFacadeTest {
       final Integer amount = 1000;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.WALLET_NOT_MATCH_USER.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.WALLET_NOT_MATCH_USER);
     }
 
     @Test
@@ -193,12 +189,11 @@ class UserFacadeTest {
       final Integer amount = -1;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
     }
 
     @Test
@@ -210,12 +205,11 @@ class UserFacadeTest {
       final Integer amount = 0;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.AMOUNT_MUST_BE_POSITIVE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.AMOUNT_MUST_BE_POSITIVE);
     }
 
     @Test
@@ -228,11 +222,11 @@ class UserFacadeTest {
       final Integer amount = UserConstants.MAX_WALLET_AMOUNT + 1;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), amount));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.EXCEED_LIMIT_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.EXCEED_LIMIT_AMOUNT);
     }
 
     @Test
@@ -264,12 +258,11 @@ class UserFacadeTest {
       final Long userId = null;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.getWallet(userId));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -279,11 +272,11 @@ class UserFacadeTest {
       final Long userId = 1L;
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.getWallet(userId));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
     }
 
     @Test
@@ -293,11 +286,11 @@ class UserFacadeTest {
       final User user = userJpaRepository.save(User.builder().name("name").build());
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> userFacade.getWallet(user.getId()));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.WALLET_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.WALLET_NOT_FOUND);
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.waitingqueue.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import java.time.LocalDateTime;
@@ -21,64 +22,52 @@ class WaitingQueueTest {
     @DisplayName("대기열 토큰 활성화 실패 - 이미 활성화된 토큰")
     void shouldThrowExceptionWhenActivateAlreadyActivatedToken() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.PROCESSING)
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.PROCESSING).build();
       final LocalDateTime expiredAt = LocalDateTime.now()
           .plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_ALREADY_ACTIVATED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_ALREADY_ACTIVATED);
     }
 
     @Test
     @DisplayName("대기열 토큰 활성화 실패 - 만료된 토큰")
     void shouldThrowExceptionWhenActivateExpiredToken() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .expiredAt(LocalDateTime.now().minusMinutes(1))
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.WAITING).expiredAt(LocalDateTime.now().minusMinutes(1))
           .build();
       final LocalDateTime expiredAt = LocalDateTime.now()
           .plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.INVALID_STATUS.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS);
     }
 
     @Test
     @DisplayName("대기열 토큰 활성화 실패 - 만료 시간이 현재 시간보다 빠름")
     void shouldThrowExceptionWhenActivateExpiredAtIsBeforeNow() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .build();
-      final LocalDateTime expiredAt = LocalDateTime.now()
-          .minusMinutes(1);
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.WAITING).build();
+      final LocalDateTime expiredAt = LocalDateTime.now().minusMinutes(1);
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> waitingQueue.activate(expiredAt));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.INVALID_EXPIRED_AT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_EXPIRED_AT);
     }
 
 
@@ -86,11 +75,8 @@ class WaitingQueueTest {
     @DisplayName("대기열 토큰 활성화 성공")
     void shouldSuccessfullyActivateToken() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.WAITING).build();
       final LocalDateTime expiredAt = LocalDateTime.now()
           .plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
 
@@ -112,51 +98,38 @@ class WaitingQueueTest {
     @DisplayName("대기열 만료 검증 실패 - 만료된 토큰")
     void shouldThrowExceptionWhenValidateExpiredToken() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.EXPIRED)
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.EXPIRED).build();
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           waitingQueue::validateNotExpired);
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
     @DisplayName("대기열 만료 검증 실패 - 만료 시간이 현재 시간보다 늦음")
     void shouldThrowExceptionWhenValidateExpiredAtIsAfterNow() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.PROCESSING)
-          .expiredAt(LocalDateTime.now())
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build();
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           waitingQueue::validateNotExpired);
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
     @DisplayName("대기열 만료 검증 성공")
     void shouldSuccessfullyValidateNotExpired() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .expiredAt(LocalDateTime.now().plusMinutes(1))
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+          .status(WaitingQueueStatus.WAITING).expiredAt(LocalDateTime.now().plusMinutes(1)).build();
 
       // when
       waitingQueue.validateNotExpired();
@@ -179,11 +152,8 @@ class WaitingQueueTest {
       @DisplayName("대기열 활성 여부 확인 false - 대기열 상태가 활성 상태가 아님")
       void shouldReturnFalseWhenStatusIsNotProcessing() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.WAITING)
-            .build();
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.WAITING).build();
 
         // when
         final boolean result = waitingQueue.isProcessing();
@@ -196,12 +166,8 @@ class WaitingQueueTest {
       @DisplayName("대기열 활성 여부 확인 false - 만료 시간이 현재 시간보다 빠름")
       void shouldReturnFalseWhenExpiredAtIsBeforeNow() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now())
-            .build();
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build();
 
         // when
         final boolean result = waitingQueue.isProcessing();
@@ -214,11 +180,8 @@ class WaitingQueueTest {
       @DisplayName("대기열 활성 여부 확인 true - 대기열 상태가 활성 상태이고 만료 시간이 현재 시간보다 늦음")
       void shouldReturnTrueWhenStatusIsProcessingAndExpiredAtIsAfterNow() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
             .build();
 
         // when
@@ -237,50 +200,38 @@ class WaitingQueueTest {
       @DisplayName("대기열 활성 여부 확인 실패 - 대기열 상태가 활성 상태가 아님")
       void shouldThrowExceptionWhenStatusIsNotProcessing() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.WAITING)
-            .build();
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.WAITING).build();
 
         // when
-        final Exception result = assertThrows(Exception.class,
+        final CoreException result = assertThrows(CoreException.class,
             waitingQueue::validateProcessing);
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.INVALID_STATUS.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS);
       }
 
       @Test
       @DisplayName("대기열 활성 여부 확인 실패 - 만료 시간이 현재 시간보다 빠름")
       void shouldThrowExceptionWhenExpiredAtIsBeforeNow() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now())
-            .build();
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build();
 
         // when
-        final Exception result = assertThrows(Exception.class,
+        final CoreException result = assertThrows(CoreException.class,
             waitingQueue::validateProcessing);
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
       }
 
       @Test
       @DisplayName("대기열 활성 여부 확인 성공 - 대기열 상태가 활성 상태이고 만료 시간이 현재 시간보다 늦음")
       void shouldSuccessfullyValidateProcessing() {
         // given
-        final var waitingQueue = WaitingQueue.builder()
-            .uuid("uuid")
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
+        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
+            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
             .build();
 
         // when
@@ -301,28 +252,21 @@ class WaitingQueueTest {
     @DisplayName("대기열 콘서트 ID 검증 실패 - 콘서트 ID가 일치하지 않음")
     void shouldThrowExceptionWhenConcertIdIsNotMatched() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L).build();
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> waitingQueue.validateConcertId(2L));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.INVALID_CONCERT_ID.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID);
     }
 
     @Test
     @DisplayName("대기열 콘서트 ID 검증 성공 - 콘서트 ID가 일치함")
     void shouldSuccessfullyValidateConcertId() {
       // given
-      final var waitingQueue = WaitingQueue.builder()
-          .uuid("uuid")
-          .concertId(1L)
-          .build();
+      final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L).build();
 
       // when
       waitingQueue.validateConcertId(1L);

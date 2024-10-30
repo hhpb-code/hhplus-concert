@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.waitingqueue.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ActivateWaitingQueuesCommand;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.CreateWaitingQueueCommand;
@@ -24,12 +25,11 @@ class WaitingQueueCommandTest {
       final Long concertId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CreateWaitingQueueCommand(concertId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -59,12 +59,11 @@ class WaitingQueueCommandTest {
       final Integer availableSlots = 1;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -75,12 +74,12 @@ class WaitingQueueCommandTest {
       final Integer availableSlots = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -91,12 +90,12 @@ class WaitingQueueCommandTest {
       final Integer availableSlots = 0;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_BE_POSITIVE.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_BE_POSITIVE);
     }
 
     @Test
@@ -107,12 +106,12 @@ class WaitingQueueCommandTest {
       final Integer availableSlots = -1;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_BE_POSITIVE.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_BE_POSITIVE);
     }
 
     @Test

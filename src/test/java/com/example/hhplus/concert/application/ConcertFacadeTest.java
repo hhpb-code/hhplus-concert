@@ -10,6 +10,7 @@ import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import com.example.hhplus.concert.domain.payment.model.Payment;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
@@ -74,13 +75,12 @@ class ConcertFacadeTest {
       final Long concertId = null;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.getReservableConcertSchedules(concertId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -90,12 +90,12 @@ class ConcertFacadeTest {
       final Long concertId = 1L;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.getReservableConcertSchedules(concertId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.CONCERT_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_NOT_FOUND);
     }
 
     @Test
@@ -121,18 +121,13 @@ class ConcertFacadeTest {
           Concert.builder().title("title").description("description").build());
       final Long concertId = concert.getId();
 
-      final List<ConcertSchedule> concertSchedules =
-          concertScheduleJpaRepository.saveAll(
-              List.of(
-                  ConcertSchedule.builder().concertId(concertId)
-                      .concertAt(LocalDateTime.now().plusDays(1))
-                      .reservationStartAt(LocalDateTime.now())
-                      .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build(),
-                  ConcertSchedule.builder().concertId(concertId)
-                      .concertAt(LocalDateTime.now().plusDays(2))
-                      .reservationStartAt(LocalDateTime.now())
-                      .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build()
-              ));
+      final List<ConcertSchedule> concertSchedules = concertScheduleJpaRepository.saveAll(List.of(
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(1))
+              .reservationStartAt(LocalDateTime.now())
+              .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build(),
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(2))
+              .reservationStartAt(LocalDateTime.now())
+              .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build()));
 
       // when
       final List<ConcertSchedule> result = concertFacade.getReservableConcertSchedules(concertId);
@@ -165,13 +160,13 @@ class ConcertFacadeTest {
       final Long concertScheduleId = null;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.getReservableConcertSeats(concertScheduleId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -181,13 +176,12 @@ class ConcertFacadeTest {
       final Long concertScheduleId = 1L;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.getReservableConcertSeats(concertScheduleId);
       });
 
       // then
-      assertThat(result.getMessage())
-          .isEqualTo(ErrorType.Concert.CONCERT_SCHEDULE_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SCHEDULE_NOT_FOUND);
     }
 
     @Test
@@ -199,20 +193,19 @@ class ConcertFacadeTest {
       final Long concertId = concert.getId();
 
       final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder().concertId(concertId)
-              .concertAt(LocalDateTime.now().plusDays(1))
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(1))
               .reservationStartAt(LocalDateTime.now().plusMinutes(1))
               .reservationEndAt(LocalDateTime.now().plusMinutes(2)).build());
       final Long concertScheduleId = concertSchedule.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.getReservableConcertSeats(concertScheduleId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE);
     }
 
     @Test
@@ -224,13 +217,13 @@ class ConcertFacadeTest {
       final Long concertId = concert.getId();
 
       final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder().concertId(concertId)
-              .concertAt(LocalDateTime.now().plusDays(1))
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(1))
               .reservationStartAt(LocalDateTime.now())
               .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
       final Long concertScheduleId = concertSchedule.getId();
-      concertSeatJpaRepository.save(ConcertSeat.builder().concertScheduleId(concertScheduleId)
-          .number(1).price(100).isReserved(true).build());
+      concertSeatJpaRepository.save(
+          ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
+              .isReserved(true).build());
 
       // when
       final List<ConcertSeat> result = concertFacade.getReservableConcertSeats(concertScheduleId);
@@ -248,8 +241,7 @@ class ConcertFacadeTest {
       final Long concertId = concert.getId();
 
       final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder().concertId(concertId)
-              .concertAt(LocalDateTime.now().plusDays(1))
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(1))
               .reservationStartAt(LocalDateTime.now())
               .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
       final Long concertScheduleId = concertSchedule.getId();
@@ -257,13 +249,11 @@ class ConcertFacadeTest {
       ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
           .isReserved(true).build();
 
-      final List<ConcertSeat> concertSeats = concertSeatJpaRepository.saveAll(
-          List.of(
-              ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
-                  .isReserved(false).build(),
-              ConcertSeat.builder().concertScheduleId(concertScheduleId).number(2).price(200)
-                  .isReserved(false).build()
-          ));
+      final List<ConcertSeat> concertSeats = concertSeatJpaRepository.saveAll(List.of(
+          ConcertSeat.builder().concertScheduleId(concertScheduleId).number(1).price(100)
+              .isReserved(false).build(),
+          ConcertSeat.builder().concertScheduleId(concertScheduleId).number(2).price(200)
+              .isReserved(false).build()));
 
       // when
       final List<ConcertSeat> result = concertFacade.getReservableConcertSeats(concertScheduleId);
@@ -303,13 +293,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -320,13 +310,12 @@ class ConcertFacadeTest {
         final Long userId = null;
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -337,12 +326,12 @@ class ConcertFacadeTest {
         final Long userId = 1L;
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
       }
 
       @Test
@@ -354,13 +343,12 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_NOT_FOUND.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
       }
 
       @Test
@@ -386,13 +374,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE);
       }
 
       @Test
@@ -405,8 +393,7 @@ class ConcertFacadeTest {
 
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
             ConcertSchedule.builder().concertId(concertId)
-                .concertAt(LocalDateTime.now().plusDays(1))
-                .reservationStartAt(LocalDateTime.now())
+                .concertAt(LocalDateTime.now().plusDays(1)).reservationStartAt(LocalDateTime.now())
                 .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
         final Long concertScheduleId = concertSchedule.getId();
 
@@ -418,13 +405,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeatWithPessimisticLock(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED);
       }
 
       @Test
@@ -437,8 +424,7 @@ class ConcertFacadeTest {
 
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
             ConcertSchedule.builder().concertId(concertId)
-                .concertAt(LocalDateTime.now().plusDays(1))
-                .reservationStartAt(LocalDateTime.now())
+                .concertAt(LocalDateTime.now().plusDays(1)).reservationStartAt(LocalDateTime.now())
                 .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
         final Long concertScheduleId = concertSchedule.getId();
 
@@ -451,8 +437,7 @@ class ConcertFacadeTest {
 
         // when
         final Reservation result = concertFacade.reserveConcertSeatWithPessimisticLock(
-            concertSeatId,
-            userId);
+            concertSeatId, userId);
 
         // then
         assertThat(result.getId()).isNotNull();
@@ -482,13 +467,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -499,13 +484,12 @@ class ConcertFacadeTest {
         final Long userId = null;
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -516,12 +500,12 @@ class ConcertFacadeTest {
         final Long userId = 1L;
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
       }
 
       @Test
@@ -533,13 +517,12 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_NOT_FOUND.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
       }
 
       @Test
@@ -565,13 +548,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE);
       }
 
       @Test
@@ -584,8 +567,7 @@ class ConcertFacadeTest {
 
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
             ConcertSchedule.builder().concertId(concertId)
-                .concertAt(LocalDateTime.now().plusDays(1))
-                .reservationStartAt(LocalDateTime.now())
+                .concertAt(LocalDateTime.now().plusDays(1)).reservationStartAt(LocalDateTime.now())
                 .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
         final Long concertScheduleId = concertSchedule.getId();
 
@@ -597,13 +579,13 @@ class ConcertFacadeTest {
         final Long userId = user.getId();
 
         // when
-        final Exception result = assertThrows(Exception.class, () -> {
+        final CoreException result = assertThrows(CoreException.class, () -> {
           concertFacade.reserveConcertSeat(concertSeatId, userId);
         });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED);
       }
 
       @Test
@@ -616,8 +598,7 @@ class ConcertFacadeTest {
 
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
             ConcertSchedule.builder().concertId(concertId)
-                .concertAt(LocalDateTime.now().plusDays(1))
-                .reservationStartAt(LocalDateTime.now())
+                .concertAt(LocalDateTime.now().plusDays(1)).reservationStartAt(LocalDateTime.now())
                 .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build());
         final Long concertScheduleId = concertSchedule.getId();
 
@@ -661,13 +642,13 @@ class ConcertFacadeTest {
       final Long userId = 1L;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -676,19 +657,17 @@ class ConcertFacadeTest {
       // given
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
       final Long userId = null;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_USER_NOT_MATCHED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
     }
 
     @Test
@@ -699,13 +678,12 @@ class ConcertFacadeTest {
       final Long userId = 1L;
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage())
-          .isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND);
     }
 
 
@@ -715,20 +693,17 @@ class ConcertFacadeTest {
       // given
       final Long userId = 1L;
       final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(1L).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.CONFIRMED)
-              .build());
+          Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+              .status(ReservationStatus.CONFIRMED).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ALREADY_PAID.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_PAID);
     }
 
     @Test
@@ -743,25 +718,21 @@ class ConcertFacadeTest {
 
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
           ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true)
-              .build());
+              .isReserved(true).build());
       final Long concertSeatId = concertSeat.getId();
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId + 1);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_USER_NOT_MATCHED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
     }
 
     @Test
@@ -771,22 +742,20 @@ class ConcertFacadeTest {
       final Long userId = 1L;
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
-              .isReserved(true)
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
               .build());
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.USER_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
     }
 
     @Test
@@ -798,18 +767,16 @@ class ConcertFacadeTest {
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_NOT_FOUND.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
     }
 
 
@@ -825,24 +792,21 @@ class ConcertFacadeTest {
 
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
           ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() + 1)
-              .isReserved(true)
-              .build());
+              .isReserved(true).build());
       final Long concertSeatId = concertSeat.getId();
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
     }
 
     @Test
@@ -853,26 +817,22 @@ class ConcertFacadeTest {
       final Long userId = user.getId();
 
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
-              .isReserved(false)
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
               .build());
       final Long concertSeatId = concertSeat.getId();
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
 
     @Test
@@ -887,25 +847,21 @@ class ConcertFacadeTest {
 
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
           ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true)
-              .build());
+              .isReserved(true).build());
       final Long concertSeatId = concertSeat.getId();
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.CANCELED)
-              .build());
+              .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
       final Long reservationId = reservation.getId();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.payReservation(reservationId, userId);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ALREADY_CANCELED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
     }
 
     @Test
@@ -920,15 +876,12 @@ class ConcertFacadeTest {
 
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
           ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true)
-              .build());
+              .isReserved(true).build());
       final Long concertSeatId = concertSeat.getId();
 
       final Reservation reservation = reservationJpaRepository.save(
           Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING)
-              .build());
+              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
       final Long reservationId = reservation.getId();
 
       // when
@@ -960,25 +913,21 @@ class ConcertFacadeTest {
     void shouldThrowConcertSeatNotReservedException() {
       // given
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
-              .isReserved(false)
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
               .build());
 
       reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
-              .reservedAt(
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L).reservedAt(
                   LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES))
-              .status(ReservationStatus.WAITING)
-              .build());
+              .status(ReservationStatus.WAITING).build());
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         concertFacade.expireReservations();
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
     }
 
     @Test
@@ -986,16 +935,13 @@ class ConcertFacadeTest {
     void shouldSuccessfullyExpireReservations() {
       // given
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
-              .isReserved(true)
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
               .build());
 
       reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
-              .reservedAt(LocalDateTime.now()
-                  .minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES - 1))
-              .status(ReservationStatus.WAITING)
-              .build());
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L).reservedAt(
+                  LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES - 1))
+              .status(ReservationStatus.WAITING).build());
 
       // when
       concertFacade.expireReservations();
@@ -1011,16 +957,13 @@ class ConcertFacadeTest {
     void shouldSuccessfullyExpireReservationsWithExpiredReservations() {
       // given
       final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100)
-              .isReserved(true)
+          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
               .build());
 
       reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L)
-              .reservedAt(LocalDateTime.now()
-                  .minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES + 1))
-              .status(ReservationStatus.WAITING)
-              .build());
+          Reservation.builder().concertSeatId(concertSeat.getId()).userId(1L).reservedAt(
+                  LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES + 1))
+              .status(ReservationStatus.WAITING).build());
 
       // when
       concertFacade.expireReservations();

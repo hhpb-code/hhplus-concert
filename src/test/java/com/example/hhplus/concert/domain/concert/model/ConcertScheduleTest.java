@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.concert.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -22,16 +23,15 @@ class ConcertScheduleTest {
       // given
       var concertSchedule = ConcertSchedule.builder()
           .reservationStartAt(LocalDateTime.now().plusDays(1))
-          .reservationEndAt(LocalDateTime.now().plusDays(2))
-          .build();
+          .reservationEndAt(LocalDateTime.now().plusDays(2)).build();
 
       // when
-      Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> concertSchedule.validateReservationTime());
 
       // then
-      assertThat(exception.getMessage()
-          .equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage()));
+      assertThat(
+          exception.getErrorType().equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE));
     }
 
     @Test
@@ -40,16 +40,15 @@ class ConcertScheduleTest {
       // given
       var concertSchedule = ConcertSchedule.builder()
           .reservationStartAt(LocalDateTime.now().minusDays(2))
-          .reservationEndAt(LocalDateTime.now().minusDays(1))
-          .build();
+          .reservationEndAt(LocalDateTime.now().minusDays(1)).build();
 
       // when
-      Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> concertSchedule.validateReservationTime());
 
       // then
-      assertThat(exception.getMessage()
-          .equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE.getMessage()));
+      assertThat(
+          exception.getErrorType().equals(ErrorType.Concert.CONCERT_SCHEDULE_NOT_RESERVABLE));
     }
 
     @Test
@@ -57,10 +56,8 @@ class ConcertScheduleTest {
     void shouldNotThrowExceptionWhenReservable() {
       // given
       var now = LocalDateTime.now();
-      var concertSchedule = ConcertSchedule.builder()
-          .reservationStartAt(now)
-          .reservationEndAt(now.plusSeconds(1))
-          .build();
+      var concertSchedule = ConcertSchedule.builder().reservationStartAt(now)
+          .reservationEndAt(now.plusSeconds(1)).build();
 
       // when
       concertSchedule.validateReservationTime();
