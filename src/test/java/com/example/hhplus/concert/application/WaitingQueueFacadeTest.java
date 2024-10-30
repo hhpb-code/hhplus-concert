@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
@@ -64,14 +65,12 @@ class WaitingQueueFacadeTest {
       final Long concertId = null;
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.createWaitingQueueToken(concertId);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.createWaitingQueueToken(concertId);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL
-          .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -106,15 +105,13 @@ class WaitingQueueFacadeTest {
       final String waitingQueueTokenUuid = null;
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-              .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
     }
 
     @Test
@@ -124,15 +121,13 @@ class WaitingQueueFacadeTest {
       final String waitingQueueTokenUuid = "";
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-              .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
     }
 
     @Test
@@ -142,14 +137,12 @@ class WaitingQueueFacadeTest {
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND
-          .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND);
     }
 
     @Test
@@ -157,22 +150,17 @@ class WaitingQueueFacadeTest {
     void shouldThrowBusinessExceptionWhenGetWaitingQueuePositionWithExpiredToken() {
       // given
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-      waitingQueueJpaRepository.save(WaitingQueue.builder()
-          .uuid(waitingQueueTokenUuid)
-          .concertId(1L)
-          .status(WaitingQueueStatus.EXPIRED)
-          .expiredAt(LocalDateTime.now())
-          .build());
+      waitingQueueJpaRepository.save(
+          WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+              .status(WaitingQueueStatus.EXPIRED).expiredAt(LocalDateTime.now()).build());
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-          .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
@@ -180,22 +168,17 @@ class WaitingQueueFacadeTest {
     void shouldThrowBusinessExceptionWhenGetWaitingQueuePositionWithExpiredTokenByExpiredAt() {
       // given
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-      waitingQueueJpaRepository.save(WaitingQueue.builder()
-          .uuid(waitingQueueTokenUuid)
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .expiredAt(LocalDateTime.now())
-          .build());
+      waitingQueueJpaRepository.save(
+          WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+              .status(WaitingQueueStatus.WAITING).expiredAt(LocalDateTime.now()).build());
 
       // when
-      final Exception result = assertThrows(
-          Exception.class, () -> {
-            waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
-          });
+      final CoreException result = assertThrows(CoreException.class, () -> {
+        waitingQueueFacade.getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-          .getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
@@ -203,16 +186,14 @@ class WaitingQueueFacadeTest {
     void shouldGetWaitingQueueWithPositionWhenStatusIsProcessing() {
       // given
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-      final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
-          .uuid(waitingQueueTokenUuid)
-          .concertId(1L)
-          .status(WaitingQueueStatus.PROCESSING)
-          .expiredAt(LocalDateTime.now().plusMinutes(1))
-          .build());
+      final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(
+          WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+              .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+              .build());
 
       // when
-      final WaitingQueueWithPosition result = waitingQueueFacade
-          .getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      final WaitingQueueWithPosition result = waitingQueueFacade.getWaitingQueueWithPosition(
+          waitingQueueTokenUuid);
 
       // then
       assertThat(result.id()).isEqualTo(waitingQueue.getId());
@@ -229,22 +210,18 @@ class WaitingQueueFacadeTest {
     @DisplayName("대기열 토큰 순서 조회 성공 - 대기열 상태가 WAITING")
     void shouldGetWaitingQueueWithPositionWhenStatusIsWaiting() {
       // given
-      waitingQueueJpaRepository.save(WaitingQueue.builder()
-          .uuid(UUID.randomUUID().toString())
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .build());
+      waitingQueueJpaRepository.save(
+          WaitingQueue.builder().uuid(UUID.randomUUID().toString()).concertId(1L)
+              .status(WaitingQueueStatus.WAITING).build());
 
       final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-      final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
-          .uuid(waitingQueueTokenUuid)
-          .concertId(1L)
-          .status(WaitingQueueStatus.WAITING)
-          .build());
+      final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(
+          WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+              .status(WaitingQueueStatus.WAITING).build());
 
       // when
-      final WaitingQueueWithPosition result = waitingQueueFacade
-          .getWaitingQueueWithPosition(waitingQueueTokenUuid);
+      final WaitingQueueWithPosition result = waitingQueueFacade.getWaitingQueueWithPosition(
+          waitingQueueTokenUuid);
 
       // then
       assertThat(result.id()).isEqualTo(waitingQueue.getId());
@@ -274,16 +251,14 @@ class WaitingQueueFacadeTest {
         final Long concertId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -294,16 +269,14 @@ class WaitingQueueFacadeTest {
         final Long concertId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -311,24 +284,20 @@ class WaitingQueueFacadeTest {
       void shouldThrowBusinessExceptionWhenValidateProcessingWithNullConcertId() {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
         final Long concertId = null;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID);
       }
 
       @Test
@@ -339,15 +308,13 @@ class WaitingQueueFacadeTest {
         final Long concertId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND);
       }
 
       @Test
@@ -356,23 +323,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long concertId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(concertId)
-            .status(WaitingQueueStatus.EXPIRED)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(concertId)
+                .status(WaitingQueueStatus.EXPIRED).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
       }
 
       @Test
@@ -381,22 +343,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long concertId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(concertId)
-            .status(WaitingQueueStatus.WAITING)
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(concertId)
+                .status(WaitingQueueStatus.WAITING).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS);
       }
 
       @Test
@@ -405,23 +363,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long concertId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(concertId)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(concertId)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  concertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              concertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
 
       }
 
@@ -432,23 +385,19 @@ class WaitingQueueFacadeTest {
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long concertId = 1L;
         final Long notMatchConcertId = 2L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(concertId)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(concertId)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-                  notMatchConcertId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
+              notMatchConcertId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID);
       }
 
       @Test
@@ -457,12 +406,10 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long concertId = 1L;
-        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(concertId)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(concertId)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
 
         // when
         waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
@@ -487,16 +434,14 @@ class WaitingQueueFacadeTest {
         final Long scheduleId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -507,16 +452,14 @@ class WaitingQueueFacadeTest {
         final Long scheduleId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -524,25 +467,21 @@ class WaitingQueueFacadeTest {
       void shouldThrowBusinessExceptionWhenValidateProcessingWithNullScheduleId() {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
         final Long scheduleId = null;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SCHEDULE_ID_MUST_NOT_BE_NULL);
       }
 
 
@@ -552,23 +491,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long scheduleId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.EXPIRED)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.EXPIRED).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
       }
 
       @Test
@@ -577,22 +511,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long scheduleId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.WAITING)
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.WAITING).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS);
       }
 
       @Test
@@ -601,23 +531,18 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long scheduleId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
 
       }
 
@@ -627,31 +552,24 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long notMatchConcertId = 2L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-            ConcertSchedule.builder()
-                .concertId(notMatchConcertId)
-                .concertAt(LocalDateTime.now())
-                .reservationStartAt(LocalDateTime.now())
-                .reservationEndAt(LocalDateTime.now())
+            ConcertSchedule.builder().concertId(notMatchConcertId).concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now()).reservationEndAt(LocalDateTime.now())
                 .build());
         final Long scheduleId = concertSchedule.getId();
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-                  scheduleId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
+              scheduleId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID);
       }
 
       @Test
@@ -659,18 +577,13 @@ class WaitingQueueFacadeTest {
       void shouldThrowBusinessExceptionWhenValidateProcessingWithProcessingToken() {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
         final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-            ConcertSchedule.builder()
-                .concertId(1L)
-                .concertAt(LocalDateTime.now())
-                .reservationStartAt(LocalDateTime.now())
-                .reservationEndAt(LocalDateTime.now())
+            ConcertSchedule.builder().concertId(1L).concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now()).reservationEndAt(LocalDateTime.now())
                 .build());
         final Long scheduleId = concertSchedule.getId();
 
@@ -698,16 +611,13 @@ class WaitingQueueFacadeTest {
         final Long seatId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -718,16 +628,13 @@ class WaitingQueueFacadeTest {
         final Long seatId = 1L;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -735,25 +642,20 @@ class WaitingQueueFacadeTest {
       void shouldThrowBusinessExceptionWhenValidateProcessingWithNullSeatId() {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+                .build());
         final Long seatId = null;
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL
-                .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -762,23 +664,17 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long seatId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.EXPIRED)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.EXPIRED).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
       }
 
       @Test
@@ -787,22 +683,17 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long seatId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.WAITING)
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.WAITING).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.INVALID_STATUS);
       }
 
       @Test
@@ -811,23 +702,17 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long seatId = 1L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now())
-            .build());
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build());
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED
-            .getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
 
       }
 
@@ -837,37 +722,26 @@ class WaitingQueueFacadeTest {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
         final Long notMatchConcertId = 2L;
-        waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
-        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-            ConcertSchedule.builder()
-                .concertId(notMatchConcertId)
-                .concertAt(LocalDateTime.now())
-                .reservationStartAt(LocalDateTime.now())
-                .reservationEndAt(LocalDateTime.now())
+        waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
                 .build());
-        final ConcertSeat concertSeat = concertSeatJpaRepository.save(ConcertSeat.builder()
-            .concertScheduleId(concertSchedule.getId())
-            .number(1)
-            .price(10000)
-            .isReserved(false)
-            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder().concertId(notMatchConcertId).concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now()).reservationEndAt(LocalDateTime.now())
+                .build());
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(concertSchedule.getId()).number(1).price(10000)
+                .isReserved(false).build());
         final Long seatId = concertSeat.getId();
 
         // when
-        final Exception result = assertThrows(
-            Exception.class, () -> {
-              waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-                  seatId);
-            });
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
+        });
 
         // then
-        assertThat(result.getMessage()).isEqualTo(
-            ErrorType.Concert.INVALID_CONCERT_ID.getMessage());
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.INVALID_CONCERT_ID);
       }
 
       @Test
@@ -875,30 +749,21 @@ class WaitingQueueFacadeTest {
       void shouldThrowBusinessExceptionWhenValidateProcessingWithProcessingToken() {
         // given
         final String waitingQueueTokenUuid = UUID.randomUUID().toString();
-        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(WaitingQueue.builder()
-            .uuid(waitingQueueTokenUuid)
-            .concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING)
-            .expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build());
-        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-            ConcertSchedule.builder()
-                .concertId(1L)
-                .concertAt(LocalDateTime.now())
-                .reservationStartAt(LocalDateTime.now())
-                .reservationEndAt(LocalDateTime.now())
+        final WaitingQueue waitingQueue = waitingQueueJpaRepository.save(
+            WaitingQueue.builder().uuid(waitingQueueTokenUuid).concertId(1L)
+                .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
                 .build());
-        final ConcertSeat concertSeat = concertSeatJpaRepository.save(ConcertSeat.builder()
-            .concertScheduleId(concertSchedule.getId())
-            .number(1)
-            .price(10000)
-            .isReserved(false)
-            .build());
+        final ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder().concertId(1L).concertAt(LocalDateTime.now())
+                .reservationStartAt(LocalDateTime.now()).reservationEndAt(LocalDateTime.now())
+                .build());
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(concertSchedule.getId()).number(1).price(10000)
+                .isReserved(false).build());
         final Long seatId = concertSeat.getId();
 
         // when
-        waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-            seatId);
+        waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid, seatId);
 
         // then
         assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
@@ -918,26 +783,19 @@ class WaitingQueueFacadeTest {
     @DisplayName("대기열 활성화 성공 - 활성 자리가 없는 경우")
     void shouldSuccessfullyActivateWaitingQueuesWhenNotExistsAvailableSlots() {
       // given
-      final Concert concert = concertJpaRepository.save(Concert.builder()
-          .title("title")
-          .description("description")
-          .build());
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
       final Long concertId = concert.getId();
 
-      IntStream.range(0, WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT)
-          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.PROCESSING)
-              .expiredAt(LocalDateTime.now().plusMinutes(1))
-              .build()));
+      IntStream.range(0, WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT).forEach(
+          i -> waitingQueueJpaRepository.save(
+              WaitingQueue.builder().concertId(concertId).uuid(UUID.randomUUID().toString())
+                  .status(WaitingQueueStatus.PROCESSING)
+                  .expiredAt(LocalDateTime.now().plusMinutes(1)).build()));
       final int waitingQueueCount = 5;
-      IntStream.range(0, waitingQueueCount)
-          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .build()));
+      IntStream.range(0, waitingQueueCount).forEach(i -> waitingQueueJpaRepository.save(
+          WaitingQueue.builder().concertId(concertId).uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING).build()));
 
       // when
       waitingQueueFacade.activateWaitingQueues();
@@ -977,18 +835,13 @@ class WaitingQueueFacadeTest {
     @DisplayName("대기열 활성화 성공 - 대기열이 있는 경우")
     void shouldSuccessfullyActivateWaitingQueuesWhenExistsWaitingQueue() {
       // given
-      final Concert concert = concertJpaRepository.save(Concert.builder()
-          .title("title")
-          .description("description")
-          .build());
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
       final Long concertId = concert.getId();
       final int waitingQueueCount = WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT + 5;
-      IntStream.range(0, waitingQueueCount)
-          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .build()));
+      IntStream.range(0, waitingQueueCount).forEach(i -> waitingQueueJpaRepository.save(
+          WaitingQueue.builder().concertId(concertId).uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING).build()));
 
       // when
       waitingQueueFacade.activateWaitingQueues();
@@ -1031,28 +884,20 @@ class WaitingQueueFacadeTest {
     @DisplayName("대기열 만료 성공 - 만료 대기열이 있는 경우")
     void shouldSuccessfullyExpireWaitingQueuesWhenExistsExpiredWaitingQueue() {
       // given
-      final Concert concert = concertJpaRepository.save(Concert.builder()
-          .title("title")
-          .description("description")
-          .build());
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
       final Long concertId = concert.getId();
 
       final int expiredWaitingQueueCount = 3;
-      IntStream.range(0, expiredWaitingQueueCount)
-          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.PROCESSING)
-              .expiredAt(LocalDateTime.now().minusMinutes(1))
+      IntStream.range(0, expiredWaitingQueueCount).forEach(i -> waitingQueueJpaRepository.save(
+          WaitingQueue.builder().concertId(concertId).uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().minusMinutes(1))
               .build()));
 
       final int waitingQueueCount = 5;
-      IntStream.range(0, waitingQueueCount)
-          .forEach(i -> waitingQueueJpaRepository.save(WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .build()));
+      IntStream.range(0, waitingQueueCount).forEach(i -> waitingQueueJpaRepository.save(
+          WaitingQueue.builder().concertId(concertId).uuid(UUID.randomUUID().toString())
+              .status(WaitingQueueStatus.WAITING).build()));
 
       // when
       waitingQueueFacade.expireWaitingQueues();

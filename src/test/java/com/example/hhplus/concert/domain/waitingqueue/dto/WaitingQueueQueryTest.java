@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.waitingqueue.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.CountWaitingQueueByConcertIdAndStatusQuery;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.FindDistinctConcertIdsByStatusQuery;
@@ -32,12 +33,12 @@ class WaitingQueueQueryTest {
         final Long id = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetWaitingQueueByIdQuery(id));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_ID_MUST_NOT_BE_NULL.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_ID_MUST_NOT_BE_NULL);
       }
 
       @Test
@@ -66,12 +67,12 @@ class WaitingQueueQueryTest {
         final String uuid = null;
 
         // when
-        final Exception exception = assertThrows(Exception.class,
+        final CoreException exception = assertThrows(CoreException.class,
             () -> new GetWaitingQueueByUuid(uuid));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo(
-            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY.getMessage());
+        assertThat(exception.getErrorType()).isEqualTo(
+            ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
       }
 
       @Test
@@ -101,12 +102,12 @@ class WaitingQueueQueryTest {
       final String uuid = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetWaitingQueuePositionByUuid(uuid));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_UUID_MUST_NOT_BE_EMPTY);
     }
 
     @Test
@@ -135,12 +136,12 @@ class WaitingQueueQueryTest {
       final WaitingQueueStatus status = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new FindDistinctConcertIdsByStatusQuery(status));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -171,12 +172,11 @@ class WaitingQueueQueryTest {
       final WaitingQueueStatus status = WaitingQueueStatus.WAITING;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CountWaitingQueueByConcertIdAndStatusQuery(concertId, status));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
     }
 
 
@@ -188,12 +188,12 @@ class WaitingQueueQueryTest {
       final WaitingQueueStatus status = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CountWaitingQueueByConcertIdAndStatusQuery(concertId, status));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.WaitingQueue.WAITING_QUEUE_STATUS_MUST_NOT_BE_NULL);
     }
 
     @Test

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
@@ -41,17 +42,15 @@ class WaitingQueueQueryServiceTest {
       // given
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
-      doReturn(WaitingQueue.builder().status(WaitingQueueStatus.EXPIRED).build())
-          .when(waitingQueueReader)
-          .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
+      doReturn(WaitingQueue.builder().status(WaitingQueueStatus.EXPIRED).build()).when(
+          waitingQueueReader).getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> target.getWaitingQueuePosition(query));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
@@ -61,17 +60,15 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().status(WaitingQueueStatus.PROCESSING)
-          .expiredAt(LocalDateTime.now()).build())
-          .when(waitingQueueReader)
+          .expiredAt(LocalDateTime.now()).build()).when(waitingQueueReader)
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
       // when
-      final Exception result = assertThrows(Exception.class,
+      final CoreException result = assertThrows(CoreException.class,
           () -> target.getWaitingQueuePosition(query));
 
       // then
-      assertThat(result.getMessage()).isEqualTo(
-          ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
 
     @Test
@@ -83,10 +80,8 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().id(waitingQueueId).concertId(concertId).uuid(uuid)
-          .status(WaitingQueueStatus.PROCESSING)
-          .expiredAt(LocalDateTime.now().plusMinutes(1))
-          .build())
-          .when(waitingQueueReader)
+          .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
+          .build()).when(waitingQueueReader)
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
 
       // when
@@ -109,13 +104,10 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().id(waitingQueueId).concertId(concertId).uuid(uuid)
-          .status(WaitingQueueStatus.WAITING).build())
-          .when(waitingQueueReader)
+          .status(WaitingQueueStatus.WAITING).build()).when(waitingQueueReader)
           .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
-      doReturn(1)
-          .when(waitingQueueReader)
-          .getWaitingQueuePosition(
-              new GetWaitingQueuePositionByIdAndConcertIdParam(waitingQueueId, concertId));
+      doReturn(1).when(waitingQueueReader).getWaitingQueuePosition(
+          new GetWaitingQueuePositionByIdAndConcertIdParam(waitingQueueId, concertId));
 
       // when
       final var result = target.getWaitingQueuePosition(query);

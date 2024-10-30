@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.user.dto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByIdQuery;
@@ -26,11 +27,10 @@ class UserQueryTest {
       final Long id = null;
 
       // when & then
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetUserByIdQuery(id));
 
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -59,11 +59,10 @@ class UserQueryTest {
       final Long userId = null;
 
       // when & then
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetUserWalletByUserIdQuery(userId));
 
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -92,11 +91,10 @@ class UserQueryTest {
       final Long userId = null;
 
       // when & then
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetUserWalletByUserIdWithLockQuery(userId));
 
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -126,11 +124,10 @@ class UserQueryTest {
       final Long walletId = null;
 
       // when & then
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new GetUserWalletByIdQuery(walletId));
 
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL);
     }
 
     @Test

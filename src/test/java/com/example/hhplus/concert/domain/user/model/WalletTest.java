@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.user.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.user.UserConstants;
 import org.junit.jupiter.api.DisplayName;
@@ -23,12 +24,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.chargeAmount(null);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -38,12 +39,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.chargeAmount(-1);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -53,12 +54,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.chargeAmount(0);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -68,12 +69,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(0).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.chargeAmount(UserConstants.MAX_WALLET_AMOUNT + 1);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.EXCEED_LIMIT_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.EXCEED_LIMIT_AMOUNT);
     }
 
     @Test
@@ -102,12 +103,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.withdrawAmount(null);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -117,12 +118,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.withdrawAmount(-1);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -132,12 +133,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.withdrawAmount(0);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.INVALID_AMOUNT.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.INVALID_AMOUNT);
     }
 
     @Test
@@ -147,12 +148,12 @@ class WalletTest {
       final Wallet wallet = Wallet.builder().amount(1000).build();
 
       // when
-      final Exception result = assertThrows(Exception.class, () -> {
+      final CoreException result = assertThrows(CoreException.class, () -> {
         wallet.withdrawAmount(1001);
       });
 
       // then
-      assertThat(result.getMessage()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE.getMessage());
+      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
     }
 
     @Test

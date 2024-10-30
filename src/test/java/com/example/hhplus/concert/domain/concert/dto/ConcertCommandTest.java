@@ -8,6 +8,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReser
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConcertSeatsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -28,12 +29,12 @@ class ConcertCommandTest {
       final Long concertSeatId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ReserveConcertSeatCommand(concertSeatId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -63,12 +64,12 @@ class ConcertCommandTest {
       final Long userId = 1L;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -79,12 +80,11 @@ class ConcertCommandTest {
       final Long userId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CreateReservationCommand(concertSeatId, userId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.User.USER_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -115,12 +115,12 @@ class ConcertCommandTest {
       final Long reservationId = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ConfirmReservationCommand(reservationId));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -149,12 +149,12 @@ class ConcertCommandTest {
       final List<Long> reservationIds = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -164,12 +164,12 @@ class ConcertCommandTest {
       final List<Long> reservationIds = List.of();
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new CancelReservationsByIdsCommand(reservationIds));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -199,12 +199,12 @@ class ConcertCommandTest {
       final List<Long> concertSeatIds = null;
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
@@ -214,12 +214,12 @@ class ConcertCommandTest {
       final List<Long> concertSeatIds = List.of();
 
       // when
-      final Exception exception = assertThrows(Exception.class,
+      final CoreException exception = assertThrows(CoreException.class,
           () -> new ReleaseConcertSeatsByIdsCommand(concertSeatIds));
 
       // then
-      assertThat(exception.getMessage()).isEqualTo(
-          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL.getMessage());
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.CONCERT_SEAT_ID_MUST_NOT_BE_NULL);
     }
 
     @Test
