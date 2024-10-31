@@ -73,9 +73,6 @@ public class ConcertFacade {
         new FindReservableConcertSeatsQuery(concertScheduleId));
   }
 
-  /*
-   * @deprecated Pessimistic Locking을 사용한 예약 기능은 성능 이슈가 있어서 사용하지 않습니다.
-   */
   @Deprecated(forRemoval = false)
   public Reservation reserveConcertSeatWithPessimisticLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
@@ -117,6 +114,7 @@ public class ConcertFacade {
     return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
   }
 
+  @Deprecated(forRemoval = false)
   @DistributedLock(type = DistributedLockType.CONCERT_SEAT, keys = "concertSeatId")
   public Reservation reserveConcertSeatWithDistributedLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
@@ -138,6 +136,7 @@ public class ConcertFacade {
     return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
   }
 
+  @Deprecated(forRemoval = false)
   @Transactional
   public Payment payReservation(Long reservationId, Long userId) {
     var reservation = concertQueryService.getReservation(
@@ -165,6 +164,7 @@ public class ConcertFacade {
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
   }
 
+  @Deprecated(forRemoval = false)
   @Retryable(
       retryFor = RuntimeException.class,
       noRetryFor = CoreException.class,

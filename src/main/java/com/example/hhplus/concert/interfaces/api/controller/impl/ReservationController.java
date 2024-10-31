@@ -26,7 +26,7 @@ public class ReservationController implements IReservationController {
       @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId
   ) {
     PaymentResponse payment = new PaymentResponse(
-        concertFacade.payReservation(reservationId, userId));
+        concertFacade.payReservationWithDistributedLock(reservationId, userId));
 
     return ResponseEntity.ok(new PayReservationResponse(payment));
   }

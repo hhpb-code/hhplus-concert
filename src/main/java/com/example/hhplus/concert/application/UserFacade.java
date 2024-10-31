@@ -26,6 +26,7 @@ public class UserFacade {
 
   private final UserCommandService userCommandService;
 
+  @Deprecated(forRemoval = false)
   @Transactional
   public Wallet chargeUserWalletAmount(Long userId, Long walletId, Integer amount) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
@@ -42,6 +43,7 @@ public class UserFacade {
     return userQueryService.getWallet(new GetUserWalletByIdQuery(wallet.getId()));
   }
 
+  @Deprecated(forRemoval = false)
   @Retryable(
       retryFor = RuntimeException.class,
       noRetryFor = CoreException.class,
