@@ -24,12 +24,19 @@ import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentById
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import com.example.hhplus.concert.domain.payment.service.PaymentCommandService;
 import com.example.hhplus.concert.domain.payment.service.PaymentQueryService;
+import com.example.hhplus.concert.domain.support.DistributedLockType;
+import com.example.hhplus.concert.domain.support.annotation.DistributedLock;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.WithdrawUserWalletAmountCommand;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdWithLockQuery;
 import com.example.hhplus.concert.domain.user.service.UserCommandService;
 import com.example.hhplus.concert.domain.user.service.UserQueryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +98,27 @@ public class ConcertFacade {
   }
 
   public Reservation reserveConcertSeat(Long concertSeatId, Long userId) {
+    var user = userQueryService.getUser(new GetUserByIdQuery(userId));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(concertSeatId));
+
+    var concertSchedule = concertQueryService.getConcertSchedule(
+        new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
+
+    concertSchedule.validateReservationTime();
+
+    concertCommandService.reserveConcertSeat(
+        new ReserveConcertSeatCommand(concertSeat.getId()));
+
+    Long reservationId = concertCommandService.createReservation(
+        new CreateReservationCommand(concertSeat.getId(), user.getId()));
+
+    return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
+  }
+
+  @DistributedLock(type = DistributedLockType.CONCERT_SEAT, keys = "concertSeatId")
+  public Reservation reserveConcertSeatWithDistributedLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 
     var concertSeat = concertQueryService.getConcertSeat(
