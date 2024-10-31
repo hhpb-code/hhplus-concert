@@ -7,6 +7,7 @@ import com.example.hhplus.concert.domain.user.UserConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +25,9 @@ public class Wallet extends BaseEntity {
 
   @Column(nullable = false)
   private int amount;
+
+  @Version
+  private Long version;
 
   @Builder
   public Wallet(Long id, Long userId, int amount, LocalDateTime createdAt,
