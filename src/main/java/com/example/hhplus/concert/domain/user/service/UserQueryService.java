@@ -8,7 +8,7 @@ import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserI
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserByIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByUserIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdParam;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdIdWithLockParam;
+import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdWithLockParam;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class UserQueryService {
   }
 
   public Wallet getWallet(GetUserWalletByUserIdWithLockQuery query) {
-    return userRepository.getWallet(new GetUserWalletByWalletUserIdIdWithLockParam(query.userId()));
+    return userRepository.getWallet(new GetUserWalletByWalletUserIdWithLockParam(query.userId()));
   }
 
   public Wallet getWallet(GetUserWalletByIdQuery query) {

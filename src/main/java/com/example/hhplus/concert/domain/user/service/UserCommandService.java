@@ -3,7 +3,6 @@ package com.example.hhplus.concert.domain.user.service;
 import com.example.hhplus.concert.domain.user.UserRepository;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.ChargeUserWalletAmountByWalletIdCommand;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.WithdrawUserWalletAmountCommand;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdIdWithLockParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,8 +25,7 @@ public class UserCommandService {
   }
 
   public void withDrawUserWalletAmount(WithdrawUserWalletAmountCommand command) {
-    var wallet = userRepository.getWallet(
-        new GetUserWalletByWalletUserIdIdWithLockParam(command.userId()));
+    var wallet = userRepository.getWallet(new GetUserWalletByWalletIdParam(command.walletId()));
 
     wallet.withdrawAmount(command.amount());
 

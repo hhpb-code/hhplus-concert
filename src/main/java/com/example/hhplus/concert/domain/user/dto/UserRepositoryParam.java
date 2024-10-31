@@ -26,7 +26,13 @@ public class UserRepositoryParam {
 
   }
 
-  public record GetUserWalletByWalletUserIdIdWithLockParam(
+  public record GetUserWalletByWalletUserIdParam(
+      Long userId
+  ) {
+
+  }
+
+  public record GetUserWalletByWalletUserIdWithLockParam(
       Long userId
   ) {
 

@@ -809,274 +809,832 @@ class ConcertFacadeTest {
   @DisplayName("콘서트 좌석 예약 내역 결제 테스트")
   class PayReservationTest {
 
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 ID가 null")
-    void shouldThrowReservationIdMustNotBeNullException() {
-      // given
-      final Long reservationId = null;
-      final Long userId = 1L;
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 비관적 락 테스트")
+    class PayReservationWithPessimisticLockTest {
 
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 ID가 null")
+      void shouldThrowReservationIdMustNotBeNullException() {
+        // given
+        final Long reservationId = null;
+        final Long userId = 1L;
 
-      // then
-      assertThat(result.getErrorType()).isEqualTo(
-          ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자 ID가 null")
+      void shouldThrowUserIdMustNotBeNullException() {
+        // given
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+        final Long userId = null;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 내역이 존재하지 않음")
+      void shouldThrowReservationNotFoundException() {
+        // given
+        final Long reservationId = 1L;
+        final Long userId = 1L;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 결제된 예약 내역")
+      void shouldThrowReservationAlreadyPaidException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.CONFIRMED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_PAID);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - userID가 다름")
+      void shouldThrowUserIdNotMatchException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId + 1);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자가 존재하지 않음")
+      void shouldThrowUserNotFoundException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
+                .build());
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 좌석이 존재하지 않음")
+      void shouldThrowConcertSeatNotFoundException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 잔액 부족")
+      void shouldThrowInsufficientBalanceException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() + 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 되지 않은 좌석")
+      void shouldThrowConcertSeatNotReservedException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
+                .build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 취소된 예약 내역")
+      void shouldThrowReservationAlreadyCanceledException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservation(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 성공")
+      void shouldSuccessfullyPayReservation() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final Payment result = concertFacade.payReservation(reservationId, userId);
+
+        // then
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getReservationId()).isEqualTo(reservationId);
+        assertThat(result.getAmount()).isEqualTo(concertSeat.getPrice());
+        assertThat(result.getCreatedAt()).isNotNull();
+        assertThat(result.getUpdatedAt()).isNull();
+
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(
+            wallet.getAmount() - concertSeat.getPrice());
+
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+      }
     }
 
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자 ID가 null")
-    void shouldThrowUserIdMustNotBeNullException() {
-      // given
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-      final Long userId = null;
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 낙관적 락 테스트")
+    class PayReservationWithOptimisticLockTest {
 
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 ID가 null")
+      void shouldThrowReservationIdMustNotBeNullException() {
+        // given
+        final Long reservationId = null;
+        final Long userId = 1L;
 
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자 ID가 null")
+      void shouldThrowUserIdMustNotBeNullException() {
+        // given
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+        final Long userId = null;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 내역이 존재하지 않음")
+      void shouldThrowReservationNotFoundException() {
+        // given
+        final Long reservationId = 1L;
+        final Long userId = 1L;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 결제된 예약 내역")
+      void shouldThrowReservationAlreadyPaidException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.CONFIRMED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_PAID);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - userID가 다름")
+      void shouldThrowUserIdNotMatchException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId + 1);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자가 존재하지 않음")
+      void shouldThrowUserNotFoundException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
+                .build());
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 좌석이 존재하지 않음")
+      void shouldThrowConcertSeatNotFoundException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 잔액 부족")
+      void shouldThrowInsufficientBalanceException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() + 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 되지 않은 좌석")
+      void shouldThrowConcertSeatNotReservedException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
+                .build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 취소된 예약 내역")
+      void shouldThrowReservationAlreadyCanceledException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithOptimisticLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 성공")
+      void shouldSuccessfullyPayReservation() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final Payment result = concertFacade.payReservationWithOptimisticLock(reservationId,
+            userId);
+
+        // then
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getReservationId()).isEqualTo(reservationId);
+        assertThat(result.getAmount()).isEqualTo(concertSeat.getPrice());
+        assertThat(result.getCreatedAt()).isNotNull();
+        assertThat(result.getUpdatedAt()).isNull();
+
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(
+            wallet.getAmount() - concertSeat.getPrice());
+
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+      }
     }
 
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 내역이 존재하지 않음")
-    void shouldThrowReservationNotFoundException() {
-      // given
-      final Long reservationId = 1L;
-      final Long userId = 1L;
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 분산락 락 테스트")
+    class PayReservationWithDistributedLockTest {
 
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 ID가 null")
+      void shouldThrowReservationIdMustNotBeNullException() {
+        // given
+        final Long reservationId = null;
+        final Long userId = 1L;
 
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND);
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(
+            ErrorType.Concert.RESERVATION_ID_MUST_NOT_BE_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자 ID가 null")
+      void shouldThrowUserIdMustNotBeNullException() {
+        // given
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(1L).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+        final Long userId = null;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.KEY_NOT_FOUND_OR_NULL);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 내역이 존재하지 않음")
+      void shouldThrowReservationNotFoundException() {
+        // given
+        final Long reservationId = 1L;
+        final Long userId = 1L;
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 결제된 예약 내역")
+      void shouldThrowReservationAlreadyPaidException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.CONFIRMED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_PAID);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - userID가 다름")
+      void shouldThrowUserIdNotMatchException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId + 1);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자가 존재하지 않음")
+      void shouldThrowUserNotFoundException() {
+        // given
+        final Long userId = 1L;
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
+                .build());
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 좌석이 존재하지 않음")
+      void shouldThrowConcertSeatNotFoundException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
+                .status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
+      }
+
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 잔액 부족")
+      void shouldThrowInsufficientBalanceException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() + 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 되지 않은 좌석")
+      void shouldThrowConcertSeatNotReservedException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
+                .build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 취소된 예약 내역")
+      void shouldThrowReservationAlreadyCanceledException() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final CoreException result = assertThrows(CoreException.class, () -> {
+          concertFacade.payReservationWithDistributedLock(reservationId, userId);
+        });
+
+        // then
+        assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
+      }
+
+      @Test
+      @DisplayName("콘서트 좌석 예약 내역 결제 성공")
+      void shouldSuccessfullyPayReservation() {
+        // given
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Long userId = user.getId();
+
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(userId).amount(100).build());
+
+        final ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
+                .isReserved(true).build());
+        final Long concertSeatId = concertSeat.getId();
+
+        final Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder().concertSeatId(concertSeatId).userId(userId)
+                .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
+        final Long reservationId = reservation.getId();
+
+        // when
+        final Payment result = concertFacade.payReservationWithDistributedLock(reservationId,
+            userId);
+
+        // then
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getReservationId()).isEqualTo(reservationId);
+        assertThat(result.getAmount()).isEqualTo(concertSeat.getPrice());
+        assertThat(result.getCreatedAt()).isNotNull();
+        assertThat(result.getUpdatedAt()).isNull();
+
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(
+            wallet.getAmount() - concertSeat.getPrice());
+
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+      }
     }
-
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 결제된 예약 내역")
-    void shouldThrowReservationAlreadyPaidException() {
-      // given
-      final Long userId = 1L;
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.CONFIRMED).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_PAID);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - userID가 다름")
-    void shouldThrowUserIdNotMatchException() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final Wallet wallet = walletJpaRepository.save(
-          Wallet.builder().userId(userId).amount(100).build());
-
-      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true).build());
-      final Long concertSeatId = concertSeat.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId + 1);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_USER_NOT_MATCHED);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 사용자가 존재하지 않음")
-    void shouldThrowUserNotFoundException() {
-      // given
-      final Long userId = 1L;
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
-              .build());
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.USER_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 좌석이 존재하지 않음")
-    void shouldThrowConcertSeatNotFoundException() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
-              .status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_FOUND);
-    }
-
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 잔액 부족")
-    void shouldThrowInsufficientBalanceException() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final Wallet wallet = walletJpaRepository.save(
-          Wallet.builder().userId(userId).amount(100).build());
-
-      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() + 1)
-              .isReserved(true).build());
-      final Long concertSeatId = concertSeat.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.User.NOT_ENOUGH_BALANCE);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 예약 되지 않은 좌석")
-    void shouldThrowConcertSeatNotReservedException() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(false)
-              .build());
-      final Long concertSeatId = concertSeat.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_SEAT_NOT_RESERVED);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 실패 - 이미 취소된 예약 내역")
-    void shouldThrowReservationAlreadyCanceledException() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final Wallet wallet = walletJpaRepository.save(
-          Wallet.builder().userId(userId).amount(100).build());
-
-      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true).build());
-      final Long concertSeatId = concertSeat.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final CoreException result = assertThrows(CoreException.class, () -> {
-        concertFacade.payReservation(reservationId, userId);
-      });
-
-      // then
-      assertThat(result.getErrorType()).isEqualTo(ErrorType.Concert.RESERVATION_ALREADY_CANCELED);
-    }
-
-    @Test
-    @DisplayName("콘서트 좌석 예약 내역 결제 성공")
-    void shouldSuccessfullyPayReservation() {
-      // given
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Long userId = user.getId();
-
-      final Wallet wallet = walletJpaRepository.save(
-          Wallet.builder().userId(userId).amount(100).build());
-
-      final ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder().concertScheduleId(1L).number(1).price(wallet.getAmount() - 1)
-              .isReserved(true).build());
-      final Long concertSeatId = concertSeat.getId();
-
-      final Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder().concertSeatId(concertSeatId).userId(userId)
-              .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
-      final Long reservationId = reservation.getId();
-
-      // when
-      final Payment result = concertFacade.payReservation(reservationId, userId);
-
-      // then
-      assertThat(result.getId()).isNotNull();
-      assertThat(result.getReservationId()).isEqualTo(reservationId);
-      assertThat(result.getAmount()).isEqualTo(concertSeat.getPrice());
-      assertThat(result.getCreatedAt()).isNotNull();
-      assertThat(result.getUpdatedAt()).isNull();
-
-      final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
-      assertThat(updatedWallet.getAmount()).isEqualTo(wallet.getAmount() - concertSeat.getPrice());
-
-      final Reservation updatedReservation = reservationJpaRepository.findById(reservation.getId())
-          .get();
-      assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-    }
-
   }
 
   @Nested

@@ -20,11 +20,11 @@ public class UserCommand {
     }
   }
 
-  public record WithdrawUserWalletAmountCommand(Long userId, Integer amount) {
+  public record WithdrawUserWalletAmountCommand(Long walletId, Integer amount) {
 
     public WithdrawUserWalletAmountCommand {
-      if (userId == null) {
-        throw new CoreException(ErrorType.User.USER_ID_MUST_NOT_BE_NULL);
+      if (walletId == null) {
+        throw new CoreException(ErrorType.User.WALLET_ID_MUST_NOT_BE_NULL);
       }
       if (amount == null) {
         throw new CoreException(ErrorType.User.AMOUNT_MUST_NOT_BE_NULL);

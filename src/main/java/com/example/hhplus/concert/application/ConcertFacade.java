@@ -152,8 +152,70 @@ public class ConcertFacade {
 
     concertSeat.validateReserved();
 
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdWithLockQuery(user.getId()));
+
     userCommandService.withDrawUserWalletAmount(
-        new WithdrawUserWalletAmountCommand(user.getId(), concertSeat.getPrice()));
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
+
+    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
+
+    Long paymentId = paymentCommandService.createPayment(
+        new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
+
+    return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
+  }
+
+  @Retryable(
+      retryFor = RuntimeException.class,
+      noRetryFor = CoreException.class,
+      backoff = @Backoff(50),
+      maxAttempts = 100
+  )
+  @Transactional
+  public Payment payReservationWithOptimisticLock(Long reservationId, Long userId) {
+    var reservation = concertQueryService.getReservation(
+        new GetReservationByIdQuery(reservationId));
+
+    reservation.validateConfirmConditions(userId);
+
+    var user = userQueryService.getUser(new GetUserByIdQuery(reservation.getUserId()));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(reservation.getConcertSeatId()));
+
+    concertSeat.validateReserved();
+
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdQuery(user.getId()));
+
+    userCommandService.withDrawUserWalletAmount(
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
+
+    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
+
+    Long paymentId = paymentCommandService.createPayment(
+        new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
+
+    return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
+  }
+
+  @DistributedLock(type = DistributedLockType.USER_WALLET, keys = "userId")
+  public Payment payReservationWithDistributedLock(Long reservationId, Long userId) {
+    var reservation = concertQueryService.getReservation(
+        new GetReservationByIdQuery(reservationId));
+
+    reservation.validateConfirmConditions(userId);
+
+    var user = userQueryService.getUser(new GetUserByIdQuery(reservation.getUserId()));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(reservation.getConcertSeatId()));
+
+    concertSeat.validateReserved();
+
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdQuery(user.getId()));
+
+    userCommandService.withDrawUserWalletAmount(
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
 
     concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
 
