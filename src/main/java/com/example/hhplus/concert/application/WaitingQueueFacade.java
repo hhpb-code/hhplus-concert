@@ -35,7 +35,6 @@ public class WaitingQueueFacade {
   private final ConcertQueryService concertQueryService;
 
 
-  @Transactional
   public WaitingQueue createWaitingQueueToken(Long concertId) {
     Long waitingQueueId = waitingQueueCommandService.createWaitingQueue(
         new CreateWaitingQueueCommand(concertId));
