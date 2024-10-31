@@ -9,6 +9,8 @@ import org.springframework.boot.logging.LogLevel;
 @Getter
 public enum ErrorType implements IErrorType {
   INVALID_REQUEST(ErrorCode.BAD_REQUEST, "유효하지 않은 요청입니다.", LogLevel.WARN),
+  FAILED_TO_ACQUIRE_LOCK(ErrorCode.INTERNAL_SERVER_ERROR, "잠금을 얻는 데 실패했습니다.", LogLevel.ERROR),
+  KEY_NOT_FOUND_OR_NULL(ErrorCode.INTERNAL_SERVER_ERROR, "키를 찾을 수 없거나 null입니다.", LogLevel.ERROR),
   ;
 
   private final ErrorCode code;
