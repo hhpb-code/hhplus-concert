@@ -20,3 +20,7 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         show_sql: true # SQL 쿼리 출력 여부
         format_sql: true # SQL 쿼리 포맷팅 여부
+  data:
+    redis:
+      host: localhost
+      port: 6379

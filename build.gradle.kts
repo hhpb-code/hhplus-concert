@@ -28,6 +28,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.retry:spring-retry")
+    implementation("org.redisson:redisson-spring-boot-starter:3.37.0")
 
     compileOnly("org.projectlombok:lombok")
 
@@ -35,8 +36,15 @@ dependencies {
     runtimeOnly("com.h2database:h2")
 
     annotationProcessor("org.projectlombok:lombok")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    testCompileOnly("org.projectlombok:lombok")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testAnnotationProcessor("org.projectlombok:lombok")
+
 }
 
 tasks.withType<Test> {

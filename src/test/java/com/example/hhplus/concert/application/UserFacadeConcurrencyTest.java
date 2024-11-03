@@ -9,6 +9,7 @@ import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Slf4j
 @SpringBootTest
 @DisplayName("UserFacade 동시성 테스트")
 class UserFacadeConcurrencyTest {
@@ -40,31 +42,119 @@ class UserFacadeConcurrencyTest {
   @DisplayName("사용자 지갑 잔액 충전 동시성 테스트")
   class ChargeUserWalletAmount {
 
-    @Test
-    @DisplayName("사용자 지갑 잔액 충전 성공 - 동시 충전")
-    void shouldSuccessfullyChargeUserWalletAmount() {
-      // given
-      final int threadCount = 10;
-      final int perChargeAmount = 100;
-      final User user = userJpaRepository.save(User.builder().name("name").build());
-      final Wallet wallet = walletJpaRepository.save(
-          Wallet.builder().userId(user.getId()).amount(0).build());
+    @Nested
+    @DisplayName("사용자 지갑 잔액 충전 동시성 테스트 - 비관적 락")
+    class ChargeUserWalletAmountWithPessimisticLock {
 
-      // when
-      final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
-          .mapToObj(i -> CompletableFuture.runAsync(() -> {
+      @Test
+      @DisplayName("사용자 지갑 잔액 충전 성공 - 동시 충전")
+      void shouldSuccessfullyChargeUserWalletAmount() {
+        // given
+        final int threadCount = 100;
+        final int perChargeAmount = 100;
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(0).build());
 
-            userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), perChargeAmount);
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
 
-          }))
-          .toList();
+              userFacade.chargeUserWalletAmount(user.getId(), wallet.getId(), perChargeAmount);
 
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }))
+            .toList();
 
-      // then
-      final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
-      assertThat(updatedWallet.getAmount()).isEqualTo(threadCount * perChargeAmount);
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("비관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(threadCount * perChargeAmount);
+      }
     }
+
+    @Nested
+    @DisplayName("사용자 지갑 잔액 충전 동시성 테스트 - 낙관적 락")
+    class ChargeUserWalletAmountWithOptimisticLock {
+
+      @Test
+      @DisplayName("사용자 지갑 잔액 충전 성공 - 동시 충전")
+      void shouldSuccessfullyChargeUserWalletAmount() {
+        // given
+        final int threadCount = 100;
+        final int perChargeAmount = 100;
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(0).build());
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+
+              userFacade.chargeUserWalletAmountWithOptimisticLock(user.getId(), wallet.getId(),
+                  perChargeAmount);
+
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(threadCount * perChargeAmount);
+      }
+    }
+
+    @Nested
+    @DisplayName("사용자 지갑 잔액 충전 동시성 테스트 - 분산 락")
+    class ChargeUserWalletAmountWithDistributionLock {
+
+      @Test
+      @DisplayName("사용자 지갑 잔액 충전 성공 - 동시 충전")
+      void shouldSuccessfullyChargeUserWalletAmount() {
+        // given
+        final int threadCount = 100;
+        final int perChargeAmount = 100;
+        final User user = userJpaRepository.save(User.builder().name("name").build());
+        final Wallet wallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(0).build());
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+
+              userFacade.chargeUserWalletAmountWithDistributionLock(user.getId(), wallet.getId(),
+                  perChargeAmount);
+
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("분산 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final Wallet updatedWallet = walletJpaRepository.findById(wallet.getId()).get();
+        assertThat(updatedWallet.getAmount()).isEqualTo(threadCount * perChargeAmount);
+      }
+    }
+
   }
 
 }

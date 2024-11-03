@@ -21,8 +21,8 @@ import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,12 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Slf4j
 @SpringBootTest
 @DisplayName("ConcertFacade 동시성 테스트")
 class ConcertFacadeConcurrencyTest {
-
-  private static final Logger logger = Logger.getLogger(
-      ConcertFacadeConcurrencyTest.class.getName());
 
   @Autowired
   private ConcertFacade concertFacade;
@@ -131,7 +129,7 @@ class ConcertFacadeConcurrencyTest {
 
         long end = System.currentTimeMillis();
 
-        logger.info("비관적 락 Execution Time: " + (end - start) + "ms");
+        log.info("비관적 락 Execution Time: " + (end - start) + "ms");
 
         // then
         final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(
@@ -203,7 +201,80 @@ class ConcertFacadeConcurrencyTest {
 
         long end = System.currentTimeMillis();
 
-        logger.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+        log.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(
+                concertSeat.getId())
+            .get();
+        assertThat(reservedConcertSeat.getIsReserved()).isTrue();
+
+        final List<Reservation> reservations = reservationJpaRepository.findAll();
+        assertThat(reservations).hasSize(1);
+
+        final Reservation reservation = reservations.get(0);
+        assertThat(reservation.getConcertSeatId()).isEqualTo(concertSeat.getId());
+        assertThat(reservation.getUserId()).isNotNull();
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+
+      }
+    }
+
+    @Nested
+    @DisplayName("동시성 테스트 - 동일 좌석 동시 예약 분산 락")
+    class ReserveConcertSeatWithDistributedLock {
+
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 예약")
+      void shouldSuccessfullyReserveConcertSeat() {
+
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(false)
+                .price(10000)
+                .build()
+        );
+
+        List<User> users = IntStream.range(0, threadCount)
+            .mapToObj(i -> userJpaRepository.save(User.builder().name("user" + i).build()))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.reserveConcertSeatWithDistributedLock(concertSeat.getId(),
+                    users.get(i).getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("분산 락 Execution Time: " + (end - start) + "ms");
 
         // then
         final ConcertSeat reservedConcertSeat = concertSeatJpaRepository.findById(
@@ -228,144 +299,706 @@ class ConcertFacadeConcurrencyTest {
   @DisplayName("콘서트 좌석 예약 내역 결제 동시성 테스트")
   class PayConcertSeatReservationConcurrencyTest {
 
-    @Test
-    @DisplayName("동시성 테스트 - 동일 좌석 동시 결제")
-    void shouldSuccessfullyPayConcertSeatReservation() {
-      // given
-      final int threadCount = 10;
-      ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder()
-              .concertId(1L)
-              .concertAt(LocalDateTime.now().plusDays(1))
-              .reservationStartAt(LocalDateTime.now().minusDays(1))
-              .reservationEndAt(LocalDateTime.now().plusDays(1))
-              .build()
-      );
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 동시성 테스트 비관적락")
+    class PayConcertSeatReservationWithPessimisticLock {
 
-      ConcertSeat concertSeat = concertSeatJpaRepository.save(
-          ConcertSeat.builder()
-              .concertScheduleId(concertSchedule.getId())
-              .number(1)
-              .isReserved(true)
-              .price(10000)
-              .build()
-      );
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 결제")
+      void shouldSuccessfullyPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
 
-      User user = userJpaRepository.save(User.builder().name("user").build());
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(true)
+                .price(10000)
+                .build()
+        );
 
-      Wallet userWallet = walletJpaRepository.save(
-          Wallet.builder().userId(user.getId()).amount(10000).build());
+        User user = userJpaRepository.save(User.builder().name("user").build());
 
-      Reservation reservation = reservationJpaRepository.save(
-          Reservation.builder()
-              .concertSeatId(concertSeat.getId())
-              .userId(user.getId())
-              .status(ReservationStatus.WAITING)
-              .reservedAt(LocalDateTime.now())
-              .build()
-      );
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(10000).build());
 
-      // when
-      final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
-          .mapToObj(i -> CompletableFuture.runAsync(() -> {
-            try {
-              concertFacade.payReservation(reservation.getId(), user.getId());
-            } catch (CoreException e) {
-              if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
-                return;
+        Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder()
+                .concertSeatId(concertSeat.getId())
+                .userId(user.getId())
+                .status(ReservationStatus.WAITING)
+                .reservedAt(LocalDateTime.now())
+                .build()
+        );
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservation(reservation.getId(), user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
+                  return;
+                }
+
+                throw e;
               }
+            }))
+            .toList();
 
-              throw e;
-            }
-          }))
-          .toList();
+        long start = System.currentTimeMillis();
 
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-      // then
-      final Reservation updatedReservation = reservationJpaRepository.findById(reservation.getId())
-          .get();
+        long end = System.currentTimeMillis();
 
-      assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        log.info("비관적 락 Execution Time: " + (end - start) + "ms");
 
-      final List<Payment> payments = paymentJpaRepository.findAll();
-      assertThat(payments).hasSize(1);
+        // then
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
 
-      final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
-      assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+
+        final List<Payment> payments = paymentJpaRepository.findAll();
+        assertThat(payments).hasSize(1);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제 잔액 부족")
+      void shouldThrowExceptionWhenPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int canPayCount = 5;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * canPayCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservation(reservations.get(i).getId(), user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("비관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(canPayCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제")
+      void shouldSuccessfullyPayOtherConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * threadCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservation(reservations.get(i).getId(), user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("비관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(threadCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
     }
 
-    @Test
-    @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제 잔액 부족")
-    void shouldThrowExceptionWhenPayConcertSeatReservation() {
-      // given
-      final int threadCount = 10;
-      final int canPayCount = 5;
-      final int perSeatPrice = 10000;
-      ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
-          ConcertSchedule.builder()
-              .concertId(1L)
-              .concertAt(LocalDateTime.now().plusDays(1))
-              .reservationStartAt(LocalDateTime.now().minusDays(1))
-              .reservationEndAt(LocalDateTime.now().plusDays(1))
-              .build()
-      );
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 동시성 테스트 낙관적락")
+    class PayConcertSeatReservationWithOptimisticLock {
 
-      List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
-          .mapToObj(i -> concertSeatJpaRepository.save(
-              ConcertSeat.builder()
-                  .concertScheduleId(concertSchedule.getId())
-                  .number(i)
-                  .isReserved(true)
-                  .price(perSeatPrice)
-                  .build()
-          ))
-          .toList();
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 결제")
+      void shouldSuccessfullyPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
 
-      User user = userJpaRepository.save(User.builder().name("user").build());
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(true)
+                .price(10000)
+                .build()
+        );
 
-      Wallet userWallet = walletJpaRepository.save(
-          Wallet.builder().userId(user.getId()).amount(perSeatPrice * canPayCount).build());
+        User user = userJpaRepository.save(User.builder().name("user").build());
 
-      List<Reservation> reservations = concertSeats.stream()
-          .map(concertSeat -> reservationJpaRepository.save(
-              Reservation.builder()
-                  .concertSeatId(concertSeat.getId())
-                  .userId(user.getId())
-                  .status(ReservationStatus.WAITING)
-                  .reservedAt(LocalDateTime.now())
-                  .build()
-          ))
-          .toList();
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(10000).build());
 
-      // when
-      final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
-          .mapToObj(i -> CompletableFuture.runAsync(() -> {
-            try {
-              concertFacade.payReservation(reservations.get(i).getId(), user.getId());
-            } catch (CoreException e) {
-              if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
-                return;
+        Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder()
+                .concertSeatId(concertSeat.getId())
+                .userId(user.getId())
+                .status(ReservationStatus.WAITING)
+                .reservedAt(LocalDateTime.now())
+                .build()
+        );
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithOptimisticLock(reservation.getId(), user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
+                  return;
+                }
+
+                throw e;
               }
+            }))
+            .toList();
 
-              throw e;
-            }
-          }))
-          .toList();
+        long start = System.currentTimeMillis();
 
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-      // then
-      final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
-      final int paidCount = (int) updatedReservations.stream()
-          .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
-          .count();
-      assertThat(paidCount).isEqualTo(canPayCount);
+        long end = System.currentTimeMillis();
 
-      final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
-      assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+        log.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
+
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+
+        final List<Payment> payments = paymentJpaRepository.findAll();
+        assertThat(payments).hasSize(1);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제 잔액 부족")
+      void shouldThrowExceptionWhenPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int canPayCount = 5;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * canPayCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithOptimisticLock(reservations.get(i).getId(),
+                    user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(canPayCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제")
+      void shouldSuccessfullyPayOtherConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * threadCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithOptimisticLock(reservations.get(i).getId(),
+                    user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("낙관적 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(threadCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
     }
+
+    @Nested
+    @DisplayName("콘서트 좌석 예약 내역 결제 동시성 테스트 분산락")
+    class PayConcertSeatReservationWithDistributedLock {
+
+      @Test
+      @DisplayName("동시성 테스트 - 동일 좌석 동시 결제")
+      void shouldSuccessfullyPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        ConcertSeat concertSeat = concertSeatJpaRepository.save(
+            ConcertSeat.builder()
+                .concertScheduleId(concertSchedule.getId())
+                .number(1)
+                .isReserved(true)
+                .price(10000)
+                .build()
+        );
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(10000).build());
+
+        Reservation reservation = reservationJpaRepository.save(
+            Reservation.builder()
+                .concertSeatId(concertSeat.getId())
+                .userId(user.getId())
+                .status(ReservationStatus.WAITING)
+                .reservedAt(LocalDateTime.now())
+                .build()
+        );
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithDistributedLock(reservation.getId(), user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("분산 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final Reservation updatedReservation = reservationJpaRepository.findById(
+                reservation.getId())
+            .get();
+
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+
+        final List<Payment> payments = paymentJpaRepository.findAll();
+        assertThat(payments).hasSize(1);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제 잔액 부족")
+      void shouldThrowExceptionWhenPayConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int canPayCount = 5;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * canPayCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithDistributedLock(reservations.get(i).getId(),
+                    user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("분산 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(canPayCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+
+      @Test
+      @DisplayName("동시성 테스트 - 다른 좌석 같은 사용자 동시 결제")
+      void shouldSuccessfullyPayOtherConcertSeatReservation() {
+        // given
+        final int threadCount = 100;
+        final int perSeatPrice = 10000;
+        ConcertSchedule concertSchedule = concertScheduleJpaRepository.save(
+            ConcertSchedule.builder()
+                .concertId(1L)
+                .concertAt(LocalDateTime.now().plusDays(1))
+                .reservationStartAt(LocalDateTime.now().minusDays(1))
+                .reservationEndAt(LocalDateTime.now().plusDays(1))
+                .build()
+        );
+
+        List<ConcertSeat> concertSeats = IntStream.range(0, threadCount)
+            .mapToObj(i -> concertSeatJpaRepository.save(
+                ConcertSeat.builder()
+                    .concertScheduleId(concertSchedule.getId())
+                    .number(i)
+                    .isReserved(true)
+                    .price(perSeatPrice)
+                    .build()
+            ))
+            .toList();
+
+        User user = userJpaRepository.save(User.builder().name("user").build());
+
+        Wallet userWallet = walletJpaRepository.save(
+            Wallet.builder().userId(user.getId()).amount(perSeatPrice * threadCount).build());
+
+        List<Reservation> reservations = concertSeats.stream()
+            .map(concertSeat -> reservationJpaRepository.save(
+                Reservation.builder()
+                    .concertSeatId(concertSeat.getId())
+                    .userId(user.getId())
+                    .status(ReservationStatus.WAITING)
+                    .reservedAt(LocalDateTime.now())
+                    .build()
+            ))
+            .toList();
+
+        // when
+        final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+              try {
+                concertFacade.payReservationWithDistributedLock(reservations.get(i).getId(),
+                    user.getId());
+              } catch (CoreException e) {
+                if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
+                  return;
+                }
+
+                throw e;
+              }
+            }))
+            .toList();
+
+        long start = System.currentTimeMillis();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long end = System.currentTimeMillis();
+
+        log.info("분산락 락 Execution Time: " + (end - start) + "ms");
+
+        // then
+        final List<Reservation> updatedReservations = reservationJpaRepository.findAll();
+        final int paidCount = (int) updatedReservations.stream()
+            .filter(reservation -> reservation.getStatus().equals(ReservationStatus.CONFIRMED))
+            .count();
+        assertThat(paidCount).isEqualTo(threadCount);
+
+        final Wallet updatedUserWallet = walletJpaRepository.findById(userWallet.getId()).get();
+        assertThat(updatedUserWallet.getAmount()).isEqualTo(0);
+      }
+    }
+
   }
-
 
 }

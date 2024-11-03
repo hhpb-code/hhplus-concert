@@ -24,12 +24,19 @@ import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentById
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import com.example.hhplus.concert.domain.payment.service.PaymentCommandService;
 import com.example.hhplus.concert.domain.payment.service.PaymentQueryService;
+import com.example.hhplus.concert.domain.support.DistributedLockType;
+import com.example.hhplus.concert.domain.support.annotation.DistributedLock;
+import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.user.dto.UserCommand.WithdrawUserWalletAmountCommand;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
+import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdWithLockQuery;
 import com.example.hhplus.concert.domain.user.service.UserCommandService;
 import com.example.hhplus.concert.domain.user.service.UserQueryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,9 +73,6 @@ public class ConcertFacade {
         new FindReservableConcertSeatsQuery(concertScheduleId));
   }
 
-  /*
-   * @deprecated Pessimistic Locking을 사용한 예약 기능은 성능 이슈가 있어서 사용하지 않습니다.
-   */
   @Deprecated(forRemoval = false)
   public Reservation reserveConcertSeatWithPessimisticLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
@@ -110,6 +114,29 @@ public class ConcertFacade {
     return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
   }
 
+  @Deprecated(forRemoval = false)
+  @DistributedLock(type = DistributedLockType.CONCERT_SEAT, keys = "concertSeatId")
+  public Reservation reserveConcertSeatWithDistributedLock(Long concertSeatId, Long userId) {
+    var user = userQueryService.getUser(new GetUserByIdQuery(userId));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(concertSeatId));
+
+    var concertSchedule = concertQueryService.getConcertSchedule(
+        new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
+
+    concertSchedule.validateReservationTime();
+
+    concertCommandService.reserveConcertSeat(
+        new ReserveConcertSeatCommand(concertSeat.getId()));
+
+    Long reservationId = concertCommandService.createReservation(
+        new CreateReservationCommand(concertSeat.getId(), user.getId()));
+
+    return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
+  }
+
+  @Deprecated(forRemoval = false)
   @Transactional
   public Payment payReservation(Long reservationId, Long userId) {
     var reservation = concertQueryService.getReservation(
@@ -124,8 +151,71 @@ public class ConcertFacade {
 
     concertSeat.validateReserved();
 
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdWithLockQuery(user.getId()));
+
     userCommandService.withDrawUserWalletAmount(
-        new WithdrawUserWalletAmountCommand(user.getId(), concertSeat.getPrice()));
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
+
+    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
+
+    Long paymentId = paymentCommandService.createPayment(
+        new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
+
+    return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
+  }
+
+  @Deprecated(forRemoval = false)
+  @Retryable(
+      retryFor = RuntimeException.class,
+      noRetryFor = CoreException.class,
+      backoff = @Backoff(50),
+      maxAttempts = 100
+  )
+  @Transactional
+  public Payment payReservationWithOptimisticLock(Long reservationId, Long userId) {
+    var reservation = concertQueryService.getReservation(
+        new GetReservationByIdQuery(reservationId));
+
+    reservation.validateConfirmConditions(userId);
+
+    var user = userQueryService.getUser(new GetUserByIdQuery(reservation.getUserId()));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(reservation.getConcertSeatId()));
+
+    concertSeat.validateReserved();
+
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdQuery(user.getId()));
+
+    userCommandService.withDrawUserWalletAmount(
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
+
+    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
+
+    Long paymentId = paymentCommandService.createPayment(
+        new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
+
+    return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
+  }
+
+  @DistributedLock(type = DistributedLockType.USER_WALLET, keys = "userId")
+  public Payment payReservationWithDistributedLock(Long reservationId, Long userId) {
+    var reservation = concertQueryService.getReservation(
+        new GetReservationByIdQuery(reservationId));
+
+    reservation.validateConfirmConditions(userId);
+
+    var user = userQueryService.getUser(new GetUserByIdQuery(reservation.getUserId()));
+
+    var concertSeat = concertQueryService.getConcertSeat(
+        new GetConcertSeatByIdQuery(reservation.getConcertSeatId()));
+
+    concertSeat.validateReserved();
+
+    var wallet = userQueryService.getWallet(new GetUserWalletByUserIdQuery(user.getId()));
+
+    userCommandService.withDrawUserWalletAmount(
+        new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
 
     concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
 

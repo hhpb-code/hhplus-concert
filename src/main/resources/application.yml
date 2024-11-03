@@ -17,6 +17,10 @@ spring:
       hibernate:
         format_sql: ${JPA_FORMAT_SQL:false}
         highlight_sql: ${JPA_HIGHLIGHT_SQL:false}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 # Swagger springdoc-ui Configuration
 springdoc:
