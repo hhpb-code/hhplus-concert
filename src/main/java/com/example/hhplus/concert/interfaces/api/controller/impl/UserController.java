@@ -33,7 +33,7 @@ public class UserController implements IUserController {
   public ResponseEntity<ChargeWalletAmountResponse> chargeWallet(@PathVariable Long userId,
       @PathVariable Long walletId, @RequestBody ChargeWalletAmountRequest request) {
     WalletResponse wallet = new WalletResponse(
-        userFacade.chargeUserWalletAmountWithDistributionLock(userId, walletId, request.amount()));
+        userFacade.chargeUserWalletAmount(userId, walletId, request.amount()));
 
     return ResponseEntity.ok(new ChargeWalletAmountResponse(wallet));
   }
