@@ -73,50 +73,7 @@ public class ConcertFacade {
         new FindReservableConcertSeatsQuery(concertScheduleId));
   }
 
-  @Deprecated(forRemoval = false)
-  public Reservation reserveConcertSeatWithPessimisticLock(Long concertSeatId, Long userId) {
-    var user = userQueryService.getUser(new GetUserByIdQuery(userId));
-
-    var concertSeat = concertQueryService.getConcertSeat(
-        new GetConcertSeatByIdWithLockQuery(concertSeatId));
-
-    var concertSchedule = concertQueryService.getConcertSchedule(
-        new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
-
-    concertSchedule.validateReservationTime();
-
-    concertCommandService.reserveConcertSeat(
-        new ReserveConcertSeatCommand(concertSeat.getId()));
-
-    Long reservationId = concertCommandService.createReservation(
-        new CreateReservationCommand(concertSeat.getId(), user.getId()));
-
-    return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
-  }
-
   public Reservation reserveConcertSeat(Long concertSeatId, Long userId) {
-    var user = userQueryService.getUser(new GetUserByIdQuery(userId));
-
-    var concertSeat = concertQueryService.getConcertSeat(
-        new GetConcertSeatByIdQuery(concertSeatId));
-
-    var concertSchedule = concertQueryService.getConcertSchedule(
-        new GetConcertScheduleByIdQuery(concertSeat.getConcertScheduleId()));
-
-    concertSchedule.validateReservationTime();
-
-    concertCommandService.reserveConcertSeat(
-        new ReserveConcertSeatCommand(concertSeat.getId()));
-
-    Long reservationId = concertCommandService.createReservation(
-        new CreateReservationCommand(concertSeat.getId(), user.getId()));
-
-    return concertQueryService.getReservation(new GetReservationByIdQuery(reservationId));
-  }
-
-  @Deprecated(forRemoval = false)
-  @DistributedLock(type = DistributedLockType.CONCERT_SEAT, keys = "concertSeatId")
-  public Reservation reserveConcertSeatWithDistributedLock(Long concertSeatId, Long userId) {
     var user = userQueryService.getUser(new GetUserByIdQuery(userId));
 
     var concertSeat = concertQueryService.getConcertSeat(
