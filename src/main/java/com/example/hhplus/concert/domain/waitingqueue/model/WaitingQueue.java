@@ -2,43 +2,38 @@ package com.example.hhplus.concert.domain.waitingqueue.model;
 
 import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
-import com.example.hhplus.concert.domain.support.model.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "waiting_queue")
 @Getter
 @NoArgsConstructor
-public class WaitingQueue extends BaseEntity {
+public class WaitingQueue {
 
-  @Column(nullable = false)
   private Long concertId;
 
-  @Column(nullable = false, unique = true)
   private String uuid;
 
-  @Column(nullable = false)
-  @Enumerated(EnumType.STRING)
+  private Double score;
+
   private WaitingQueueStatus status;
 
   private LocalDateTime expiredAt;
 
+  private LocalDateTime createdAt;
+
   @Builder
-  public WaitingQueue(Long id, Long concertId, String uuid, WaitingQueueStatus status,
-      LocalDateTime expiredAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
-    super(id, createdAt, updatedAt);
+  public WaitingQueue(Long concertId, String uuid,
+      Double score,
+      WaitingQueueStatus status,
+      LocalDateTime expiredAt, LocalDateTime createdAt) {
     this.concertId = concertId;
     this.uuid = uuid;
+    this.score = score;
     this.status = status;
     this.expiredAt = expiredAt;
+    this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
   }
 
   public void activate(LocalDateTime expiredAt) {
@@ -66,14 +61,6 @@ public class WaitingQueue extends BaseEntity {
     if (this.expiredAt != null && LocalDateTime.now().isAfter(this.expiredAt)) {
       throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_EXPIRED);
     }
-  }
-
-  public boolean isProcessing() {
-    if (this.status != WaitingQueueStatus.PROCESSING) {
-      return false;
-    }
-
-    return LocalDateTime.now().isBefore(this.expiredAt);
   }
 
   public void validateProcessing() {
