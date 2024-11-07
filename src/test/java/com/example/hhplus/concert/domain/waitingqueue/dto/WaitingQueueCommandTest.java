@@ -52,30 +52,14 @@ class WaitingQueueCommandTest {
   class ActivateWaitingQueuesCommandTest {
 
     @Test
-    @DisplayName("대기열 활성화 Command 실패 - 콘서트 ID가 null인 경우")
-    void shouldThrowExceptionWhenConcertIdIsNull() {
-      // given
-      final Long concertId = null;
-      final Integer availableSlots = 1;
-
-      // when
-      final CoreException exception = assertThrows(CoreException.class,
-          () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
-
-      // then
-      assertThat(exception.getErrorType()).isEqualTo(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
-    }
-
-    @Test
     @DisplayName("대기열 활성화 Command 실패 - 사용 가능한 슬롯이 null인 경우")
     void shouldThrowExceptionWhenAvailableSlotsIsNull() {
       // given
-      final Long concertId = 1L;
       final Integer availableSlots = null;
 
       // when
       final CoreException exception = assertThrows(CoreException.class,
-          () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
+          () -> new ActivateWaitingQueuesCommand(availableSlots));
 
       // then
       assertThat(exception.getErrorType()).isEqualTo(
@@ -86,12 +70,11 @@ class WaitingQueueCommandTest {
     @DisplayName("대기열 활성화 Command 실패 - 사용 가능한 슬롯이 0인 경우")
     void shouldThrowExceptionWhenAvailableSlotsIsZero() {
       // given
-      final Long concertId = 1L;
       final Integer availableSlots = 0;
 
       // when
       final CoreException exception = assertThrows(CoreException.class,
-          () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
+          () -> new ActivateWaitingQueuesCommand(availableSlots));
 
       // then
       assertThat(exception.getErrorType()).isEqualTo(
@@ -102,12 +85,11 @@ class WaitingQueueCommandTest {
     @DisplayName("대기열 활성화 Command 실패 - 사용 가능한 슬롯이 음수인 경우")
     void shouldThrowExceptionWhenAvailableSlotsIsNegative() {
       // given
-      final Long concertId = 1L;
       final Integer availableSlots = -1;
 
       // when
       final CoreException exception = assertThrows(CoreException.class,
-          () -> new ActivateWaitingQueuesCommand(concertId, availableSlots));
+          () -> new ActivateWaitingQueuesCommand(availableSlots));
 
       // then
       assertThat(exception.getErrorType()).isEqualTo(
@@ -118,16 +100,14 @@ class WaitingQueueCommandTest {
     @DisplayName("대기열 활성화 Command 성공")
     void shouldSuccessfullyValidateActivateWaitingQueuesCommand() {
       // given
-      final Long concertId = 1L;
       final Integer availableSlots = 1;
 
       // when
-      final ActivateWaitingQueuesCommand command = new ActivateWaitingQueuesCommand(concertId,
+      final ActivateWaitingQueuesCommand command = new ActivateWaitingQueuesCommand(
           availableSlots);
 
       // then
       assertThat(command).isNotNull();
-      assertThat(command.concertId()).isEqualTo(concertId);
       assertThat(command.availableSlots()).isEqualTo(availableSlots);
     }
   }

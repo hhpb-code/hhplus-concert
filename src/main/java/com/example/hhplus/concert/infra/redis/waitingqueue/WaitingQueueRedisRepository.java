@@ -83,6 +83,14 @@ public class WaitingQueueRedisRepository implements WaitingQueueRepository {
           redisTemplate.opsForZSet().remove(waitingZSetKey, waitingQueue.getUuid());
         }
         redisTemplate.opsForZSet().add(activeZSetKey, waitingQueue.getUuid(), newScore);
+      } else if (waitingQueue.getStatus().equals(WaitingQueueStatus.EXPIRED)) {
+        if (redisTemplate.opsForZSet().rank(waitingZSetKey, waitingQueue.getUuid()) != null) {
+          redisTemplate.opsForZSet().remove(waitingZSetKey, waitingQueue.getUuid());
+        }
+        if (redisTemplate.opsForZSet().rank(activeZSetKey, waitingQueue.getUuid()) != null) {
+          redisTemplate.opsForZSet().remove(activeZSetKey, waitingQueue.getUuid());
+        }
+
       } else {
         if (redisTemplate.opsForZSet().rank(activeZSetKey, waitingQueue.getUuid()) != null) {
           redisTemplate.opsForZSet().remove(activeZSetKey, waitingQueue.getUuid());

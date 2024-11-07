@@ -145,54 +145,6 @@ class WaitingQueueTest {
   class CheckProcessingTest {
 
     @Nested
-    @DisplayName("대기열 활성 여부 확인 is")
-    class IsProcessingTest {
-
-      @Test
-      @DisplayName("대기열 활성 여부 확인 false - 대기열 상태가 활성 상태가 아님")
-      void shouldReturnFalseWhenStatusIsNotProcessing() {
-        // given
-        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
-            .status(WaitingQueueStatus.WAITING).build();
-
-        // when
-        final boolean result = waitingQueue.isProcessing();
-
-        // then
-        assertThat(result).isFalse();
-      }
-
-      @Test
-      @DisplayName("대기열 활성 여부 확인 false - 만료 시간이 현재 시간보다 빠름")
-      void shouldReturnFalseWhenExpiredAtIsBeforeNow() {
-        // given
-        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now()).build();
-
-        // when
-        final boolean result = waitingQueue.isProcessing();
-
-        // then
-        assertThat(result).isFalse();
-      }
-
-      @Test
-      @DisplayName("대기열 활성 여부 확인 true - 대기열 상태가 활성 상태이고 만료 시간이 현재 시간보다 늦음")
-      void shouldReturnTrueWhenStatusIsProcessingAndExpiredAtIsAfterNow() {
-        // given
-        final var waitingQueue = WaitingQueue.builder().uuid("uuid").concertId(1L)
-            .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
-            .build();
-
-        // when
-        final boolean result = waitingQueue.isProcessing();
-
-        // then
-        assertThat(result).isTrue();
-      }
-    }
-
-    @Nested
     @DisplayName("대기열 활성 여부 확인 validate")
     class ValidateProcessingTest {
 

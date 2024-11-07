@@ -23,8 +23,8 @@ public class WaitingQueueRepositoryParam {
   }
 
 
-  public record GetWaitingQueuePositionByIdAndConcertIdParam(
-      Long id,
+  public record GetWaitingQueuePositionByUuidAndConcertIdParam(
+      String uuid,
       Long concertId
   ) {
 
@@ -43,8 +43,7 @@ public class WaitingQueueRepositoryParam {
 
   }
 
-  public record FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam(
-      Long concertId,
+  public record FindAllWaitingQueuesByStatusWithLimitAndLockParam(
       WaitingQueueStatus status,
       int limit
   ) {

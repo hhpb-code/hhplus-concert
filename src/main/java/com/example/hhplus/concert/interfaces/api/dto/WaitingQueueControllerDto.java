@@ -31,9 +31,6 @@ public class WaitingQueueControllerDto {
   // NOTE: Common DTO
 
   public record WaitingQueueResponse(
-      @Schema(description = "대기열 ID", example = "1")
-      Long id,
-
       @Schema(description = "콘서트 ID", example = "1")
       Long concertId,
 
@@ -47,23 +44,18 @@ public class WaitingQueueControllerDto {
       LocalDateTime expiredAt,
 
       @Schema(description = "생성 일시", example = "2024-12-31T23:59:59")
-      LocalDateTime createdAt,
-
-      @Schema(description = "수정 일시", example = "2024-12-31T23:59:59")
-      LocalDateTime updatedAt
+      LocalDateTime createdAt
   ) {
 
     public WaitingQueueResponse(WaitingQueue waitingQueueToken) {
-      this(waitingQueueToken.getId(), waitingQueueToken.getConcertId(),
+      this(waitingQueueToken.getConcertId(),
           waitingQueueToken.getUuid(), waitingQueueToken.getStatus(),
-          waitingQueueToken.getExpiredAt(), waitingQueueToken.getCreatedAt(),
-          waitingQueueToken.getUpdatedAt());
+          waitingQueueToken.getExpiredAt(), waitingQueueToken.getCreatedAt()
+      );
     }
   }
 
   public record WaitingQueueResponseWithPosition(
-      @Schema(description = "대기열 ID", example = "1")
-      Long id,
 
       @Schema(description = "콘서트 ID", example = "1")
       Long concertId,
@@ -81,21 +73,19 @@ public class WaitingQueueControllerDto {
       LocalDateTime expiredAt,
 
       @Schema(description = "생성 일시", example = "2024-12-31T23:59:59")
-      LocalDateTime createdAt,
+      LocalDateTime createdAt
 
-      @Schema(description = "수정 일시", example = "2024-12-31T23:59:59")
-      LocalDateTime updatedAt
   ) {
 
     public WaitingQueueResponseWithPosition(WaitingQueueWithPosition waitingQueueWithPosition) {
-      this(waitingQueueWithPosition.id(),
+      this(
           waitingQueueWithPosition.concertId(),
           waitingQueueWithPosition.uuid(),
           waitingQueueWithPosition.status(),
           waitingQueueWithPosition.position(),
           waitingQueueWithPosition.expiredAt(),
-          waitingQueueWithPosition.createdAt(),
-          waitingQueueWithPosition.updatedAt());
+          waitingQueueWithPosition.createdAt()
+      );
     }
   }
 
