@@ -16,7 +16,9 @@ import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
+import com.example.hhplus.concert.domain.support.CacheName;
 import java.util.List;
+import org.springframework.cache.annotation.Cacheable;
 
 public interface ConcertRepository {
 
@@ -28,10 +30,13 @@ public interface ConcertRepository {
 
   void saveAllConcertSeats(List<ConcertSeat> concertSeats);
 
+  @Cacheable(value = CacheName.CONCERT, key = "#param.id")
   Concert getConcert(GetConcertByIdParam param);
 
+  @Cacheable(value = CacheName.CONCERT, key = "#param.id")
   Concert getConcert(GetConcertByIdWithLockParam param);
 
+  @Cacheable(value = CacheName.CONCERT_SCHEDULE, key = "#param.id")
   ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param);
 
   List<ConcertSchedule> findReservableConcertSchedules(

@@ -28,8 +28,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @DisplayName("ConcertFacade 통합 테스트")
 class ConcertFacadeTest {
 
@@ -53,7 +55,6 @@ class ConcertFacadeTest {
 
   @Autowired
   private WalletJpaRepository walletJpaRepository;
-
 
   @BeforeEach
   void setUp() {
