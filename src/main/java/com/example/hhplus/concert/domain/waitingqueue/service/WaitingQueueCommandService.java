@@ -4,7 +4,7 @@ import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ActivateWaitingQueuesCommand;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.CreateWaitingQueueCommand;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByStatusWithLimitAndLockParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import java.time.LocalDateTime;
@@ -21,20 +21,19 @@ public class WaitingQueueCommandService {
 
   private final WaitingQueueRepository waitingQueueRepository;
 
-  public Long createWaitingQueue(CreateWaitingQueueCommand command) {
+  public String createWaitingQueue(CreateWaitingQueueCommand command) {
     return waitingQueueRepository.save(
         WaitingQueue.builder()
             .uuid(UUID.randomUUID().toString())
             .concertId(command.concertId())
             .status(WaitingQueueStatus.WAITING)
             .build()
-    ).getId();
+    ).getUuid();
   }
 
   public void activateWaitingQueues(ActivateWaitingQueuesCommand command) {
     List<WaitingQueue> waitingQueues = waitingQueueRepository.findAllWaitingQueues(
-        new FindAllWaitingQueuesByConcertIdAndStatusWithLimitAndLockParam(
-            command.concertId(), WaitingQueueStatus.WAITING,
+        new FindAllWaitingQueuesByStatusWithLimitAndLockParam(WaitingQueueStatus.WAITING,
             command.availableSlots()));
 
     LocalDateTime now = LocalDateTime.now();
@@ -43,9 +42,5 @@ public class WaitingQueueCommandService {
     waitingQueues.forEach(waitingQueue -> waitingQueue.activate(expiredAt));
 
     waitingQueueRepository.saveAll(waitingQueues);
-  }
-
-  public void expireWaitingQueues() {
-    waitingQueueRepository.expireWaitingQueues();
   }
 }

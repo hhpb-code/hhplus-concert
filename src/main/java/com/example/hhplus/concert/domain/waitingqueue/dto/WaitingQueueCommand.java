@@ -14,12 +14,9 @@ public class WaitingQueueCommand {
     }
   }
 
-  public record ActivateWaitingQueuesCommand(Long concertId, Integer availableSlots) {
+  public record ActivateWaitingQueuesCommand(Integer availableSlots) {
 
     public ActivateWaitingQueuesCommand {
-      if (concertId == null) {
-        throw new CoreException(ErrorType.Concert.CONCERT_ID_MUST_NOT_BE_NULL);
-      }
       if (availableSlots == null) {
         throw new CoreException(ErrorType.WaitingQueue.AVAILABLE_SLOTS_MUST_NOT_BE_NULL);
       }

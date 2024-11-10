@@ -24,6 +24,10 @@ spring:
   cache:
     type: redis
 
+queue:
+  waiting-key: ${QUEUE_WAITING_KEY}
+  active-key: ${QUEUE_ACTIVE_KEY}
+
 # Swagger springdoc-ui Configuration
 springdoc:
   packages-to-scan: com.example.hhplus.concert

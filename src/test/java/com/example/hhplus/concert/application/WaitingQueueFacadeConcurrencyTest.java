@@ -2,14 +2,11 @@ package com.example.hhplus.concert.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.hhplus.concert.domain.concert.model.Concert;
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import com.example.hhplus.concert.infra.db.concert.ConcertJpaRepository;
-import com.example.hhplus.concert.infra.db.waitingqueue.WaitingQueueJpaRepository;
+import com.example.hhplus.concert.infra.redis.waitingqueue.WaitingQueueRedisRepository;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +15,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
@@ -29,15 +27,19 @@ class WaitingQueueFacadeConcurrencyTest {
   private WaitingQueueFacade waitingQueueFacade;
 
   @Autowired
-  private WaitingQueueJpaRepository waitingQueueJpaRepository;
+  private ConcertJpaRepository concertJpaRepository;
 
   @Autowired
-  private ConcertJpaRepository concertJpaRepository;
+  private WaitingQueueRedisRepository waitingQueueRedisRepository;
+
+  @Autowired
+  private RedisTemplate redisTemplate;
 
   @BeforeEach
   void setUp() {
-    waitingQueueJpaRepository.deleteAll();
     concertJpaRepository.deleteAll();
+
+    redisTemplate.keys("*").forEach(redisTemplate::delete);
   }
 
   @Nested
@@ -60,7 +62,7 @@ class WaitingQueueFacadeConcurrencyTest {
       CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
       // then
-      final List<WaitingQueue> waitingQueues = waitingQueueJpaRepository.findAll();
+      final List<WaitingQueue> waitingQueues = waitingQueueRedisRepository.findAllWaitingQueues();
       waitingQueues.forEach(waitingQueue -> {
         assertThat(waitingQueue).isNotNull();
         assertThat(waitingQueue.getConcertId()).isEqualTo(concertId);
@@ -68,57 +70,9 @@ class WaitingQueueFacadeConcurrencyTest {
         assertThat(waitingQueue.getUuid()).isNotNull();
         assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
         assertThat(waitingQueue.getCreatedAt()).isNotNull();
-        assertThat(waitingQueue.getUpdatedAt()).isNull();
       });
     }
 
-  }
-
-  @Nested
-  @DisplayName("대기열 토큰 활성화 동시성 테스트")
-  class ActivateWaitingQueues {
-
-    @Test
-    @DisplayName("대기열 토큰 활성화 동시성 테스트 성공")
-    void shouldActivateWaitingQueues() {
-      // given
-      final int threadCount = 100;
-      final Concert concert = concertJpaRepository.save(
-          Concert.builder().title("title").description("description").build());
-      final Long concertId = concert.getId();
-
-      final List<WaitingQueue> waitingQueues = IntStream.range(0, threadCount)
-          .mapToObj(i -> WaitingQueue.builder()
-              .concertId(concertId)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .build())
-          .toList();
-      waitingQueueJpaRepository.saveAll(waitingQueues);
-
-      // when
-      final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
-          .mapToObj(i -> CompletableFuture.runAsync(
-              () -> waitingQueueFacade.activateWaitingQueues()))
-          .toList();
-
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-      // then
-      final List<WaitingQueue> result = waitingQueueJpaRepository.findAll();
-
-      for (int i = 0; i < result.size(); i++) {
-        final WaitingQueue waitingQueue = result.get(i);
-
-        if (i < WaitingQueueConstants.MAX_PROCESSING_WAITING_QUEUE_COUNT) {
-          assertThat(waitingQueue.getExpiredAt()).isNotNull();
-          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.PROCESSING);
-        } else {
-          assertThat(waitingQueue.getExpiredAt()).isNull();
-          assertThat(waitingQueue.getStatus()).isEqualTo(WaitingQueueStatus.WAITING);
-        }
-      }
-    }
   }
 
 }

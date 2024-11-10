@@ -19,9 +19,4 @@ public class WaitingQueueScheduler {
     waitingQueueFacade.activateWaitingQueues();
   }
 
-  @Scheduled(cron = "0 * * * * *")
-  @Transactional
-  public void expireWaitingQueues() {
-    waitingQueueFacade.expireWaitingQueues();
-  }
 }

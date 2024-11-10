@@ -7,7 +7,7 @@ public enum DistributedLockType {
   CONCERT_SEAT("concertSeatLock"),
   USER_WALLET("userWalletLock"),
   RESERVATION("reservationLock"),
-  ;
+  WAITING_QUEUE("waitingQueueLock");
 
   private final String lockName;
 

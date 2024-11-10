@@ -30,21 +30,7 @@ public class WaitingQueueValidationInterceptor implements HandlerInterceptor {
     Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
         HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
-    if (pathVariables.containsKey("concertId")) {
-      Long concertId = Long.parseLong(pathVariables.get("concertId"));
-      waitingQueueFacade.validateWaitingQueueProcessingAndConcertId(waitingQueueTokenUuid,
-          concertId);
-    } else if (pathVariables.containsKey("concertScheduleId")) {
-      Long concertScheduleId = Long.parseLong(pathVariables.get("concertScheduleId"));
-      waitingQueueFacade.validateWaitingQueueProcessingAndScheduleId(waitingQueueTokenUuid,
-          concertScheduleId);
-    } else if (pathVariables.containsKey("concertSeatId")) {
-      Long concertSeatId = Long.parseLong(pathVariables.get("concertSeatId"));
-      waitingQueueFacade.validateWaitingQueueProcessingAndSeatId(waitingQueueTokenUuid,
-          concertSeatId);
-    } else {
-      throw new CoreException(ErrorType.INVALID_REQUEST);
-    }
+    waitingQueueFacade.validateWaitingQueueProcessing(waitingQueueTokenUuid);
 
     return true;
   }

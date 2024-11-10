@@ -8,8 +8,8 @@ import com.example.hhplus.concert.domain.support.error.CoreException;
 import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidWithLockParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByIdAndConcertIdParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidAndConcertIdParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ class WaitingQueueQueryServiceTest {
   private WaitingQueueQueryService target;
 
   @Mock
-  private WaitingQueueRepository waitingQueueReader;
+  private WaitingQueueRepository waitingQueueRepository;
 
 
   @Nested
@@ -43,7 +43,7 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().status(WaitingQueueStatus.EXPIRED).build()).when(
-          waitingQueueReader).getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
+          waitingQueueRepository).getWaitingQueue(new GetWaitingQueueByUuidParam(uuid));
 
       // when
       final CoreException result = assertThrows(CoreException.class,
@@ -60,8 +60,8 @@ class WaitingQueueQueryServiceTest {
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
       doReturn(WaitingQueue.builder().status(WaitingQueueStatus.PROCESSING)
-          .expiredAt(LocalDateTime.now()).build()).when(waitingQueueReader)
-          .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
+          .expiredAt(LocalDateTime.now()).build()).when(waitingQueueRepository)
+          .getWaitingQueue(new GetWaitingQueueByUuidParam(uuid));
 
       // when
       final CoreException result = assertThrows(CoreException.class,
@@ -75,20 +75,18 @@ class WaitingQueueQueryServiceTest {
     @DisplayName("대기열 순서 조회 성공 - 대기열이 PROCESSING 상태")
     void shouldSuccessfullyGetWaitingQueuePositionWhenWaitingQueueIsProcessing() {
       // given
-      final Long waitingQueueId = 1L;
       final Long concertId = 1L;
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
-      doReturn(WaitingQueue.builder().id(waitingQueueId).concertId(concertId).uuid(uuid)
+      doReturn(WaitingQueue.builder().concertId(concertId).uuid(uuid)
           .status(WaitingQueueStatus.PROCESSING).expiredAt(LocalDateTime.now().plusMinutes(1))
-          .build()).when(waitingQueueReader)
-          .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
+          .build()).when(waitingQueueRepository)
+          .getWaitingQueue(new GetWaitingQueueByUuidParam(uuid));
 
       // when
       final var result = target.getWaitingQueuePosition(query);
 
       // then
-      assertThat(result.id()).isEqualTo(waitingQueueId);
       assertThat(result.concertId()).isEqualTo(concertId);
       assertThat(result.uuid()).isEqualTo(uuid);
       assertThat(result.status()).isEqualTo(WaitingQueueStatus.PROCESSING);
@@ -99,21 +97,19 @@ class WaitingQueueQueryServiceTest {
     @DisplayName("대기열 순서 조회 성공 - 대기열이 WAITING 상태")
     void shouldSuccessfullyGetWaitingQueuePositionWhenWaitingQueueIsWaiting() {
       // given
-      final Long waitingQueueId = 1L;
       final Long concertId = 1L;
       final String uuid = "uuid";
       final GetWaitingQueuePositionByUuid query = new GetWaitingQueuePositionByUuid(uuid);
-      doReturn(WaitingQueue.builder().id(waitingQueueId).concertId(concertId).uuid(uuid)
-          .status(WaitingQueueStatus.WAITING).build()).when(waitingQueueReader)
-          .getWaitingQueue(new GetWaitingQueueByUuidWithLockParam(uuid));
-      doReturn(1).when(waitingQueueReader).getWaitingQueuePosition(
-          new GetWaitingQueuePositionByIdAndConcertIdParam(waitingQueueId, concertId));
+      doReturn(WaitingQueue.builder().concertId(concertId).uuid(uuid)
+          .status(WaitingQueueStatus.WAITING).build()).when(waitingQueueRepository)
+          .getWaitingQueue(new GetWaitingQueueByUuidParam(uuid));
+      doReturn(1).when(waitingQueueRepository).getWaitingQueuePosition(
+          new GetWaitingQueuePositionByUuidAndConcertIdParam(uuid, concertId));
 
       // when
       final var result = target.getWaitingQueuePosition(query);
 
       // then
-      assertThat(result.id()).isEqualTo(waitingQueueId);
       assertThat(result.concertId()).isEqualTo(concertId);
       assertThat(result.uuid()).isEqualTo(uuid);
       assertThat(result.status()).isEqualTo(WaitingQueueStatus.WAITING);
