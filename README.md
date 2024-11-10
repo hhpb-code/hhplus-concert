@@ -11,4 +11,4 @@
 - [Swagger](./docs/SWAGGER.md)
 - [CHAPTER2 Learn Log](./docs/CHAPTER2.md)
 - [Concurrency Issue](https://penguin-dev.tistory.com/22)
-- [CACHE REDIS QUEUE](./docs/CACHE_REDIS_QUEUE)
+- [CACHE REDIS QUEUE](./docs/CACHE_REDIS_QUEUE.md)
