@@ -122,4 +122,3 @@ sequenceDiagram
 기존 DB에 토큰정보를 저장하고 status로 활성화 여부를 판단하던 방식을 Redis의 ZSet을 활용하여 waiting queue ZSet, active queue ZSet으로
 구분하여 관리하였습니다.
 이를 통해 ZSet의 `ZRANK` 명령어를 통해 대기열 순번을 조회하는 방식으로 변경하였습니다.
-기존 DB에 저장하던 토큰 정보는 Redis의 Hash로 관리하였으며 TTL을 설정하여 만료된 토큰은 자동으로 삭제되도록 구현하였습니다.

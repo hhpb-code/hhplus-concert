@@ -1,6 +1,5 @@
 package com.example.hhplus.concert.interfaces.api.controller;
 
-import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenRequest;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.CreateWaitingQueueTokenResponse;
 import com.example.hhplus.concert.interfaces.api.dto.WaitingQueueControllerDto.GetWaitingQueuePositionResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,9 +13,7 @@ public interface IWaitingQueueController {
 
   @Operation(summary = "대기열 토큰 생성", description = "새로운 대기열 토큰을 생성합니다.")
   @ApiResponse(responseCode = "201", description = "대기열 토큰 생성 성공")
-  ResponseEntity<CreateWaitingQueueTokenResponse> createWaitingQueueToken(
-      CreateWaitingQueueTokenRequest request
-  );
+  ResponseEntity<CreateWaitingQueueTokenResponse> createWaitingQueueToken();
 
   @Operation(summary = "대기열 순번 조회", description = "대기 중인 토큰의 순번을 조회합니다.")
   ResponseEntity<GetWaitingQueuePositionResponse> getWaitingQueuePosition(

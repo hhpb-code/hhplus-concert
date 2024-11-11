@@ -2,21 +2,21 @@ package com.example.hhplus.concert.infra.redis.waitingqueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByStatusWithLimitAndLockParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindDistinctConcertIdsByStatusParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidAndConcertIdParam;
+import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetActiveTokenByUuid;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,297 +27,115 @@ import org.springframework.test.context.ActiveProfiles;
 class WaitingQueueRedisRepositoryTest {
 
   @Autowired
-  private WaitingQueueRedisRepository target;
+  private WaitingQueueRepository target;
 
   @Autowired
   private RedisTemplate redisTemplate;
+
+  @Value("${queue.waiting-key}")
+  private String waitingQueueKey;
+  @Value("${queue.active-key}")
+  private String activeQueueKey;
 
   @BeforeEach
   void setUp() {
     redisTemplate.keys("*").forEach(redisTemplate::delete);
   }
 
-  @Nested
-  @DisplayName("save 테스트")
-  class saveTest {
 
-    @Test
-    @DisplayName("WaitingQueue 추가 - waiting 상태")
-    void shouldSuccessfullySaveWaitingQueue() {
-      // given
-      final WaitingQueue waitingQueue = WaitingQueue.builder()
-          .concertId(1L)
-          .uuid("uuid")
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build();
+  @Test
+  @DisplayName("대기열 추가")
+  void shouldSuccessfullyAddWaitingQueue() {
+    // given
+    final String uuid = UUID.randomUUID().toString();
 
-      // when
-      final WaitingQueue result = target.save(waitingQueue);
+    // when
+    final String result = target.addWaitingQueue(uuid);
 
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.getConcertId()).isEqualTo(waitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(waitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(waitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
-    }
-
-    @Test
-    @DisplayName("WaitingQueue 추가 - processing 상태")
-    void shouldSuccessfullySaveProcessingQueue() {
-      // given
-      final WaitingQueue waitingQueue = WaitingQueue.builder()
-          .concertId(1L)
-          .uuid("uuid")
-          .status(WaitingQueueStatus.PROCESSING)
-          .createdAt(LocalDateTime.now())
-          .build();
-
-      // when
-      final WaitingQueue result = target.save(waitingQueue);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.getConcertId()).isEqualTo(waitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(waitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(waitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
-    }
-
-    @Test
-    @DisplayName("WaitingQueue 수정 - processing 상태")
-    void shouldSuccessfullyUpdateProcessingQueue() {
-      // given
-      final WaitingQueue waitingQueue = WaitingQueue.builder()
-          .concertId(1L)
-          .uuid("uuid")
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build();
-
-      final WaitingQueue updatedWaitingQueue = WaitingQueue.builder()
-          .concertId(1L)
-          .uuid("uuid")
-          .status(WaitingQueueStatus.PROCESSING)
-          .createdAt(LocalDateTime.now())
-          .expiredAt(LocalDateTime.now().plusMinutes(10))
-          .build();
-
-      // when
-      target.save(waitingQueue);
-      final WaitingQueue result = target.save(updatedWaitingQueue);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.getConcertId()).isEqualTo(updatedWaitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(updatedWaitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(updatedWaitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(updatedWaitingQueue.getCreatedAt());
-    }
+    // then
+    assertThat(result).isEqualTo(uuid);
   }
 
-  @Nested
-  @DisplayName("getWaitingQueue 테스트")
-  class getWaitingQueueTest {
+  @Test
+  @DisplayName("대기열 활성화")
+  void shouldSuccessfullyActivateWaitingQueues() {
+    // given
+    final String uuid = UUID.randomUUID().toString();
+    redisTemplate.opsForZSet().add(waitingQueueKey, uuid, 1);
+    final ActivateWaitingQueuesParam param = new ActivateWaitingQueuesParam(1, 1, TimeUnit.MINUTES);
 
-    @Test
-    @DisplayName("WaitingQueue 조회 - By UUID")
-    void shouldSuccessfullyGetWaitingQueueByUuid() {
+    // when
+    target.activateWaitingQueues(param);
 
-      final WaitingQueue waitingQueue = target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid("uuid")
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      final GetWaitingQueueByUuidParam param = new GetWaitingQueueByUuidParam(
-          waitingQueue.getUuid());
-
-      // when
-      final WaitingQueue result = target.getWaitingQueue(param);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.getConcertId()).isEqualTo(waitingQueue.getConcertId());
-      assertThat(result.getUuid()).isEqualTo(waitingQueue.getUuid());
-      assertThat(result.getStatus()).isEqualTo(waitingQueue.getStatus());
-      assertThat(result.getCreatedAt()).isEqualTo(waitingQueue.getCreatedAt());
-    }
+    // then
+    final Long waitingQueueSize = redisTemplate.opsForZSet().size(waitingQueueKey);
+    final Double score = redisTemplate.opsForZSet().score(activeQueueKey, uuid);
+    assertThat(waitingQueueSize).isZero();
+    assertThat(score).isNotNull();
   }
 
-  @Nested
-  @DisplayName("getWaitingQueuePosition 테스트")
-  class getWaitingQueuePositionTest {
+  @Test
+  @DisplayName("대기열 순번 조회")
+  void shouldSuccessfullyGetWaitingQueuePosition() {
+    // given
+    final String uuid = UUID.randomUUID().toString();
+    redisTemplate.opsForZSet().add(waitingQueueKey, uuid, LocalDateTime.now().toEpochSecond(
+        ZoneOffset.UTC));
+    final GetWaitingQueuePositionByUuidParam param = new GetWaitingQueuePositionByUuidParam(uuid);
 
-    @Test
-    @DisplayName("WaitingQueue 조회 - By UUID")
-    void shouldSuccessfullyGetWaitingQueuePositionByUuid() {
+    // when
+    final Long result = target.getWaitingQueuePosition(param);
 
-      target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-
-      final WaitingQueue waitingQueue = target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      final GetWaitingQueuePositionByUuidAndConcertIdParam param = new GetWaitingQueuePositionByUuidAndConcertIdParam(
-          waitingQueue.getUuid(), waitingQueue.getConcertId());
-
-      // when
-      final Integer result = target.getWaitingQueuePosition(param);
-
-      // then
-      assertThat(result).isEqualTo(4);
-    }
+    // then
+    assertThat(result).isOne();
   }
 
-  @Nested
-  @DisplayName("findAllWaitingQueues 테스트")
-  class findAllWaitingQueuesTest {
+  @Test
+  @DisplayName("활성 토큰 조회")
+  void shouldSuccessfullyGetActiveToken() {
+    // given
+    final String uuid = UUID.randomUUID().toString();
+    redisTemplate.opsForZSet().add(activeQueueKey, uuid, 1);
+    final GetActiveTokenByUuid param = new GetActiveTokenByUuid(uuid);
 
-    @Test
-    @DisplayName("WaitingQueue 전체 조회")
-    void shouldSuccessfullyGetAllWaitingQueues() {
-      // given
-      List<WaitingQueue> waitingQueues = List.of(
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build(),
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build(),
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build()
-      );
-      target.saveAll(waitingQueues);
+    // when
+    final WaitingQueue result = target.getActiveToken(param);
 
-      // when
-      final List<WaitingQueue> result = target.findAllWaitingQueues();
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.size()).isEqualTo(3);
-      for (int i = 0; i < result.size(); i++) {
-        final WaitingQueue waitingQueue = result.get(i);
-        final WaitingQueue expected = waitingQueues.get(i);
-        assertThat(waitingQueue.getConcertId()).isEqualTo(expected.getConcertId());
-        assertThat(waitingQueue.getUuid()).isEqualTo(expected.getUuid());
-        assertThat(waitingQueue.getStatus()).isEqualTo(expected.getStatus());
-        assertThat(waitingQueue.getCreatedAt()).isEqualTo(expected.getCreatedAt());
-      }
-    }
-
-    @DisplayName("WaitingQueue 전체 조회 - By Status Limit")
-    @Test
-    void shouldSuccessfullyGetAllWaitingQueuesByStatusLimit() {
-      // given
-      List<WaitingQueue> waitingQueues = List.of(
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build(),
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build(),
-          WaitingQueue.builder()
-              .concertId(1L)
-              .uuid(UUID.randomUUID().toString())
-              .status(WaitingQueueStatus.WAITING)
-              .createdAt(LocalDateTime.now())
-              .build()
-      );
-      target.saveAll(waitingQueues);
-
-      final FindAllWaitingQueuesByStatusWithLimitAndLockParam param = new FindAllWaitingQueuesByStatusWithLimitAndLockParam(
-          WaitingQueueStatus.WAITING, WaitingQueueConstants.ADD_PROCESSING_COUNT);
-
-      // when
-      final List<WaitingQueue> result = target.findAllWaitingQueues(param);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.size()).isEqualTo(3);
-      for (int i = 0; i < result.size(); i++) {
-        final WaitingQueue waitingQueue = result.get(i);
-        final WaitingQueue expected = waitingQueues.get(i);
-        assertThat(waitingQueue.getConcertId()).isEqualTo(expected.getConcertId());
-        assertThat(waitingQueue.getUuid()).isEqualTo(expected.getUuid());
-        assertThat(waitingQueue.getStatus()).isEqualTo(expected.getStatus());
-        assertThat(waitingQueue.getCreatedAt()).isEqualTo(expected.getCreatedAt());
-      }
-    }
+    // then
+    assertThat(result.getUuid()).isEqualTo(uuid);
   }
 
-  @Nested
-  @DisplayName("findDistinctConcertIdByStatus 테스트")
-  class findDistinctConcertIdByStatusTest {
+  @Test
+  @DisplayName("활성 토큰 전체 조회")
+  void shouldSuccessfullyGetActiveTokens() {
+    // given
+    final String uuid1 = UUID.randomUUID().toString();
+    final String uuid2 = UUID.randomUUID().toString();
+    final String uuid3 = UUID.randomUUID().toString();
+    redisTemplate.opsForZSet().add(activeQueueKey, uuid1, 1);
+    redisTemplate.opsForZSet().add(activeQueueKey, uuid2, 2);
+    redisTemplate.opsForZSet().add(activeQueueKey, uuid3, 3);
 
-    @Test
-    @DisplayName("WaitingQueue 상태별 ConcertId 조회")
-    void shouldSuccessfullyFindDistinctConcertIdByStatus() {
-      // given
-      target.save(WaitingQueue.builder()
-          .concertId(1L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      target.save(WaitingQueue.builder()
-          .concertId(2L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      target.save(WaitingQueue.builder()
-          .concertId(3L)
-          .uuid(UUID.randomUUID().toString())
-          .status(WaitingQueueStatus.WAITING)
-          .createdAt(LocalDateTime.now())
-          .build());
-      final FindDistinctConcertIdsByStatusParam param = new FindDistinctConcertIdsByStatusParam(
-          WaitingQueueStatus.WAITING);
+    // when
+    final List<WaitingQueue> result = target.getAllActiveTokens();
 
-      // when
-      final List<Long> result = target.findDistinctConcertIdByStatus(param);
-
-      // then
-      assertThat(result).isNotNull();
-      assertThat(result.size()).isEqualTo(3);
-    }
+    // then
+    assertThat(result).extracting(WaitingQueue::getUuid)
+        .containsExactlyInAnyOrder(uuid1, uuid2, uuid3);
   }
 
+  @Test
+  @DisplayName("활성 토큰 삭제")
+  void shouldSuccessfullyRemoveActiveToken() {
+    // given
+    final String uuid = UUID.randomUUID().toString();
+    redisTemplate.opsForZSet().add(activeQueueKey, uuid, 1);
+
+    // when
+    target.removeActiveToken(uuid);
+
+    // then
+    final Long result = redisTemplate.opsForZSet().size(activeQueueKey);
+    assertThat(result).isZero();
+  }
 }

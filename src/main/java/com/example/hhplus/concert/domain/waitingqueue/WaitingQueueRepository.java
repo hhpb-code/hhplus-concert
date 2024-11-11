@@ -1,27 +1,23 @@
 package com.example.hhplus.concert.domain.waitingqueue;
 
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByStatusWithLimitAndLockParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindDistinctConcertIdsByStatusParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidAndConcertIdParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetActiveTokenByUuid;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import java.util.List;
 
 public interface WaitingQueueRepository {
 
-  WaitingQueue save(WaitingQueue waitingQueue);
+  String addWaitingQueue(String uuid);
 
-  void saveAll(List<WaitingQueue> waitingQueues);
+  void activateWaitingQueues(ActivateWaitingQueuesParam param);
 
-  WaitingQueue getWaitingQueue(GetWaitingQueueByUuidParam param);
+  Long getWaitingQueuePosition(GetWaitingQueuePositionByUuidParam param);
 
-  Integer getWaitingQueuePosition(GetWaitingQueuePositionByUuidAndConcertIdParam param);
+  WaitingQueue getActiveToken(GetActiveTokenByUuid param);
 
-  List<Long> findDistinctConcertIdByStatus(FindDistinctConcertIdsByStatusParam param);
+  List<WaitingQueue> getAllActiveTokens();
 
-  List<WaitingQueue> findAllWaitingQueues();
-
-  List<WaitingQueue> findAllWaitingQueues(
-      FindAllWaitingQueuesByStatusWithLimitAndLockParam param);
+  void removeActiveToken(String uuid);
 
 }

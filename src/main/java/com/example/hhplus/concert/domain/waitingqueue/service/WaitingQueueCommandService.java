@@ -3,13 +3,9 @@ package com.example.hhplus.concert.domain.waitingqueue.service;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ActivateWaitingQueuesCommand;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.CreateWaitingQueueCommand;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.FindAllWaitingQueuesByStatusWithLimitAndLockParam;
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,26 +17,13 @@ public class WaitingQueueCommandService {
 
   private final WaitingQueueRepository waitingQueueRepository;
 
-  public String createWaitingQueue(CreateWaitingQueueCommand command) {
-    return waitingQueueRepository.save(
-        WaitingQueue.builder()
-            .uuid(UUID.randomUUID().toString())
-            .concertId(command.concertId())
-            .status(WaitingQueueStatus.WAITING)
-            .build()
-    ).getUuid();
+  public String createWaitingQueue() {
+    return waitingQueueRepository.addWaitingQueue(UUID.randomUUID().toString());
   }
 
   public void activateWaitingQueues(ActivateWaitingQueuesCommand command) {
-    List<WaitingQueue> waitingQueues = waitingQueueRepository.findAllWaitingQueues(
-        new FindAllWaitingQueuesByStatusWithLimitAndLockParam(WaitingQueueStatus.WAITING,
-            command.availableSlots()));
-
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime expiredAt = now.plusMinutes(WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES);
-
-    waitingQueues.forEach(waitingQueue -> waitingQueue.activate(expiredAt));
-
-    waitingQueueRepository.saveAll(waitingQueues);
+    waitingQueueRepository.activateWaitingQueues(
+        new ActivateWaitingQueuesParam(command.availableSlots(),
+            WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES, TimeUnit.MINUTES));
   }
 }

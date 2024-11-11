@@ -1,53 +1,20 @@
 package com.example.hhplus.concert.domain.waitingqueue.dto;
 
-import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueStatus;
+import java.util.concurrent.TimeUnit;
 
 public class WaitingQueueRepositoryParam {
 
-  public record GetWaitingQueueByIdParam(
-      Long id
-  ) {
-
-  }
-
-  public record GetWaitingQueueByUuidParam(
+  public record GetWaitingQueuePositionByUuidParam(
       String uuid
   ) {
 
   }
 
-  public record GetWaitingQueueByUuidWithLockParam(
-      String uuid
+  public record ActivateWaitingQueuesParam(
+      int availableSlots,
+      long timeout,
+      TimeUnit unit
   ) {
 
   }
-
-
-  public record GetWaitingQueuePositionByUuidAndConcertIdParam(
-      String uuid,
-      Long concertId
-  ) {
-
-  }
-
-  public record FindDistinctConcertIdsByStatusParam(
-      WaitingQueueStatus status
-  ) {
-
-  }
-
-  public record CountWaitingQueueByConcertIdAndStatusParam(
-      Long concertId,
-      WaitingQueueStatus status
-  ) {
-
-  }
-
-  public record FindAllWaitingQueuesByStatusWithLimitAndLockParam(
-      WaitingQueueStatus status,
-      int limit
-  ) {
-
-  }
-
 }
