@@ -4,7 +4,7 @@ import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueueByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetWaitingQueuePositionByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueueByUuidParam;
-import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidAndConcertIdParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueueWithPosition;
 import lombok.RequiredArgsConstructor;
@@ -27,18 +27,11 @@ public class WaitingQueueQueryService {
     final WaitingQueue waitingQueue = waitingQueueRepository.getWaitingQueue(
         new GetWaitingQueueByUuidParam(query.uuid()));
 
-    waitingQueue.validateNotExpired();
-
     Integer position = waitingQueueRepository.getWaitingQueuePosition(
-        new GetWaitingQueuePositionByUuidAndConcertIdParam(waitingQueue.getUuid(),
-            waitingQueue.getConcertId()));
+        new GetWaitingQueuePositionByUuidParam(waitingQueue.getUuid()));
 
     return new WaitingQueueWithPosition(
-        waitingQueue.getConcertId(),
         waitingQueue.getUuid(),
-        waitingQueue.getStatus(),
-        waitingQueue.getExpiredAt(),
-        waitingQueue.getCreatedAt(),
         position
     );
   }
