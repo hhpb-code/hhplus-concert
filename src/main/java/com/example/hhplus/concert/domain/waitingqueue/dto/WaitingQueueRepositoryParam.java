@@ -1,12 +1,8 @@
 package com.example.hhplus.concert.domain.waitingqueue.dto;
 
+import java.util.concurrent.TimeUnit;
+
 public class WaitingQueueRepositoryParam {
-
-  public record GetWaitingQueueByUuidParam(
-      String uuid
-  ) {
-
-  }
 
   public record GetWaitingQueuePositionByUuidParam(
       String uuid
@@ -14,4 +10,11 @@ public class WaitingQueueRepositoryParam {
 
   }
 
+  public record ActivateWaitingQueuesParam(
+      int availableSlots,
+      long timeout,
+      TimeUnit unit
+  ) {
+
+  }
 }

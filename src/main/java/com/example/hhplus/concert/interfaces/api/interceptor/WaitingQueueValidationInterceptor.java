@@ -6,11 +6,9 @@ import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.interfaces.api.support.CommonHttpHeader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.HandlerMapping;
 
 @Component
 @RequiredArgsConstructor
@@ -26,9 +24,6 @@ public class WaitingQueueValidationInterceptor implements HandlerInterceptor {
     if (waitingQueueTokenUuid == null || waitingQueueTokenUuid.isEmpty()) {
       throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_TOKEN_UUID_REQUIRED);
     }
-
-    Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
-        HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
     waitingQueueFacade.validateWaitingQueueProcessing(waitingQueueTokenUuid);
 

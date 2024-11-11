@@ -39,7 +39,7 @@ public class WaitingQueueControllerDto {
       String uuid,
 
       @Schema(description = "대기열 순번", example = "1")
-      Integer position
+      Long position
 
   ) {
 

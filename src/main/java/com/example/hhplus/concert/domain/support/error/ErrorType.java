@@ -20,6 +20,7 @@ public enum ErrorType implements IErrorType {
   @AllArgsConstructor
   public enum WaitingQueue implements IErrorType {
     WAITING_QUEUE_NOT_FOUND(ErrorCode.NOT_FOUND, "대기열 정보를 찾을 수 없습니다.", LogLevel.WARN),
+    ACTIVE_QUEUE_NOT_FOUND(ErrorCode.NOT_FOUND, "활성 대기열 정보를 찾을 수 없습니다.", LogLevel.WARN),
     WAITING_QUEUE_EXPIRED(ErrorCode.BAD_REQUEST, "대기열이 만료되었습니다.", LogLevel.WARN),
     WAITING_QUEUE_ALREADY_ACTIVATED(ErrorCode.BAD_REQUEST, "대기열이 이미 활성 상태입니다.", LogLevel.WARN),
     INVALID_STATUS(ErrorCode.BAD_REQUEST, "대기열 상태가 유효하지 않습니다.", LogLevel.WARN),
@@ -34,6 +35,8 @@ public enum ErrorType implements IErrorType {
         LogLevel.WARN),
     AVAILABLE_SLOTS_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "사용 가능한 슬롯은 0보다 커야 합니다.",
         LogLevel.WARN),
+    TIMEOUT_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "타임아웃은 0보다 커야 합니다.", LogLevel.WARN),
+    TIME_UNIT_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "시간 단위는 null일 수 없습니다.", LogLevel.WARN),
     WAITING_QUEUE_TOKEN_UUID_REQUIRED(ErrorCode.BAD_REQUEST, "대기열 토큰 UUID는 필수입니다.", LogLevel.WARN),
     ;
 

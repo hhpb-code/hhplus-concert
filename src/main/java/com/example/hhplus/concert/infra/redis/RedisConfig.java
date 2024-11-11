@@ -49,7 +49,7 @@ public class RedisConfig {
     template.setKeySerializer(new StringRedisSerializer());
     template.setHashKeySerializer(new StringRedisSerializer());
 
-    template.setValueSerializer(new StringRedisSerializer());
+    template.setValueSerializer(new Jackson2JsonRedisSerializer(objectMapper, Object.class));
     template.setHashValueSerializer(
         new Jackson2JsonRedisSerializer(objectMapper, WaitingQueue.class));
 
