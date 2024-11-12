@@ -3,8 +3,6 @@ package com.example.hhplus.concert.domain.user;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserByIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByUserIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdParam;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdWithLockParam;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdWithLockParam;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
@@ -19,10 +17,6 @@ public interface UserRepository {
 
   Wallet getWallet(GetUserWalletByWalletIdParam param);
 
-  Wallet getWallet(GetUserWalletByWalletUserIdParam param);
-
-  Wallet getWallet(GetUserWalletByWalletIdWithLockParam param);
-
   Wallet getWallet(GetUserWalletByWalletUserIdWithLockParam param);
-  
+
 }

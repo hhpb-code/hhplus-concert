@@ -6,8 +6,6 @@ import com.example.hhplus.concert.domain.user.UserRepository;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserByIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByUserIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdParam;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletIdWithLockParam;
-import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdParam;
 import com.example.hhplus.concert.domain.user.dto.UserRepositoryParam.GetUserWalletByWalletUserIdWithLockParam;
 import com.example.hhplus.concert.domain.user.model.User;
 import com.example.hhplus.concert.domain.user.model.Wallet;
@@ -44,18 +42,6 @@ public class UserRepositoryImpl implements UserRepository {
   @Override
   public Wallet getWallet(GetUserWalletByWalletIdParam param) {
     return walletJpaRepository.findById(param.walletId())
-        .orElseThrow(() -> new CoreException(ErrorType.User.WALLET_NOT_FOUND));
-  }
-
-  @Override
-  public Wallet getWallet(GetUserWalletByWalletUserIdParam param) {
-    return walletJpaRepository.findByUserId(param.userId())
-        .orElseThrow(() -> new CoreException(ErrorType.User.WALLET_NOT_FOUND));
-  }
-
-  @Override
-  public Wallet getWallet(GetUserWalletByWalletIdWithLockParam param) {
-    return walletJpaRepository.findByIdWithLock(param.walletId())
         .orElseThrow(() -> new CoreException(ErrorType.User.WALLET_NOT_FOUND));
   }
 

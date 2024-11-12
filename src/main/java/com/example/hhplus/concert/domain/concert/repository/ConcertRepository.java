@@ -36,7 +36,7 @@ public interface ConcertRepository {
   @Cacheable(value = CacheName.CONCERT, key = "#param.id")
   Concert getConcert(GetConcertByIdWithLockParam param);
 
-  @Cacheable(value = CacheName.CONCERT_SCHEDULE, key = "#param.id")
+  @Cacheable(value = CacheName.CONCERT_SCHEDULE, key = "#param.concertScheduleId")
   ConcertSchedule getConcertSchedule(GetConcertScheduleByIdParam param);
 
   List<ConcertSchedule> findReservableConcertSchedules(
