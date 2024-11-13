@@ -12,3 +12,4 @@
 - [CHAPTER 2 회고](./docs/CHAPTER2_LEARN_LOG.md)
 - [콘서트 예약 시나리오 동시성 문제 분석](https://penguin-dev.tistory.com/22)
 - [캐시와 Redis를 이용한 성능 개선](./docs/CACHE_REDIS_QUEUE.md)
+- [인덱싱을 통한 성능 개선](./docs/INDEXING.md)
