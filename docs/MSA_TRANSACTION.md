@@ -22,6 +22,8 @@ MSA로 전환할 경우, 위의 각 서비스들은 개별 마이크로서비스
 
 ### 모놀리식 아키텍처 개요
 
+![Monolithic Architecture](./images/monolithic-architecture.png)
+
 모놀리식 아키텍처는 하나의 애플리케이션 안에 모든 기능이 통합되어 있는 구조입니다. 현재 시스템에서도 사용자, 대기열, 콘서트 예약, 결제 처리가 모두 한 곳에서 이루어지고 있어
 트랜잭션 관리가 상대적으로 용이하지만 몇 가지 한계가 존재합니다.
 
@@ -55,6 +57,8 @@ public Payment payReservation(Long reservationId, Long userId, String queueToken
 ## MSA 전환 시 트랜잭션 관리 방안
 
 ### MSA 아키텍처 개요
+
+![Microservice Architecture](./images/msa-architecture.png)
 
 MSA는 개별 서비스가 독립적으로 배포 및 운영될 수 있는 구조로, 각 서비스는 자체적인 데이터베이스를 사용하고 독립적인 트랜잭션을 관리하게 됩니다. 이처럼 서비스가 분리되면
 네트워크 통신이 필수적이 되며, 이에 따라 트랜잭션 관리가 더욱 복잡해질 수 있습니다.
