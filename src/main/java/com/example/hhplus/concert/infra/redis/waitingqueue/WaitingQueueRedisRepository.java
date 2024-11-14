@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetActiveTokenByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.RemoveActiveTokenParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -87,7 +88,7 @@ public class WaitingQueueRedisRepository implements WaitingQueueRepository {
   }
 
   @Override
-  public void removeActiveToken(String uuid) {
-    redisTemplate.opsForZSet().remove(activeQueueKey, uuid);
+  public void removeActiveToken(RemoveActiveTokenParam param) {
+    redisTemplate.opsForZSet().remove(activeQueueKey, param.uuid());
   }
 }

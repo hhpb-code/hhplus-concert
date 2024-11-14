@@ -16,4 +16,13 @@ public class WaitingQueueCommand {
       }
     }
   }
+
+  public record ExpireActivatedWaitingQueueCommand(String uuid) {
+
+    public ExpireActivatedWaitingQueueCommand {
+      if (uuid == null) {
+        throw new CoreException(ErrorType.WaitingQueue.UUID_MUST_NOT_BE_NULL);
+      }
+    }
+  }
 }

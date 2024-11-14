@@ -3,6 +3,7 @@ package com.example.hhplus.concert.domain.waitingqueue;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueQuery.GetActiveTokenByUuid;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.GetWaitingQueuePositionByUuidParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.RemoveActiveTokenParam;
 import com.example.hhplus.concert.domain.waitingqueue.model.WaitingQueue;
 import java.util.List;
 
@@ -18,6 +19,6 @@ public interface WaitingQueueRepository {
 
   List<WaitingQueue> getAllActiveTokens();
 
-  void removeActiveToken(String uuid);
+  void removeActiveToken(RemoveActiveTokenParam param);
 
 }

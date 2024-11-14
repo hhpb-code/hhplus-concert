@@ -23,10 +23,11 @@ public class ReservationController implements IReservationController {
   @PostMapping("{reservationId}/payments")
   public ResponseEntity<PayReservationResponse> payReservation(
       @PathVariable Long reservationId,
-      @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId
+      @RequestHeader(CommonHttpHeader.X_USER_ID) Long userId,
+      @RequestHeader(CommonHttpHeader.X_WAITING_QUEUE_TOKEN_UUID) String token
   ) {
     PaymentResponse payment = new PaymentResponse(
-        concertFacade.payReservation(reservationId, userId));
+        concertFacade.payReservation(reservationId, userId, token));
 
     return ResponseEntity.ok(new PayReservationResponse(payment));
   }

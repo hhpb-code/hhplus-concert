@@ -20,6 +20,7 @@ import com.example.hhplus.concert.infra.db.user.UserJpaRepository;
 import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
@@ -196,11 +197,13 @@ class ConcertFacadeConcurrencyTest {
                 .build()
         );
 
+        String token = UUID.randomUUID().toString();
+
         // when
         final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
               try {
-                concertFacade.payReservation(reservation.getId(), user.getId());
+                concertFacade.payReservation(reservation.getId(), user.getId(), token);
               } catch (CoreException e) {
                 if (e.getErrorType().equals(ErrorType.Concert.RESERVATION_ALREADY_PAID)) {
                   return;
@@ -276,12 +279,14 @@ class ConcertFacadeConcurrencyTest {
             ))
             .toList();
 
+        String token = UUID.randomUUID().toString();
+
         // when
         final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
               try {
                 concertFacade.payReservation(reservations.get(i).getId(),
-                    user.getId());
+                    user.getId(), token);
               } catch (CoreException e) {
                 if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
                   return;
@@ -353,12 +358,14 @@ class ConcertFacadeConcurrencyTest {
             ))
             .toList();
 
+        String token = UUID.randomUUID().toString();
+
         // when
         final List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
               try {
                 concertFacade.payReservation(reservations.get(i).getId(),
-                    user.getId());
+                    user.getId(), token);
               } catch (CoreException e) {
                 if (e.getErrorType().equals(ErrorType.User.NOT_ENOUGH_BALANCE)) {
                   return;
