@@ -29,6 +29,8 @@ import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserByIdQuery;
 import com.example.hhplus.concert.domain.user.dto.UserQuery.GetUserWalletByUserIdQuery;
 import com.example.hhplus.concert.domain.user.service.UserCommandService;
 import com.example.hhplus.concert.domain.user.service.UserQueryService;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ExpireActivatedWaitingQueueCommand;
+import com.example.hhplus.concert.domain.waitingqueue.service.WaitingQueueCommandService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -49,6 +51,8 @@ public class ConcertFacade {
   private final PaymentQueryService paymentQueryService;
 
   private final PaymentCommandService paymentCommandService;
+
+  private final WaitingQueueCommandService waitingQueueCommandService;
 
   public List<ConcertSchedule> getReservableConcertSchedules(Long concertId) {
     var concert = concertQueryService.getConcert(new GetConcertByIdQuery(concertId));
@@ -88,7 +92,7 @@ public class ConcertFacade {
   }
 
   @DistributedLock(type = DistributedLockType.USER_WALLET, keys = "userId")
-  public Payment payReservation(Long reservationId, Long userId) {
+  public Payment payReservation(Long reservationId, Long userId, String uuid) {
     var reservation = concertQueryService.getReservation(
         new GetReservationByIdQuery(reservationId));
 
@@ -106,10 +110,12 @@ public class ConcertFacade {
     userCommandService.withDrawUserWalletAmount(
         new WithdrawUserWalletAmountCommand(wallet.getId(), concertSeat.getPrice()));
 
-    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
-
     Long paymentId = paymentCommandService.createPayment(
         new CreatePaymentCommand(reservation.getId(), user.getId(), concertSeat.getPrice()));
+
+    waitingQueueCommandService.removeActiveToken(new ExpireActivatedWaitingQueueCommand(uuid));
+
+    concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
 
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
   }

@@ -38,6 +38,7 @@ public enum ErrorType implements IErrorType {
     TIMEOUT_MUST_BE_POSITIVE(ErrorCode.BAD_REQUEST, "타임아웃은 0보다 커야 합니다.", LogLevel.WARN),
     TIME_UNIT_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "시간 단위는 null일 수 없습니다.", LogLevel.WARN),
     WAITING_QUEUE_TOKEN_UUID_REQUIRED(ErrorCode.BAD_REQUEST, "대기열 토큰 UUID는 필수입니다.", LogLevel.WARN),
+    UUID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "UUID는 null일 수 없습니다.", LogLevel.WARN),
     ;
 
     private final ErrorCode code;

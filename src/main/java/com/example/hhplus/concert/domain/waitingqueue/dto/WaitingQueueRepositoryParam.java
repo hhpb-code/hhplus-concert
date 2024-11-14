@@ -17,4 +17,10 @@ public class WaitingQueueRepositoryParam {
   ) {
 
   }
+
+  public record RemoveActiveTokenParam(
+      String uuid
+  ) {
+
+  }
 }

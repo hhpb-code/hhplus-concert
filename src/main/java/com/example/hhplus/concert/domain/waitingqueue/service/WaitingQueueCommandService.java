@@ -3,7 +3,9 @@ package com.example.hhplus.concert.domain.waitingqueue.service;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueConstants;
 import com.example.hhplus.concert.domain.waitingqueue.WaitingQueueRepository;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ActivateWaitingQueuesCommand;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.ExpireActivatedWaitingQueueCommand;
 import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.ActivateWaitingQueuesParam;
+import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueRepositoryParam.RemoveActiveTokenParam;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -26,4 +28,10 @@ public class WaitingQueueCommandService {
         new ActivateWaitingQueuesParam(command.availableSlots(),
             WaitingQueueConstants.WAITING_QUEUE_EXPIRE_MINUTES, TimeUnit.MINUTES));
   }
+
+  public void removeActiveToken(ExpireActivatedWaitingQueueCommand command) {
+    waitingQueueRepository.removeActiveToken(
+        new RemoveActiveTokenParam(command.uuid()));
+  }
+
 }

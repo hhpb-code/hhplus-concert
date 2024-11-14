@@ -22,6 +22,7 @@ import com.example.hhplus.concert.infra.db.user.UserJpaRepository;
 import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -472,10 +473,11 @@ class ConcertFacadeTest {
         // given
         final Long reservationId = null;
         final Long userId = 1L;
+        final String token = UUID.randomUUID().toString();
 
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -492,10 +494,11 @@ class ConcertFacadeTest {
                 .status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
         final Long userId = null;
+        final String token = UUID.randomUUID().toString();
 
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -508,10 +511,11 @@ class ConcertFacadeTest {
         // given
         final Long reservationId = 1L;
         final Long userId = 1L;
+        final String token = UUID.randomUUID().toString();
 
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -528,10 +532,11 @@ class ConcertFacadeTest {
             Reservation.builder().concertSeatId(1L).userId(userId).reservedAt(LocalDateTime.now())
                 .status(ReservationStatus.CONFIRMED).build());
         final Long reservationId = reservation.getId();
+        final String token = UUID.randomUUID().toString();
 
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -558,9 +563,11 @@ class ConcertFacadeTest {
                 .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId + 1);
+          concertFacade.payReservation(reservationId, userId + 1, token);
         });
 
         // then
@@ -581,9 +588,11 @@ class ConcertFacadeTest {
             ConcertSeat.builder().concertScheduleId(1L).number(1).price(100).isReserved(true)
                 .build());
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -602,9 +611,11 @@ class ConcertFacadeTest {
                 .status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -632,9 +643,11 @@ class ConcertFacadeTest {
                 .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -658,9 +671,11 @@ class ConcertFacadeTest {
                 .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -687,9 +702,11 @@ class ConcertFacadeTest {
                 .reservedAt(LocalDateTime.now()).status(ReservationStatus.CANCELED).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final CoreException result = assertThrows(CoreException.class, () -> {
-          concertFacade.payReservation(reservationId, userId);
+          concertFacade.payReservation(reservationId, userId, token);
         });
 
         // then
@@ -716,9 +733,11 @@ class ConcertFacadeTest {
                 .reservedAt(LocalDateTime.now()).status(ReservationStatus.WAITING).build());
         final Long reservationId = reservation.getId();
 
+        final String token = UUID.randomUUID().toString();
+
         // when
         final Payment result = concertFacade.payReservation(reservationId,
-            userId);
+            userId, token);
 
         // then
         assertThat(result.getId()).isNotNull();
