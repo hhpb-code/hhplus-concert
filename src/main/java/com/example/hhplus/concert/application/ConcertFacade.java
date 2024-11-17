@@ -19,6 +19,8 @@ import com.example.hhplus.concert.domain.concert.service.ConcertCommandService;
 import com.example.hhplus.concert.domain.concert.service.ConcertQueryService;
 import com.example.hhplus.concert.domain.payment.dto.PaymentCommand.CreatePaymentCommand;
 import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentByIdQuery;
+import com.example.hhplus.concert.domain.payment.event.PaymentEventPublisher;
+import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import com.example.hhplus.concert.domain.payment.service.PaymentCommandService;
 import com.example.hhplus.concert.domain.payment.service.PaymentQueryService;
@@ -33,9 +35,11 @@ import com.example.hhplus.concert.domain.waitingqueue.dto.WaitingQueueCommand.Ex
 import com.example.hhplus.concert.domain.waitingqueue.service.WaitingQueueCommandService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ConcertFacade {
@@ -53,6 +57,8 @@ public class ConcertFacade {
   private final PaymentCommandService paymentCommandService;
 
   private final WaitingQueueCommandService waitingQueueCommandService;
+
+  private final PaymentEventPublisher paymentEventPublisher;
 
   public List<ConcertSchedule> getReservableConcertSchedules(Long concertId) {
     var concert = concertQueryService.getConcert(new GetConcertByIdQuery(concertId));
@@ -92,6 +98,7 @@ public class ConcertFacade {
   }
 
   @DistributedLock(type = DistributedLockType.USER_WALLET, keys = "userId")
+  @Transactional
   public Payment payReservation(Long reservationId, Long userId, String uuid) {
     var reservation = concertQueryService.getReservation(
         new GetReservationByIdQuery(reservationId));
@@ -116,6 +123,12 @@ public class ConcertFacade {
     waitingQueueCommandService.removeActiveToken(new ExpireActivatedWaitingQueueCommand(uuid));
 
     concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
+
+    log.info("PaymentSuccessEvent publish");
+
+    paymentEventPublisher.publish(new PaymentSuccessEvent(paymentId));
+
+    log.info("PaymentSuccessEvent published");
 
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
   }
