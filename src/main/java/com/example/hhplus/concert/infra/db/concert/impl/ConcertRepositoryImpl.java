@@ -1,10 +1,10 @@
 package com.example.hhplus.concert.infra.db.concert.impl;
 
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByConcertIdAndIsReservedParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllExpiredReservationsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByStatusAndReservedAtBeforeWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertScheduleByIdParam;
@@ -79,10 +79,9 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   }
 
   @Override
-  public List<ConcertSchedule> findReservableConcertSchedules(
-      FindReservableConcertSchedulesByConcertIdAndNowParam param) {
-    return concertScheduleJpaRepository.findReservableConcertSchedulesByConcertIdAndNow(
-        param.concertId(),
+  public List<ConcertSchedule> findAllConcertSchedules(
+      FindAllConcertSchedulesByConcertIdAndNowParam param) {
+    return concertScheduleJpaRepository.findByConcertIdAndReservationPeriod(param.concertId(),
         LocalDateTime.now());
   }
 
@@ -99,10 +98,10 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   }
 
   @Override
-  public List<ConcertSeat> findReservableConcertSeats(
-      FindReservableConcertSeatsByConcertIdParam param) {
-    return concertSeatJpaRepository.findReservableConcertSeatsByConcertScheduleId(
-        param.concertScheduleId());
+  public List<ConcertSeat> findAllConcertSeats(
+      FindAllConcertSeatsByConcertIdAndIsReservedParam param) {
+    return concertSeatJpaRepository.findSeatsByScheduleIdAndIsReserved(param.concertScheduleId(),
+        param.isReserved());
   }
 
   @Override
@@ -118,9 +117,10 @@ public class ConcertRepositoryImpl implements ConcertRepository {
   }
 
   @Override
-  public List<Reservation> findAllExpiredReservations(
-      FindAllExpiredReservationsWithLockParam param) {
-    return reservationJpaRepository.findAllExpiredReservationsWithLock(param.expiredAt());
+  public List<Reservation> findAllReservations(
+      FindAllReservationsByStatusAndReservedAtBeforeWithLockParam param) {
+    return reservationJpaRepository.findAllByStatusAndReservedAtBefore(param.status(),
+        param.expiredAt());
   }
 
   @Override

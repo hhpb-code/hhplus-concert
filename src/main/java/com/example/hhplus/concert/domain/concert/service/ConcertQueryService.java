@@ -11,9 +11,9 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeat
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllExpiredReservationsWithLockParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSchedulesByConcertIdAndNowParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindReservableConcertSeatsByConcertIdParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByConcertIdAndIsReservedParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByStatusAndReservedAtBeforeWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertScheduleByIdParam;
@@ -25,6 +25,7 @@ import com.example.hhplus.concert.domain.concert.model.Concert;
 import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
+import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import com.example.hhplus.concert.domain.concert.repository.ConcertRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,8 +65,8 @@ public class ConcertQueryService {
 
   public List<ConcertSchedule> findReservableConcertSchedules(
       FindReservableConcertSchedulesQuery query) {
-    return concertRepository.findReservableConcertSchedules(
-        new FindReservableConcertSchedulesByConcertIdAndNowParam(query.concertId(),
+    return concertRepository.findAllConcertSchedules(
+        new FindAllConcertSchedulesByConcertIdAndNowParam(query.concertId(),
             LocalDateTime.now()));
   }
 
@@ -75,8 +76,8 @@ public class ConcertQueryService {
   }
 
   public List<ConcertSeat> findReservableConcertSeats(FindReservableConcertSeatsQuery query) {
-    return concertRepository.findReservableConcertSeats(
-        new FindReservableConcertSeatsByConcertIdParam(query.concertScheduleId()));
+    return concertRepository.findAllConcertSeats(
+        new FindAllConcertSeatsByConcertIdAndIsReservedParam(query.concertScheduleId(), false));
   }
 
   @Transactional
@@ -87,8 +88,8 @@ public class ConcertQueryService {
 
   public List<Reservation> findAllExpiredReservations(
       FindAllExpiredReservationsWithLockQuery query) {
-    return concertRepository.findAllExpiredReservations(
-        new FindAllExpiredReservationsWithLockParam(
+    return concertRepository.findAllReservations(
+        new FindAllReservationsByStatusAndReservedAtBeforeWithLockParam(ReservationStatus.WAITING,
             LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES)));
   }
 }
