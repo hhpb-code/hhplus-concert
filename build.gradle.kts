@@ -34,7 +34,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
 
     runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("com.h2database:h2")
 
     annotationProcessor("org.projectlombok:lombok")
 
@@ -44,6 +43,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("com.h2database:h2")
 
     testAnnotationProcessor("org.projectlombok:lombok")
 
