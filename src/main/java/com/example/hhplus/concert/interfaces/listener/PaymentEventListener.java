@@ -1,7 +1,6 @@
 package com.example.hhplus.concert.interfaces.listener;
 
 import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
-import com.example.hhplus.concert.domain.payment.event.PaymentSuccessPayload;
 import com.example.hhplus.concert.domain.send.DataPlatformSendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -18,7 +17,6 @@ public class PaymentEventListener {
   @Async
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void paymentSuccessHandler(PaymentSuccessEvent event) {
-    PaymentSuccessPayload payload = new PaymentSuccessPayload(event);
-    sendService.send(payload);
+    sendService.send(event);
   }
 }
