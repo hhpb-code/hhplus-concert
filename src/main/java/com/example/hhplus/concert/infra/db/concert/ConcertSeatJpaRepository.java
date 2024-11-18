@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ConcertSeatJpaRepository extends JpaRepository<ConcertSeat, Long> {
 
-  @Query("select cs from ConcertSeat cs where cs.concertScheduleId = :scheduleId and cs.isReserved = false")
-  List<ConcertSeat> findReservableConcertSeatsByConcertScheduleId(Long scheduleId);
+  @Query("select cs from ConcertSeat cs where cs.concertScheduleId = :scheduleId and cs.isReserved = :isReserved")
+  List<ConcertSeat> findSeatsByScheduleIdAndIsReserved(Long scheduleId, boolean isReserved);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select cs from ConcertSeat cs where cs.id = :concertSeatId")

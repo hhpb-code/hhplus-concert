@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.domain.concert.dto;
 
+import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class ConcertRepositoryParam {
 
   }
 
-  public record FindReservableConcertSchedulesByConcertIdAndNowParam(
+  public record FindAllConcertSchedulesByConcertIdAndNowParam(
       Long concertId,
       LocalDateTime now
   ) {
@@ -25,8 +26,9 @@ public class ConcertRepositoryParam {
   }
 
 
-  public record FindReservableConcertSeatsByConcertIdParam(
-      Long concertScheduleId
+  public record FindAllConcertSeatsByConcertIdAndIsReservedParam(
+      Long concertScheduleId,
+      Boolean isReserved
   ) {
 
   }
@@ -59,7 +61,8 @@ public class ConcertRepositoryParam {
 
   }
 
-  public record FindAllExpiredReservationsWithLockParam(
+  public record FindAllReservationsByStatusAndReservedAtBeforeWithLockParam(
+      ReservationStatus status,
       LocalDateTime expiredAt
   ) {
 

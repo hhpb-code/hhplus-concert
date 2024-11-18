@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.infra.db.concert;
 
 import com.example.hhplus.concert.domain.concert.model.Reservation;
+import com.example.hhplus.concert.domain.concert.model.ReservationStatus;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,8 +17,9 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
   Optional<Reservation> findByIdWithLock(Long reservationId);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT r FROM Reservation r WHERE r.status = 'WAITING' AND r.reservedAt < :expiredAt")
-  List<Reservation> findAllExpiredReservationsWithLock(LocalDateTime expiredAt);
+  @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.reservedAt < :expiredAt")
+  List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status,
+      LocalDateTime expiredAt);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT r FROM Reservation r WHERE r.id IN :ids")
