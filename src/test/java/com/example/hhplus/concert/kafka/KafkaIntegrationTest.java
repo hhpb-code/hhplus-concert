@@ -2,6 +2,7 @@ package com.example.hhplus.concert.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.hhplus.concert.domain.payment.event.EventTopic;
 import com.example.hhplus.concert.infra.kafka.KafkaProducer;
 import com.example.hhplus.concert.interfaces.consumer.KafkaConsumer;
 import org.junit.jupiter.api.DisplayName;
@@ -24,12 +25,12 @@ class KafkaIntegrationTest {
   @Test
   void test() throws Exception {
     // given
-    String topic = "test-topic";
+    String topic = EventTopic.TEST_TOPIC;
     String message = "Hello Kafka";
 
     // when
     producer.sendMessage(topic, message);
-    Thread.sleep(3000);
+    Thread.sleep(4000);
 
     // then
     assertThat(kafkaConsumer.getMessage()).isEqualTo(message);

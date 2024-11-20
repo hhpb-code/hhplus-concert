@@ -10,8 +10,6 @@ public class DataPlatformSendService {
 
   public void send(PaymentSuccessEvent event) {
     log.info("Send to data platform: {}", event);
-
-    throw new RuntimeException("Data platform is not available");
   }
 
 }

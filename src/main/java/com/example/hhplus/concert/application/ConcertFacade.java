@@ -124,11 +124,7 @@ public class ConcertFacade {
 
     concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
 
-    log.info("PaymentSuccessEvent publish");
-
     paymentEventPublisher.publish(new PaymentSuccessEvent(paymentId));
-
-    log.info("PaymentSuccessEvent published");
 
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
   }

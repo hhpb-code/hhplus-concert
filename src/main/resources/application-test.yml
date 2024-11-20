@@ -30,7 +30,6 @@ spring:
       - localhost:9093
       - localhost:9094
     consumer:
-      group-id: test-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
