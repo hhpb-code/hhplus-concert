@@ -23,10 +23,23 @@ spring:
       port: ${REDIS_PORT}
   cache:
     type: redis
+  kafka:
+    bootstrap-servers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 queue:
-  waiting-key: ${QUEUE_WAITING_KEY}
-  active-key: ${QUEUE_ACTIVE_KEY}
+  waiting-key: ${QUEUE_WAITING_KEY:waiting}
+  active-key: ${QUEUE_ACTIVE_KEY:active}
 
 # Swagger springdoc-ui Configuration
 springdoc:
