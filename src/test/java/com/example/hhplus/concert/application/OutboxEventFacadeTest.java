@@ -4,10 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.hhplus.concert.domain.event.model.OutboxEvent;
 import com.example.hhplus.concert.domain.event.model.OutboxEventStatus;
+import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
 import com.example.hhplus.concert.domain.support.Event;
 import com.example.hhplus.concert.infra.db.event.OutboxEventJpaRepository;
 import com.example.hhplus.concert.interfaces.consumer.KafkaConsumer;
+import com.example.hhplus.concert.interfaces.consumer.PaymentKafkaConsumer;
 import com.example.hhplus.concert.kafka.TestEvent;
+import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +36,9 @@ class OutboxEventFacadeTest {
   @Autowired
   private KafkaConsumer kafkaConsumer;
 
+  @Autowired
+  private PaymentKafkaConsumer paymentKafkaConsumer;
+
   @BeforeEach
   void setUp() {
     outboxEventJpaRepository.deleteAll();
@@ -49,10 +58,11 @@ class OutboxEventFacadeTest {
     }
 
     @Test
-    @DisplayName("outbox 이벤트 발행 성공")
-    void shouldPublishOutboxEvent() throws InterruptedException {
+    @DisplayName("outbox 이벤트 발행 성공 - test topic 이벤트 발행")
+    void shouldPublishOutboxEvent() {
       // given
-      final Event event = new TestEvent("test");
+      LocalDateTime now = LocalDateTime.now();
+      final Event event = new TestEvent(now.toString());
       final Long eventId = outboxEventJpaRepository.save(
           OutboxEvent.builder()
               .status(OutboxEventStatus.PENDING)
@@ -63,13 +73,43 @@ class OutboxEventFacadeTest {
 
       // when
       target.publishOutboxEvent();
-      Thread.sleep(4000);
 
       // then
       final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
       assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.PUBLISHED);
 
-      assertThat(kafkaConsumer.getMessage()).isEqualTo(event.getPayload());
+      Awaitility.await()
+          .atMost(5, TimeUnit.SECONDS)
+          .untilAsserted(
+              () -> assertThat(kafkaConsumer.getMessage()).isEqualTo(event.getPayload()));
+    }
+
+    @Test
+    @DisplayName("outbox 이벤트 발행 성공 - payment success 이벤트 발행")
+    void shouldPublishOutboxEventPaymentSuccess() {
+      // given
+      Random random = new Random();
+      long randomLong = random.nextLong();
+      final Event event = new PaymentSuccessEvent(randomLong);
+      final Long eventId = outboxEventJpaRepository.save(
+          OutboxEvent.builder()
+              .status(OutboxEventStatus.PENDING)
+              .type(event.getType())
+              .payload(event.getPayload())
+              .build()
+      ).getId();
+
+      // when
+      target.publishOutboxEvent();
+
+      // then
+      final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
+      assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.PUBLISHED);
+
+      Awaitility.await()
+          .atMost(5, TimeUnit.SECONDS)
+          .untilAsserted(
+              () -> assertThat(paymentKafkaConsumer.getMessage()).isEqualTo(event.getPayload()));
     }
 
   }
