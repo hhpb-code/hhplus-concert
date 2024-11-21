@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.hhplus.concert.domain.support.EventType;
 import com.example.hhplus.concert.infra.kafka.KafkaProducer;
 import com.example.hhplus.concert.interfaces.consumer.KafkaConsumer;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +29,16 @@ class KafkaIntegrationTest {
   void test() throws Exception {
     // given
     String topic = EventType.TEST_TOPIC;
-    String message = "Hello Kafka";
+    String message = LocalDateTime.now().toString();
 
     // when
     producer.publish(topic, message);
-    Thread.sleep(4000);
 
     // then
-    assertThat(kafkaConsumer.getMessage()).isEqualTo(message);
+    Awaitility.await()
+        .atMost(5, TimeUnit.SECONDS)
+        .untilAsserted(
+            () -> assertThat(kafkaConsumer.getMessages()).contains(message));
   }
 
 }

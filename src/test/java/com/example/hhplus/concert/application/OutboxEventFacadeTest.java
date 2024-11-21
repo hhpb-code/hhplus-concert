@@ -1,7 +1,10 @@
 package com.example.hhplus.concert.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 
+import com.example.hhplus.concert.domain.event.EventConstants;
+import com.example.hhplus.concert.domain.event.EventPublisher;
 import com.example.hhplus.concert.domain.event.model.OutboxEvent;
 import com.example.hhplus.concert.domain.event.model.OutboxEventStatus;
 import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
@@ -38,6 +42,9 @@ class OutboxEventFacadeTest {
 
   @Autowired
   private PaymentKafkaConsumer paymentKafkaConsumer;
+
+  @SpyBean
+  private EventPublisher eventPublisher;
 
   @BeforeEach
   void setUp() {
@@ -59,7 +66,7 @@ class OutboxEventFacadeTest {
 
     @Test
     @DisplayName("outbox 이벤트 발행 성공 - test topic 이벤트 발행")
-    void shouldPublishOutboxEvent() {
+    void shouldSuccessfullyPublishOutboxEvent() {
       // given
       LocalDateTime now = LocalDateTime.now();
       final Event event = new TestEvent(now.toString());
@@ -81,12 +88,12 @@ class OutboxEventFacadeTest {
       Awaitility.await()
           .atMost(5, TimeUnit.SECONDS)
           .untilAsserted(
-              () -> assertThat(kafkaConsumer.getMessage()).isEqualTo(event.getPayload()));
+              () -> assertThat(KafkaConsumer.getMessages()).contains(event.getPayload()));
     }
 
     @Test
     @DisplayName("outbox 이벤트 발행 성공 - payment success 이벤트 발행")
-    void shouldPublishOutboxEventPaymentSuccess() {
+    void shouldSuccessfullyPublishPaymentSuccessEvent() {
       // given
       Random random = new Random();
       long randomLong = random.nextLong();
@@ -109,9 +116,109 @@ class OutboxEventFacadeTest {
       Awaitility.await()
           .atMost(5, TimeUnit.SECONDS)
           .untilAsserted(
-              () -> assertThat(paymentKafkaConsumer.getMessage()).isEqualTo(event.getPayload()));
+              () -> assertThat(PaymentKafkaConsumer.getMessages()).contains(event.getPayload()));
     }
 
+    @Test
+    @DisplayName("outbox 이벤트 발행 실패 - kafka publish 실패")
+    void shouldFailToPublishOutboxEvent() {
+      // given
+      LocalDateTime now = LocalDateTime.now();
+      final Event event = new TestEvent(now.toString());
+      final Long eventId = outboxEventJpaRepository.save(
+          OutboxEvent.builder()
+              .status(OutboxEventStatus.PENDING)
+              .type(event.getType())
+              .payload(event.getPayload())
+              .build()
+      ).getId();
+      doThrow(new RuntimeException()).when(eventPublisher)
+          .publish(event.getType(), event.getPayload());
+
+      // when
+      target.publishOutboxEvent();
+
+      // then
+      final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
+      assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.FAILED);
+      assertThat(result.getRetryAt()).isAfter(
+          now.plusMinutes(EventConstants.RETRY_INTERVAL_MINUTES));
+    }
+  }
+
+  @Nested
+  @DisplayName("outbox 이벤트 재시도 테스트")
+  class RetryFailedOutboxEventsTest {
+
+    @Test
+    @DisplayName("outbox 이벤트 재시도 실패 - retryAt이 지나지 않은 경우")
+    void shouldFailToRetryOutboxEventWhenRetryIntervalNotPassed() {
+      // given
+      final Long eventId =
+          outboxEventJpaRepository.save(
+              OutboxEvent.builder()
+                  .type("test")
+                  .payload("test")
+                  .status(OutboxEventStatus.FAILED)
+                  .retryCount(0)
+                  .retryAt(LocalDateTime.now().plusMinutes(1))
+                  .build()
+          ).getId();
+
+      // when
+      target.retryFailedOutboxEvents();
+
+      // then
+      final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
+      assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.FAILED);
+    }
+
+    @Test
+    @DisplayName("outbox 이벤트 재시도 실패 - retryCount가 MAX_RETRY_COUNT인 경우")
+    void shouldFailToRetryOutboxEventWhenRetryCountExceeded() {
+      // given
+      final Long eventId = outboxEventJpaRepository.save(
+          OutboxEvent.builder()
+              .type("test")
+              .payload("test")
+              .status(OutboxEventStatus.FAILED)
+              .retryCount(EventConstants.MAX_RETRY_COUNT)
+              .retryAt(LocalDateTime.now().minusMinutes(EventConstants.RETRY_INTERVAL_MINUTES))
+              .build()
+      ).getId();
+
+      // when
+      target.retryFailedOutboxEvents();
+
+      // then
+      final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
+      assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.FAILED);
+    }
+
+    @Test
+    @DisplayName("outbox 이벤트 재시도 성공")
+    void shouldSuccessfullyRetryFailedOutboxEvents() {
+      // given
+      LocalDateTime now = LocalDateTime.now();
+      final Event event = new TestEvent(now.toString());
+      final Long eventId = outboxEventJpaRepository.save(
+          OutboxEvent.builder()
+              .status(OutboxEventStatus.FAILED)
+              .type(event.getType())
+              .payload(event.getPayload())
+              .retryCount(EventConstants.MAX_RETRY_COUNT - 1)
+              .retryAt(now)
+              .build()
+      ).getId();
+
+      // when
+      target.retryFailedOutboxEvents();
+
+      // then
+      final OutboxEvent result = outboxEventJpaRepository.findById(eventId).orElseThrow();
+      assertThat(result.getStatus()).isEqualTo(OutboxEventStatus.PENDING);
+      assertThat(result.getRetryCount()).isEqualTo(EventConstants.MAX_RETRY_COUNT);
+    }
   }
 
 }

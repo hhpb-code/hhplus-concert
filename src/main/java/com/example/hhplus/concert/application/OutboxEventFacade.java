@@ -16,13 +16,17 @@ public class OutboxEventFacade {
   private final OutboxEventQueryService outboxEventQueryService;
 
   public void publishOutboxEvent() {
-    OutboxEvent event = outboxEventQueryService.getPendingOutboxEvent();
+    OutboxEvent event = outboxEventQueryService.findPendingOutboxEvent();
 
     if (event == null) {
       return;
     }
 
     outboxEventCommandService.publishOutboxEvent(new PublishOutboxEventCommand(event.getId()));
+  }
+
+  public void retryFailedOutboxEvents() {
+    outboxEventCommandService.retryFailedOutboxEvents();
   }
 
 }

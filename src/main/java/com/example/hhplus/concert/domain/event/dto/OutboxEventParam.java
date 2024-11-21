@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.domain.event.dto;
 
 import com.example.hhplus.concert.domain.event.model.OutboxEventStatus;
+import java.time.LocalDateTime;
 
 public class OutboxEventParam {
 
@@ -12,7 +13,12 @@ public class OutboxEventParam {
 
   }
 
-  public record GetByStatusParam(OutboxEventStatus status) {
+  public record FindByStatusParam(OutboxEventStatus status) {
+
+  }
+
+  public record FindAllByStatusAndRetryCountAndRetryAtBeforeWithLockParam(
+      OutboxEventStatus status, int maxRetryCount, LocalDateTime retryAtBefore) {
 
   }
 

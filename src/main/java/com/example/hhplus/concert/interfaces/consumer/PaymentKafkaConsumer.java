@@ -3,6 +3,8 @@ package com.example.hhplus.concert.interfaces.consumer;
 import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
 import com.example.hhplus.concert.domain.send.DataPlatformSendService;
 import com.example.hhplus.concert.domain.support.EventType;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,16 +16,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentKafkaConsumer {
 
-  private final DataPlatformSendService sendService;
-
   @Getter
-  private String message = null;
+  private static final List<String> messages = new ArrayList<>();
+  private final DataPlatformSendService sendService;
 
   @KafkaListener(topics = EventType.PAYMENT_SUCCESS, groupId = "payment-group")
   public void consume(Long paymentId) {
     log.info("Consumed message: {}", paymentId);
     sendService.send(new PaymentSuccessEvent(paymentId));
-    this.message = paymentId.toString();
+    messages.add(paymentId.toString());
   }
 
 }

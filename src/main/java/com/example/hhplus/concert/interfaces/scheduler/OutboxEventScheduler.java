@@ -4,7 +4,6 @@ import com.example.hhplus.concert.application.OutboxEventFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -14,7 +13,6 @@ public class OutboxEventScheduler {
 
 
   @Scheduled(cron = "0 * * * * *")
-  @Transactional
   public void publishOutboxEvent() {
     outboxEventFacade.publishOutboxEvent();
   }

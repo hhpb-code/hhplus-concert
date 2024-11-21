@@ -1,6 +1,6 @@
 package com.example.hhplus.concert.domain.event.service;
 
-import com.example.hhplus.concert.domain.event.dto.OutboxEventParam.GetByStatusParam;
+import com.example.hhplus.concert.domain.event.dto.OutboxEventParam.FindByStatusParam;
 import com.example.hhplus.concert.domain.event.model.OutboxEvent;
 import com.example.hhplus.concert.domain.event.model.OutboxEventStatus;
 import com.example.hhplus.concert.domain.event.repository.OutboxEventRepository;
@@ -15,7 +15,7 @@ public class OutboxEventQueryService {
 
   private final OutboxEventRepository outboxEventRepository;
 
-  public OutboxEvent getPendingOutboxEvent() {
-    return outboxEventRepository.findByStatus(new GetByStatusParam(OutboxEventStatus.PENDING));
+  public OutboxEvent findPendingOutboxEvent() {
+    return outboxEventRepository.findByStatus(new FindByStatusParam(OutboxEventStatus.PENDING));
   }
 }
