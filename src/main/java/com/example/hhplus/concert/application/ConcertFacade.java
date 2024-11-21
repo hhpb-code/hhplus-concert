@@ -17,9 +17,10 @@ import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
 import com.example.hhplus.concert.domain.concert.service.ConcertCommandService;
 import com.example.hhplus.concert.domain.concert.service.ConcertQueryService;
+import com.example.hhplus.concert.domain.event.dto.OutboxEventCommand.CreateOutboxEventCommand;
+import com.example.hhplus.concert.domain.event.service.OutboxEventCommandService;
 import com.example.hhplus.concert.domain.payment.dto.PaymentCommand.CreatePaymentCommand;
 import com.example.hhplus.concert.domain.payment.dto.PaymentQuery.GetPaymentByIdQuery;
-import com.example.hhplus.concert.domain.payment.event.PaymentEventPublisher;
 import com.example.hhplus.concert.domain.payment.event.PaymentSuccessEvent;
 import com.example.hhplus.concert.domain.payment.model.Payment;
 import com.example.hhplus.concert.domain.payment.service.PaymentCommandService;
@@ -58,7 +59,7 @@ public class ConcertFacade {
 
   private final WaitingQueueCommandService waitingQueueCommandService;
 
-  private final PaymentEventPublisher paymentEventPublisher;
+  private final OutboxEventCommandService outboxEventCommandService;
 
   public List<ConcertSchedule> getReservableConcertSchedules(Long concertId) {
     var concert = concertQueryService.getConcert(new GetConcertByIdQuery(concertId));
@@ -124,7 +125,8 @@ public class ConcertFacade {
 
     concertCommandService.confirmReservation(new ConfirmReservationCommand(reservation.getId()));
 
-    paymentEventPublisher.publish(new PaymentSuccessEvent(paymentId));
+    outboxEventCommandService.createOutboxEvent(
+        new CreateOutboxEventCommand(new PaymentSuccessEvent(paymentId)));
 
     return paymentQueryService.getPayment(new GetPaymentByIdQuery(paymentId));
   }

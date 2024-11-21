@@ -1,6 +1,6 @@
 package com.example.hhplus.concert.interfaces.consumer;
 
-import com.example.hhplus.concert.domain.payment.event.EventTopic;
+import com.example.hhplus.concert.domain.support.EventType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,9 +13,10 @@ public class KafkaConsumer {
   @Getter
   private String message = null;
 
-  @KafkaListener(topics = EventTopic.TEST_TOPIC, groupId = "test-group")
+  @KafkaListener(topics = EventType.TEST_TOPIC, groupId = "test-group")
   public void consume(String message) {
     log.info("Consumed message: {}", message);
+
     this.message = message;
   }
 

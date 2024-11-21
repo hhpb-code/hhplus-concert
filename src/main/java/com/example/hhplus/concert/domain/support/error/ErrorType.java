@@ -162,4 +162,33 @@ public enum ErrorType implements IErrorType {
       return logLevel;
     }
   }
+
+  @AllArgsConstructor
+  public enum OutboxEvent implements IErrorType {
+    OUTBOX_EVENT_NOT_FOUND(ErrorCode.NOT_FOUND, "아웃박스 이벤트를 찾을 수 없습니다.", LogLevel.WARN),
+    OUTBOX_EVENT_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "아웃박스 이벤트는 null일 수 없습니다.", LogLevel.WARN),
+    OUTBOX_EVENT_ALREADY_PUBLISHED(ErrorCode.BAD_REQUEST, "이미 발행된 아웃박스 이벤트입니다.", LogLevel.WARN),
+    OUTBOX_EVENT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "아웃박스 이벤트 ID는 null일 수 없습니다.",
+        LogLevel.WARN),
+    ;
+
+    private final ErrorCode code;
+    private final String message;
+    private final LogLevel logLevel;
+
+    @Override
+    public ErrorCode getCode() {
+      return code;
+    }
+
+    @Override
+    public String getMessage() {
+      return message;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+      return logLevel;
+    }
+  }
 }

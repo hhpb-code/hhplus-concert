@@ -20,7 +20,6 @@ import com.example.hhplus.concert.infra.db.concert.ConcertSeatJpaRepository;
 import com.example.hhplus.concert.infra.db.concert.ReservationJpaRepository;
 import com.example.hhplus.concert.infra.db.user.UserJpaRepository;
 import com.example.hhplus.concert.infra.db.user.WalletJpaRepository;
-import com.example.hhplus.concert.interfaces.consumer.PaymentKafkaConsumer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -57,9 +56,6 @@ class ConcertFacadeTest {
 
   @Autowired
   private WalletJpaRepository walletJpaRepository;
-
-  @Autowired
-  private PaymentKafkaConsumer paymentKafkaConsumer;
 
   @BeforeEach
   void setUp() {
@@ -719,7 +715,7 @@ class ConcertFacadeTest {
 
       @Test
       @DisplayName("콘서트 좌석 예약 내역 결제 성공")
-      void shouldSuccessfullyPayReservation() throws InterruptedException {
+      void shouldSuccessfullyPayReservation() {
         // given
         final User user = userJpaRepository.save(User.builder().name("name").build());
         final Long userId = user.getId();
@@ -758,11 +754,6 @@ class ConcertFacadeTest {
                 reservation.getId())
             .get();
         assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-
-        Thread.sleep(4000);
-
-        // then
-        assertThat(paymentKafkaConsumer.getMessage()).isEqualTo(result.getId());
       }
     }
 
