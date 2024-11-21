@@ -16,4 +16,10 @@ public class OutboxEventScheduler {
   public void publishOutboxEvent() {
     outboxEventFacade.publishOutboxEvent();
   }
+
+  @Scheduled(cron = "0 * * * * *")
+  public void retryFailedOutboxEvents() {
+    outboxEventFacade.retryFailedOutboxEvents();
+  }
+  
 }
