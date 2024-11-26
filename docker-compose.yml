@@ -17,6 +17,11 @@ services:
     depends_on:
       - mysql
       - redis
+    deploy:
+      resources:
+        limits:
+          cpus: "2.00"
+          memory: 4GB
     networks:
       - concert-network
 
