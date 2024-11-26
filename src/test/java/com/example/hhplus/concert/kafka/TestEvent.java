@@ -1,4 +1,4 @@
-package com.example.hhplus.concert.domain.payment.event;
+package com.example.hhplus.concert.kafka;
 
 import com.example.hhplus.concert.domain.support.Event;
 import com.example.hhplus.concert.domain.support.EventType;
@@ -9,18 +9,18 @@ import lombok.ToString;
 @Getter
 @AllArgsConstructor
 @ToString
-public class PaymentSuccessEvent implements Event {
+public class TestEvent implements Event {
 
-  private final Long paymentId;
+  private final String payload;
 
   @Override
   public String getType() {
-    return EventType.PAYMENT_SUCCESS;
+    return EventType.TEST_TOPIC;
   }
 
   @Override
   public String getPayload() {
-    return paymentId.toString();
+    return payload;
   }
 
 }

@@ -41,6 +41,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.0.23")
     testImplementation("com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.0.23")
+    testImplementation("org.awaitility:awaitility:4.2.2")
+
     testCompileOnly("org.projectlombok:lombok")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

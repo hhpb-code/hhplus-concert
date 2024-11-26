@@ -2,8 +2,12 @@ package com.example.hhplus.concert.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.hhplus.concert.domain.support.EventType;
 import com.example.hhplus.concert.infra.kafka.KafkaProducer;
 import com.example.hhplus.concert.interfaces.consumer.KafkaConsumer;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +28,17 @@ class KafkaIntegrationTest {
   @Test
   void test() throws Exception {
     // given
-    String topic = "test-topic";
-    String message = "Hello Kafka";
+    String topic = EventType.TEST_TOPIC;
+    String message = LocalDateTime.now().toString();
 
     // when
-    producer.sendMessage(topic, message);
-    Thread.sleep(3000);
+    producer.publish(topic, message);
 
     // then
-    assertThat(kafkaConsumer.getMessage()).isEqualTo(message);
+    Awaitility.await()
+        .atMost(5, TimeUnit.SECONDS)
+        .untilAsserted(
+            () -> assertThat(kafkaConsumer.getMessages()).contains(message));
   }
 
 }
