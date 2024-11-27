@@ -54,6 +54,11 @@ public class WaitingQueueRedisRepository implements WaitingQueueRepository {
   public Long getWaitingQueuePosition(GetWaitingQueuePositionByUuidParam param) {
     Long rank = redisTemplate.opsForZSet().rank(waitingQueueKey, param.uuid());
     if (rank == null) {
+
+      if (redisTemplate.opsForZSet().rank(activeQueueKey, param.uuid()) != null) {
+        return 0L;
+      }
+
       throw new CoreException(ErrorType.WaitingQueue.WAITING_QUEUE_NOT_FOUND);
     }
     return rank + 1;
