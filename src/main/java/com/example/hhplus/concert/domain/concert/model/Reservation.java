@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -14,7 +15,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "reservation")
+@Table(
+    name = "reservation",
+    indexes = {
+        @Index(
+            name = "idx_reservation_reserved_at",
+            columnList = "reserved_at"
+        )
+    }
+)
 @Getter
 @NoArgsConstructor
 public class Reservation extends BaseEntity {

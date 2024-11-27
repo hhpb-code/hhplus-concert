@@ -5,6 +5,7 @@ import com.example.hhplus.concert.domain.support.error.ErrorType;
 import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -12,7 +13,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "concert_schedule")
+@Table(
+    name = "concert_schedule",
+    indexes = {
+        @Index(
+            name = "idx_concert_schedule",
+            columnList = "concert_id, reservation_start_at, reservation_end_at"
+        )
+    }
+)
 @Getter
 @NoArgsConstructor
 public class ConcertSchedule extends BaseEntity {

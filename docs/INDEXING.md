@@ -317,7 +317,7 @@ WHERE status = 'WAITING'
   ```java
   @Entity
   @Table(
-    name = "reservation"
+    name = "reservation",
     indexes = {
         @Index(
           name = "idx_reservation_reserved_at",

@@ -6,6 +6,7 @@ import com.example.hhplus.concert.domain.support.model.BaseEntity;
 import com.example.hhplus.concert.domain.user.UserConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
@@ -15,7 +16,12 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "wallet")
+@Table(
+    name = "wallet",
+    indexes = {
+        @Index(name = "idx_wallet_user_id", columnList = "user_id")
+    }
+)
 @Getter
 @NoArgsConstructor
 public class Wallet extends BaseEntity {
