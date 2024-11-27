@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @Disabled
@@ -89,21 +90,31 @@ class CreateDummyDateTest {
 
   @Test
   void createDummyConcertSeatData() {
-    final int scheduleForSeatCount = 1;
-    final List<ConcertSchedule> concertSchedules = concertScheduleJpaRepository.findAll();
+    final int scheduleForSeatCount = 10;
+    final int chunkSize = 100;
+    int page = 0;
 
-    concertSeatJpaRepository.saveAll(
-        concertSchedules.stream()
-            .flatMap(concertSchedule ->
-                IntStream.range(0, scheduleForSeatCount)
-                    .mapToObj(i -> SUT.giveMeBuilder(ConcertSeat.class)
-                        .set("concertScheduleId", concertSchedule.getId())
-                        .set("version", 0L)
-                        .build().sample())
-            )
-            .toList()
-    );
+    List<ConcertSchedule> concertSchedules;
+    do {
+      Pageable pageable = PageRequest.of(page, chunkSize);
+      Page<ConcertSchedule> concertSchedulePage = concertScheduleJpaRepository.findAll(pageable);
+      concertSchedules = concertSchedulePage.getContent();
+
+      List<ConcertSeat> concertSeats = concertSchedules.stream()
+          .flatMap(concertSchedule ->
+              IntStream.range(0, scheduleForSeatCount)
+                  .mapToObj(i -> SUT.giveMeBuilder(ConcertSeat.class)
+                      .set("concertScheduleId", concertSchedule.getId())
+                      .set("version", 0L)
+                      .build().sample())
+          )
+          .toList();
+
+      concertSeatJpaRepository.saveAll(concertSeats);
+      page++;
+    } while (!concertSchedules.isEmpty());
   }
+
 
   @Test
   void createDummyReservationData() {
