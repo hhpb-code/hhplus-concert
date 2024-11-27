@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.infra.redis;
 
 import com.example.hhplus.concert.domain.concert.model.Concert;
+import com.example.hhplus.concert.domain.concert.model.ConcertSchedule;
 import com.example.hhplus.concert.domain.support.CacheName;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +65,20 @@ public class CacheConfig {
                 .serializeValuesWith(
                     RedisSerializationContext.SerializationPair.fromSerializer(
                         new Jackson2JsonRedisSerializer(objectMapper, Concert.class))
+                )
+        )
+        .withCacheConfiguration(
+            CacheName.CONCERT_SCHEDULE,
+            RedisCacheConfiguration.defaultCacheConfig()
+                .disableCachingNullValues()
+                .entryTtl(Duration.ofMinutes(2))
+                .serializeKeysWith(
+                    RedisSerializationContext.SerializationPair.fromSerializer(
+                        new StringRedisSerializer())
+                )
+                .serializeValuesWith(
+                    RedisSerializationContext.SerializationPair.fromSerializer(
+                        new Jackson2JsonRedisSerializer(objectMapper, ConcertSchedule.class))
                 )
         )
         .build();
