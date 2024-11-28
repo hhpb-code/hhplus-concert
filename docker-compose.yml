@@ -12,6 +12,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       QUEUE_WAITING_KEY: concertWaitingQueue
       QUEUE_ACTIVE_KEY: concertActiveQueue
+      SPRING_PROFILES_ACTIVE: local
     ports:
       - "8080:8080"
     depends_on:
