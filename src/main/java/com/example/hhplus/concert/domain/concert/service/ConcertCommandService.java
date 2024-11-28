@@ -7,7 +7,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReleaseConce
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConcertSeatCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
-import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdWithLockParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertSeatByIdParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetReservationByIdWithLockParam;
 import com.example.hhplus.concert.domain.concert.model.ConcertSeat;
 import com.example.hhplus.concert.domain.concert.model.Reservation;
@@ -28,7 +28,7 @@ public class ConcertCommandService {
 
   public void reserveConcertSeat(ReserveConcertSeatCommand command) {
     ConcertSeat concertSeat = concertRepository.getConcertSeat(
-        new GetConcertSeatByIdWithLockParam(command.concertSeatId()));
+        new GetConcertSeatByIdParam(command.concertSeatId()));
 
     concertSeat.reserve();
 
