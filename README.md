@@ -14,3 +14,4 @@
 - [캐시와 Redis를 이용한 성능 개선](./docs/CACHE_REDIS_QUEUE.md)
 - [인덱싱을 통한 성능 개선](./docs/INDEXING.md)
 - [MSA 관점에서 트랜잭션 관리](./docs/MSA_TRANSACTION.md)
+- [부하 테스트 대상 선정 및 목적](./docs/LOAD_TEST.md)

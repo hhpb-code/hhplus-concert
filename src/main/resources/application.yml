@@ -5,9 +5,9 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://${DB_HOST}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=UTC
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://${DB_HOST:localhost}/${DB_NAME:concert}?characterEncoding=UTF-8&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: ${JPA_SHOW_SQL:false}
@@ -15,19 +15,17 @@ spring:
       ddl-auto: ${JPA_DDL_AUTO:none}
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: ${JPA_FORMAT_SQL:false}
         highlight_sql: ${JPA_HIGHLIGHT_SQL:false}
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cache:
     type: redis
   kafka:
-    bootstrap-servers:
-      - localhost:9092
-      - localhost:9093
-      - localhost:9094
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

@@ -26,7 +26,7 @@ services:
       - concert-network
 
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: 1234
@@ -41,7 +41,7 @@ services:
       - concert-network
 
   redis:
-    image: redis:latest
+    image: redis:7.4.1-alpine
     container_name: redis
     ports:
       - "6379:6379"
