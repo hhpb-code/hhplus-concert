@@ -5,7 +5,7 @@ export const options = {
   scenarios: {
     booking_scenario: {
       executor: 'constant-arrival-rate',
-      rate: 200, // 초당 요청 속도 (TPS)
+      rate: 3000, // 초당 요청 속도 (TPS)
       timeUnit: '1s',
       duration: '5m', // 테스트 지속 시간: 5분
       preAllocatedVUs: 2000, // 최대 가상 사용자 수
