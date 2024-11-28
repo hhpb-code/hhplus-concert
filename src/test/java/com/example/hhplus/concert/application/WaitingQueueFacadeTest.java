@@ -93,7 +93,7 @@ class WaitingQueueFacadeTest {
     }
 
     @Test
-    @DisplayName("토큰 대기 번호 조회 성공")
+    @DisplayName("토큰 대기 번호 조회 성공 - 대기 중인 토큰")
     void shouldSuccessfullyGetWaitingQueueWithPosition() {
       // given
       final String uuid = UUID.randomUUID().toString();
@@ -105,6 +105,23 @@ class WaitingQueueFacadeTest {
       // then
       assertThat(result.uuid()).isEqualTo(uuid);
       assertThat(result.position()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("토큰 대기 번호 조회 성공 - 활성 토큰")
+    void shouldSuccessfullyGetWaitingQueueWithPositionWhenActiveToken() {
+      // given
+      final String uuid = UUID.randomUUID().toString();
+      waitingQueueRepository.addWaitingQueue(uuid);
+      waitingQueueRepository.activateWaitingQueues(
+          new ActivateWaitingQueuesParam(1, 1, TimeUnit.MINUTES));
+
+      // when
+      final WaitingQueueWithPosition result = waitingQueueFacade.getWaitingQueueWithPosition(uuid);
+
+      // then
+      assertThat(result.uuid()).isEqualTo(uuid);
+      assertThat(result.position()).isEqualTo(0);
     }
 
   }
