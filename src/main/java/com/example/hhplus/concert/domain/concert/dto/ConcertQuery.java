@@ -89,4 +89,16 @@ public class ConcertQuery {
   public record FindAllExpiredReservationsWithLockQuery() {
     // 이 경우에는 특별한 필드가 없으므로 유효성 검사는 불필요
   }
+
+  public record FindUpcomingConcertsQuery(
+      int minutesBeforeReservationStartAt) {
+
+    public FindUpcomingConcertsQuery {
+      if (minutesBeforeReservationStartAt <= 0) {
+        throw new CoreException(ErrorType.Concert.INVALID_MINUTES_BEFORE_RESERVATION_START_AT);
+      }
+    }
+
+  }
+
 }

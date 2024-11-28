@@ -1,5 +1,6 @@
 package com.example.hhplus.concert.application;
 
+import com.example.hhplus.concert.domain.concert.ConcertConstants;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CancelReservationsByIdsCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ConfirmReservationCommand;
 import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.CreateReservationCommand;
@@ -8,6 +9,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertCommand.ReserveConce
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAllExpiredReservationsWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindUpcomingConcertsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeatByIdQuery;
@@ -151,4 +153,25 @@ public class ConcertFacade {
     concertCommandService.cancelReservations(new CancelReservationsByIdsCommand(reservationIds));
   }
 
+  public List<ConcertSchedule> getUpcomingConcertsAndSchedulesWithCache() {
+    var concertSchedules = concertQueryService.findAllConcertSchedules(
+        new FindUpcomingConcertsQuery(
+            ConcertConstants.MINUTES_BEFORE_RESERVATION_START_AT));
+
+    List<Long> concertIds = concertSchedules.stream()
+        .map(ConcertSchedule::getConcertId)
+        .distinct()
+        .toList();
+
+    for (Long concertId : concertIds) {
+      concertQueryService.getConcert(new GetConcertByIdQuery(concertId));
+    }
+
+    for (ConcertSchedule concertSchedule : concertSchedules) {
+      concertQueryService.getConcertSchedule(
+          new GetConcertScheduleByIdQuery(concertSchedule.getId()));
+    }
+
+    return concertSchedules;
+  }
 }

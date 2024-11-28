@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindUpcomingConcertsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
@@ -342,6 +343,40 @@ class ConcertQueryTest {
         assertThat(query).isNotNull();
         assertThat(query.reservationId()).isEqualTo(reservationId);
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("예약 시작 임박한 콘서트 조회 Query By Find")
+  class FindUpcomingConcertsQueryTest {
+
+    @Test
+    @DisplayName("예약 시작 임박한 콘서트 조회 query 생성 실패 - 예약 시작 임박 시간이 0 이하인 경우")
+    void shouldThrowExceptionWhenMinutesBeforeReservationStartAtIsLessThanOrEqualToZero() {
+      // given
+      final int minutesBeforeReservationStartAt = 0;
+
+      // when
+      final CoreException exception = assertThrows(CoreException.class,
+          () -> new FindUpcomingConcertsQuery(minutesBeforeReservationStartAt));
+
+      // then
+      assertThat(exception.getErrorType()).isEqualTo(
+          ErrorType.Concert.INVALID_MINUTES_BEFORE_RESERVATION_START_AT);
+    }
+
+    @Test
+    @DisplayName("예약 시작 임박한 콘서트 조회 query 생성 성공")
+    void shouldSuccessfullyCreateFindUpcomingConcertsQuery() {
+      // given
+      final int minutesBeforeReservationStartAt = 3;
+
+      // when
+      final FindUpcomingConcertsQuery query = new FindUpcomingConcertsQuery(
+          minutesBeforeReservationStartAt);
+
+      // then
+      assertThat(query).isNotNull();
     }
   }
 }

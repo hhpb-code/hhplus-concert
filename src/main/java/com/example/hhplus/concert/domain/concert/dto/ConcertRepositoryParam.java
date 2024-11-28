@@ -67,4 +67,11 @@ public class ConcertRepositoryParam {
   ) {
 
   }
+
+  public record FindAllConcertSchedulesByReservationStartAtBetweenParam(
+      LocalDateTime startAt,
+      LocalDateTime endAt
+  ) {
+
+  }
 }
