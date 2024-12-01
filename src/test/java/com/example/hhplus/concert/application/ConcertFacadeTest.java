@@ -833,4 +833,71 @@ class ConcertFacadeTest {
       assertThat(updatedConcertSeat.getIsReserved()).isFalse();
     }
   }
+
+  @Nested
+  @DisplayName("예약 임박한 콘서트 일정 조회")
+  class GetUpcomingConcertsAndSchedulesTest {
+
+    @Test
+    @DisplayName("예약 임박한 콘서트 일정 조회 성공 - 일정 없음")
+    void shouldSuccessfullyGetUpcomingConcertsAndSchedules() {
+      // given
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
+      concertScheduleJpaRepository.saveAll(
+          List.of(ConcertSchedule.builder().concertId(concert.getId())
+                  .concertAt(LocalDateTime.now().plusDays(1)).reservationStartAt(LocalDateTime.now())
+                  .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build(),
+              ConcertSchedule.builder().concertId(concert.getId())
+                  .concertAt(LocalDateTime.now().plusDays(2))
+                  .reservationStartAt(LocalDateTime.now()
+                      .plusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES - 1))
+                  .reservationEndAt(LocalDateTime.now()
+                      .plusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES + 10)).build())
+      );
+
+      // when
+      final List<ConcertSchedule> result = concertFacade.getUpcomingConcertsAndSchedulesWithCache();
+
+      // then
+      assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 임박한 콘서트 일정 조회 성공 - 일정 있음")
+    void shouldSuccessfullyGetUpcomingConcertsAndSchedulesWithSchedule() {
+      // given
+      final Concert concert = concertJpaRepository.save(
+          Concert.builder().title("title").description("description").build());
+      final Long concertId = concert.getId();
+
+      final List<ConcertSchedule> concertSchedules = concertScheduleJpaRepository.saveAll(List.of(
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(1))
+              .reservationStartAt(LocalDateTime.now()
+                  .plusMinutes(ConcertConstants.MINUTES_BEFORE_RESERVATION_START_AT))
+              .reservationEndAt(LocalDateTime.now()
+                  .plusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES + 10)).build(),
+          ConcertSchedule.builder().concertId(concertId).concertAt(LocalDateTime.now().plusDays(2))
+              .reservationStartAt(LocalDateTime.now().plusMinutes(1))
+              .reservationEndAt(LocalDateTime.now().plusMinutes(1)).build()));
+
+      // when
+      final List<ConcertSchedule> result = concertFacade.getUpcomingConcertsAndSchedulesWithCache();
+
+      // then
+      assertThat(result).hasSize(concertSchedules.size());
+      for (int i = 0; i < result.size(); i++) {
+        final ConcertSchedule concertSchedule = result.get(i);
+        final ConcertSchedule expected = concertSchedules.get(i);
+
+        assertThat(concertSchedule.getId()).isNotNull();
+        assertThat(concertSchedule.getConcertId()).isEqualTo(expected.getConcertId());
+        assertThat(concertSchedule.getConcertAt()).isEqualTo(expected.getConcertAt());
+        assertThat(concertSchedule.getReservationStartAt()).isEqualTo(
+            expected.getReservationStartAt());
+        assertThat(concertSchedule.getReservationEndAt()).isEqualTo(expected.getReservationEndAt());
+      }
+    }
+
+  }
 }

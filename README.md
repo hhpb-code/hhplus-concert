@@ -15,3 +15,4 @@
 - [인덱싱을 통한 성능 개선](./docs/INDEXING.md)
 - [MSA 관점에서 트랜잭션 관리](./docs/MSA_TRANSACTION.md)
 - [부하 테스트 대상 선정 및 목적](./docs/LOAD_TEST.md)
+- [부하 테스트 결과 분석 및 가상 장애 대응 문서](./docs/LOAD_TEST_RESULT.md)

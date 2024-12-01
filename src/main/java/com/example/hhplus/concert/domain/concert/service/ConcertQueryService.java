@@ -4,6 +4,7 @@ import com.example.hhplus.concert.domain.concert.ConcertConstants;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindAllExpiredReservationsWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSchedulesQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindReservableConcertSeatsQuery;
+import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.FindUpcomingConcertsQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertScheduleByIdQuery;
@@ -12,6 +13,7 @@ import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetConcertSeat
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertQuery.GetReservationByIdWithLockQuery;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByReservationStartAtBetweenParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByConcertIdAndIsReservedParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByStatusAndReservedAtBeforeWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.GetConcertByIdParam;
@@ -91,5 +93,15 @@ public class ConcertQueryService {
     return concertRepository.findAllReservations(
         new FindAllReservationsByStatusAndReservedAtBeforeWithLockParam(ReservationStatus.WAITING,
             LocalDateTime.now().minusMinutes(ConcertConstants.RESERVATION_EXPIRATION_MINUTES)));
+  }
+
+  public List<ConcertSchedule> findAllConcertSchedules(
+      FindUpcomingConcertsQuery query) {
+    return concertRepository.findAllConcertSchedules(
+        new FindAllConcertSchedulesByReservationStartAtBetweenParam(
+            LocalDateTime.now(),
+            LocalDateTime.now().plusMinutes(query.minutesBeforeReservationStartAt())
+        )
+    );
   }
 }

@@ -16,7 +16,7 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEvent, Lon
   @Query("SELECT e FROM OutboxEvent e WHERE e.id = :id")
   Optional<OutboxEvent> findByIdWithLock(Long id);
 
-  Optional<OutboxEvent> findByStatus(OutboxEventStatus status);
+  Optional<OutboxEvent> findFirstByStatus(OutboxEventStatus status);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT e FROM OutboxEvent e WHERE e.status = :status AND e.retryCount < :maxRetryCount AND e.retryAt < :retryAtBefore")

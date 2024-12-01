@@ -10,4 +10,6 @@ public interface ConcertScheduleJpaRepository extends JpaRepository<ConcertSched
 
   @Query("select cs from ConcertSchedule cs where cs.concertId = :concertId and cs.reservationStartAt <= :now and cs.reservationEndAt >= :now")
   List<ConcertSchedule> findByConcertIdAndReservationPeriod(Long concertId, LocalDateTime now);
+
+  List<ConcertSchedule> findByReservationStartAtBetween(LocalDateTime startAt, LocalDateTime endAt);
 }

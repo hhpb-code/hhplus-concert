@@ -5,7 +5,7 @@ export const options = {
   scenarios: {
     booking_scenario: {
       executor: 'constant-arrival-rate',
-      rate: 200, // 초당 요청 속도 (TPS)
+      rate: 3000, // 초당 요청 속도 (TPS)
       timeUnit: '1s',
       duration: '5m', // 테스트 지속 시간: 5분
       preAllocatedVUs: 2000, // 최대 가상 사용자 수
@@ -22,8 +22,7 @@ function getRandomWaitTime(min = 0.5, max = 3) {
 export default function () {
   const concertId = 1;
   const tokenId = 'test';
-  const userId = 1;
-  const walletId = 1;
+  const userId = Math.floor(Math.random() * 100000) + 1;
 
   // Step 1: 예약 가능한 일정 조회
   const scheduleResponse = http.get(
@@ -40,12 +39,14 @@ export default function () {
       {'Schedule list status is 200': (r) => r.status === 200})) {
     fail(
         `Schedule list request failed with status: ${scheduleResponse.status}`);
+    return;
   }
   sleep(getRandomWaitTime()); // 랜덤 대기
 
   const schedules = scheduleResponse.json().concertSchedules;
   if (!schedules || schedules.length === 0) {
     fail('No schedules available for booking.');
+    return;
   }
 
   let randomIndex = Math.floor(Math.random() * schedules.length);
@@ -71,6 +72,7 @@ export default function () {
   const seats = seatResponse.json().concertSeats;
   if (!seats) {
     fail('No seats available for booking.');
+    return;
   }
 
   if (seats.length === 0) {
@@ -96,12 +98,14 @@ export default function () {
   if (!check(reserveResponse,
       {'Reservation status is 201': (r) => r.status === 201})) {
     fail(`Reservation request failed with status: ${reserveResponse.status}`);
+    return;
   }
   sleep(getRandomWaitTime()); // 랜덤 대기
 
   const reservation = reserveResponse.json()?.reservation;
   if (!reservation) {
     fail('Reservation response does not contain reservation details.');
+    return;
   }
 
   const reservationId = reservation.id;
@@ -119,13 +123,16 @@ export default function () {
   if (!check(balanceResponse,
       {'Balance status is 200': (r) => r.status === 200})) {
     fail(`Balance request failed with status: ${balanceResponse.status}`);
+    return;
   }
+
+  const walletId = balanceResponse.json()?.wallet?.id;
 
   sleep(getRandomWaitTime()); // 랜덤 대기
 
   const chargeResponse = http.put(
       `http://host.docker.internal:8080/api/v1/users/${userId}/wallets/${walletId}/charge`,
-      JSON.stringify({amount: 10000}),
+      JSON.stringify({amount: 100}),
       {
         headers: {
           'Content-Type': 'application/json',
@@ -138,6 +145,7 @@ export default function () {
       {'Charge status is 200': (r) => r.status === 200})) {
     console.log(chargeResponse);
     fail(`Charge request failed with status: ${chargeResponse.status}`);
+    return;
   }
   sleep(getRandomWaitTime()); // 랜덤 대기
 
@@ -157,6 +165,7 @@ export default function () {
   if (!check(paymentResponse,
       {'Payment status is 200': (r) => r.status === 200})) {
     fail(`Payment request failed with status: ${paymentResponse.status}`);
+    return;
   }
   sleep(getRandomWaitTime()); // 랜덤 대기
 }

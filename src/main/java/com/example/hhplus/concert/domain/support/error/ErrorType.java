@@ -81,6 +81,8 @@ public enum ErrorType implements IErrorType {
     CONCERT_SEAT_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "콘서트 좌석 ID는 null일 수 없습니다.",
         LogLevel.WARN),
     RESERVATION_ID_MUST_NOT_BE_NULL(ErrorCode.BAD_REQUEST, "예약 ID는 null일 수 없습니다.", LogLevel.WARN),
+    INVALID_MINUTES_BEFORE_RESERVATION_START_AT(ErrorCode.BAD_REQUEST, "예약 시작 시간 전의 분은 유효하지 않습니다.",
+        LogLevel.WARN),
     ;
 
     private final ErrorCode code;

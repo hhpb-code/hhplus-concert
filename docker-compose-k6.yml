@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  k6-queue:
+    image: grafana/k6
+    volumes:
+      - ./k6:/scripts
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
+    command: run -o experimental-prometheus-rw /scripts/queue-script.js
+
+  k6-concert:
+    image: grafana/k6
+    volumes:
+      - ./k6:/scripts
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
+    command: run -o experimental-prometheus-rw /scripts/concert-reservation-script.js

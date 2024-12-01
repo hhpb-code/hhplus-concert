@@ -43,7 +43,7 @@ public class OutboxEventRepositoryImpl implements OutboxEventRepository {
 
   @Override
   public OutboxEvent findByStatus(FindByStatusParam param) {
-    return outboxEventJpaRepository.findByStatus(param.status()).orElse(null);
+    return outboxEventJpaRepository.findFirstByStatus(param.status()).orElse(null);
   }
 
   @Override

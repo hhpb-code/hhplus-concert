@@ -1,6 +1,7 @@
 package com.example.hhplus.concert.infra.db.concert.impl;
 
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByConcertIdAndNowParam;
+import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSchedulesByReservationStartAtBetweenParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByConcertIdAndIsReservedParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllConcertSeatsByIdsWithLockParam;
 import com.example.hhplus.concert.domain.concert.dto.ConcertRepositoryParam.FindAllReservationsByIdsWithLockParam;
@@ -83,6 +84,13 @@ public class ConcertRepositoryImpl implements ConcertRepository {
       FindAllConcertSchedulesByConcertIdAndNowParam param) {
     return concertScheduleJpaRepository.findByConcertIdAndReservationPeriod(param.concertId(),
         LocalDateTime.now());
+  }
+
+  @Override
+  public List<ConcertSchedule> findAllConcertSchedules(
+      FindAllConcertSchedulesByReservationStartAtBetweenParam param) {
+    return concertScheduleJpaRepository.findByReservationStartAtBetween(param.startAt(),
+        param.endAt());
   }
 
   @Override

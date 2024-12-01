@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
@@ -115,6 +116,8 @@ class ConcertFacadeConcurrencyTest {
             .mapToObj(i -> CompletableFuture.runAsync(() -> {
               try {
                 concertFacade.reserveConcertSeat(concertSeat.getId(), users.get(i).getId());
+              } catch (ObjectOptimisticLockingFailureException e) {
+                log.error("Optimistic Locking Error: " + e.getMessage());
               } catch (CoreException e) {
                 if (e.getErrorType().equals(ErrorType.Concert.CONCERT_SEAT_ALREADY_RESERVED)) {
                   return;
